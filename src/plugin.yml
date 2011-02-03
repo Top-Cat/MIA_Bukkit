@@ -1,0 +1,5 @@
+name: MIA_Bukkit
+
+main: com.bukkit.Top_Cat.MIA.MIA
+
+version: 0.2
