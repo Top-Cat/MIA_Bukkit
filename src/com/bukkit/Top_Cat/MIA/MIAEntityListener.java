@@ -1,5 +1,7 @@
 package com.bukkit.Top_Cat.MIA;
 
+import java.util.HashMap;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -32,6 +34,8 @@ public class MIAEntityListener extends EntityListener {
     	return onDamage(attacker, defender, 0);
     }
     
+    HashMap<Player, Player> lastattacker = new HashMap<Player, Player>();
+    
     public boolean onDamage(Entity attacker, Entity defender, int damage) {
     	if (defender instanceof Player) {
 	    	int x = defender.getLocation().getBlockX();
@@ -56,17 +60,7 @@ public class MIAEntityListener extends EntityListener {
 	    			return true;
 	    		}
 		    	if (((Player) defender).getHealth() - damage <= 0) {
-		    		// Death
-		    		int amm = (int) (plugin.playerListener.userinfo.get(((Player) defender).getDisplayName()).getBalance() * 0.05);
-		    		plugin.playerListener.cbal(
-		    				((Player) defender).getDisplayName(),
-		    				-amm
-		    		);
-		    		plugin.playerListener.cbal(
-		    				((Player) attacker).getDisplayName(),
-		    				amm
-		    		);
-		    		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), ((Player) attacker).getDisplayName() + " got " + amm + " ISK for killing " + ((Player) defender).getDisplayName());
+		    		lastattacker.put((Player) defender, (Player) attacker);
 		    	}
 	    	}
     	}
@@ -85,6 +79,21 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onEntityDeath(EntityDeathEvent event) {
+    	Entity defender = event.getEntity();
+    	if (defender instanceof Player) {
+    		Player attacker = lastattacker.get(defender);
+	    	// Death
+			int amm = (int) (plugin.playerListener.userinfo.get(((Player) defender).getDisplayName()).getBalance() * 0.05);
+			plugin.playerListener.cbal(
+					((Player) defender).getDisplayName(),
+					-amm
+			);
+			plugin.playerListener.cbal(
+					((Player) attacker).getDisplayName(),
+					amm
+			);
+			plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), ((Player) attacker).getDisplayName() + " got " + amm + " ISK for killing " + ((Player) defender).getDisplayName());
+    	}
     	// DMC
     	//event.getDrops()
     }
