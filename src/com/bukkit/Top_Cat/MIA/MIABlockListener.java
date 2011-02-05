@@ -162,7 +162,7 @@ public class MIABlockListener extends BlockListener {
     				checklift(w, event.getPlayer(), x, i, z);
     			}
     		} else if (signtxt.equalsIgnoreCase("[Lift Up]")) {
-    			for (int i = event.getBlock().getY() + 1; i < w.getHighestBlockYAt(x, z) + 1; i++) {
+    			for (int i = event.getBlock().getY() + 1; i < 128; i++) {
     				checklift(w, event.getPlayer(), x, i, z);
     			}
     		} else if (signtxt.equalsIgnoreCase("[Bridge]")) {
