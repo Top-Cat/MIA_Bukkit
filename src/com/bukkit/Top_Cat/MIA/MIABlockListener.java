@@ -84,6 +84,58 @@ public class MIABlockListener extends BlockListener {
 		}
     }
     
+    public boolean dogatecol(HashMap<Block, Boolean> fb, int x, int y, int z, World w) {
+    	if (!fb.containsKey(w.getBlockAt(x, y, z))){
+    		int tmpy = y;
+    		if (w.getBlockAt(x, y, z).getType() != Material.FENCE) { return false; }
+	    	for (int y1 = y + 1; y1 <= y + 12; y1++) {
+	            if (w.getBlockAt(x, y1, z).getType() == Material.FENCE) {
+	                y = y1;
+	            } else {
+	                break;
+	            }
+	        }
+    	
+	    	if (w.getBlockAt(x, y + 1, z).getType() == Material.AIR) {
+	            return false;
+	        }
+	    	
+	    	if (!fb.containsKey(w.getBlockAt(x, y, z))){
+	    		fb.put(w.getBlockAt(x, tmpy, z), false);
+		    	fb.put(w.getBlockAt(x, y, z), true);
+		    	Boolean close = w.getBlockAt(x, y - 1, z).getType() != Material.FENCE;
+		    	
+		    	int minY = Math.max(0, y - 12);
+		    	for (int y1 = y - 1; y1 >= minY; y1--) {
+		    		Material cur = w.getBlockAt(x, y1, z).getType();
+		
+		            // Allowing water allows the use of gates as flood gates
+		            if (cur != Material.WATER
+		                    && cur != Material.STATIONARY_WATER
+		                    && cur != Material.LAVA
+		                    && cur != Material.STATIONARY_LAVA
+		                    && cur != Material.FENCE
+		                    && cur != Material.AIR) {
+		                break;
+		            }
+		            
+		            w.getBlockAt(x, y1, z).setType(close ? Material.FENCE : Material.AIR);
+		            
+		            dogatecol(fb, x + 1, y1, z, w);
+		            dogatecol(fb, x - 1, y1, z, w);
+		            dogatecol(fb, x, y1, z + 1, w);
+		            dogatecol(fb, x, y1, z - 1, w);
+		    	}
+	            dogatecol(fb, x + 1, y, z, w);
+	            dogatecol(fb, x - 1, y, z, w);
+	            dogatecol(fb, x, y, z + 1, w);
+	            dogatecol(fb, x, y, z - 1, w);
+		    	return true;
+	    	}
+    	}
+    	return false;
+    }
+    
     @Override
     public void onBlockRightClick(BlockRightClickEvent event) {
 		World w = event.getPlayer().getWorld();
@@ -94,7 +146,17 @@ public class MIABlockListener extends BlockListener {
     		int y = event.getBlock().getY();
     		//System.out.println(x + "," + event.getBlock().getY() + "," + z);
     		if (signtxt.equalsIgnoreCase("[Gate]")) {
-    			//Find + toggle gate
+    			HashMap<Block, Boolean> foundblocks = new HashMap<Block, Boolean>();
+    			
+    			//Find gate
+    			for (int x1 = x - 3; x1 <= x + 3; x1++) {
+                    for (int y1 = y - 3; y1 <= y + 6; y1++) {
+                        for (int z1 = z - 3; z1 <= z + 3; z1++) {
+                            dogatecol(foundblocks, x1, y1, z1, w);
+                        }
+                    }
+                }
+    			
     		} else if (signtxt.equalsIgnoreCase("[Lift Down]")) {
     			for (int i = event.getBlock().getY() - 1; i > 0; i--) {
     				checklift(w, event.getPlayer(), x, i, z);
