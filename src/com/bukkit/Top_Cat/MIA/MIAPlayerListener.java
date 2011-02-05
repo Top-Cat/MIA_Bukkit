@@ -139,7 +139,7 @@ public class MIAPlayerListener extends PlayerListener {
     	if (com.startsWith("/g ")) {
     		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
     	} else if (com.startsWith("/tpc") && coms.length > 1 && plugin.getServer().getPlayer(coms[1]) != null) {
-			tprequests.put(coms[1], event.getPlayer().getDisplayName());
+			tprequests.put(plugin.getServer().getPlayer(coms[1]).getDisplayName(), event.getPlayer().getDisplayName());
 			plugin.mf.sendmsg(plugin.getServer().getPlayer(coms[1]), "Player " + event.getPlayer().getDisplayName() + " requested to teleport to you!");
     	} else if (com.equalsIgnoreCase("/deny") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		tprequests.remove(event.getPlayer().getDisplayName());
@@ -321,7 +321,7 @@ public class MIAPlayerListener extends PlayerListener {
     		lastup = (int) (time.getTime() / 1000);
     		Sign sign = ((Sign) w.getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
-    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
+    		sign.setLine(1, sdf.	format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
     		time.setTime(time.getTime() - 18000000);
     		sign.setLine(2, sdf.format(time) + " EST");
     		time.setTime(time.getTime() - 10800000);
