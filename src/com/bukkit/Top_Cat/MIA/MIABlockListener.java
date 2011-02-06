@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 
@@ -33,15 +34,21 @@ public class MIABlockListener extends BlockListener {
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
     	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
-		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer())) {
+		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}
 	}
     
+    ArrayList<Block> b = new ArrayList<Block>();
+    
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
+    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && b.contains(event.getBlock())) {
+    		event.setCancelled(true);
+    		event.getBlock().setType(Material.AIR);
+    	}
     	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
-		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer())) {
+		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}
     }
@@ -438,11 +445,17 @@ public class MIABlockListener extends BlockListener {
     }
     
     @Override
+    public void onBlockRedstoneChange(BlockFromToEvent event) {
+    	//Check all blocks around for power?
+    }
+    
+    @Override
     public void onBlockFlow(BlockFromToEvent event) {
     	int town1 = plugin.mf.intown(event.getBlock());
     	int town2 = plugin.mf.intown(event.getToBlock());
-    	if (town1 == 0 && town1 != town2) {
-    		event.setCancelled(true);
+    	if (town1 == 0 && town1 != town2 && event.getToBlock().getType() == Material.AIR) {
+    		event.getToBlock().setType(Material.LEAVES);
+    		b.add(event.getToBlock());
     	}
     }
     
