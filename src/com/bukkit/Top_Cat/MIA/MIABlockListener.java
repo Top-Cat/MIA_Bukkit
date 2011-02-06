@@ -31,26 +31,58 @@ public class MIABlockListener extends BlockListener {
         this.plugin = plugin;
     }
     
+    HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> blocksdestroyed = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
+    int updatec = 0;
+    
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
     	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
 		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
+		} else {
+			updatestats(event.getPlayer(), 1, event.getBlock().getTypeId());
 		}
 	}
+    
+    public void updatestats(Player p, int type, int id) {
+    	updatestats(p, type, id, 1);
+    }
+    
+    public void updatestats(Player pl, int type, int id, int amm) {
+    	String p = pl.getDisplayName();
+    	if (updatec++ > 10) {
+    		updatec = 0;
+    		plugin.mf.updatestats(blocksdestroyed);
+    	}
+		if (!blocksdestroyed.containsKey(p)){
+			blocksdestroyed.put(p, new HashMap<Integer, HashMap<Integer, Integer>>());
+		}
+		if (!blocksdestroyed.get(p).containsKey(type)){
+			blocksdestroyed.get(p).put(type, new HashMap<Integer, Integer>());
+		}
+		HashMap<Integer, Integer> pblocks = blocksdestroyed.get(p).get(type);
+		if (pblocks.containsKey(id)) {
+			pblocks.put(id, pblocks.get(id) + amm);
+		} else {
+			pblocks.put(id, 1);
+		}
+    }
     
     ArrayList<Block> b = new ArrayList<Block>();
     
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
-    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && b.contains(event.getBlock())) {
-    		event.setCancelled(true);
-    		event.getBlock().setType(Material.AIR);
-    	}
     	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
 		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}
+    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {
+    		if (b.contains(event.getBlock())) {
+	    		event.setCancelled(true);
+	    		event.getBlock().setType(Material.AIR);
+    		}
+    		updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
+    	}
     }
     
     @Override

@@ -65,6 +65,40 @@ public class MIAFunctions {
     	return 0;
     }
     
+    public void updatestats(HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats) {
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM stats";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			while (r.next()){
+				if (stats.containsKey(r.getString("player"))) {
+					if (stats.get(r.getString("player")).containsKey(r.getInt("type"))) {
+						if (stats.get(r.getString("player")).get(r.getInt("type")).containsKey(r.getInt("blockid"))) {
+							int amm = stats.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"));
+							String u = "UPDATE stats SET count = count + " + amm + " WHERE Id = " + r.getInt("Id");
+							pr = plugin.conn.prepareStatement(u);
+							pr.executeUpdate();
+							stats.get(r.getString("player")).get(r.getInt("type")).remove(r.getInt("blockid"));					}
+					}
+				}
+			}
+			for (String p : stats.keySet()) {
+				for (Integer p2 : stats.get(p).keySet()) {
+					for (Integer p3 : stats.get(p).get(p2).keySet()) {
+						int amm = stats.get(p).get(p2).get(p3);
+						String u = "INSERT INTO stats (player, type, blockid, count) VALUES ('" + p + "', '" + p2 + "', '" + p3 + "', '" + amm + "')";
+						pr = plugin.conn.prepareStatement(u);
+						pr.executeUpdate();
+					}
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     HashMap<Block, ArrayList<String>> dests = new HashMap<Block, ArrayList<String>>();
     
     public ArrayList<String> getDest(Block sign) {
