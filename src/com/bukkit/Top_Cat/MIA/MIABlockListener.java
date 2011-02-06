@@ -50,7 +50,7 @@ public class MIABlockListener extends BlockListener {
     
     public void updatestats(Player pl, int type, int id, int amm) {
     	String p = pl.getDisplayName();
-    	if (updatec++ > 10) {
+    	if (updatec++ > 50) {
     		updatec = 0;
     		plugin.mf.updatestats(blocksdestroyed);
     	}
