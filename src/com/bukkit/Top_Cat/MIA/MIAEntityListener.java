@@ -80,19 +80,22 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityDeath(EntityDeathEvent event) {
     	Entity defender = event.getEntity();
-    	if (defender instanceof Player && lastattacker.containsKey(defender)) {
-    		Player attacker = lastattacker.get(defender);
-	    	// Death
-			int amm = (int) (plugin.playerListener.userinfo.get(((Player) defender).getDisplayName()).getBalance() * 0.05);
-			plugin.playerListener.cbal(
-					((Player) defender).getDisplayName(),
-					-amm
-			);
-			plugin.playerListener.cbal(
-					((Player) attacker).getDisplayName(),
-					amm
-			);
-			plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), ((Player) attacker).getDisplayName() + " got " + amm + " ISK for killing " + ((Player) defender).getDisplayName());
+    	if (defender instanceof Player) {
+    		if (lastattacker.containsKey(defender)) {
+	    		Player attacker = lastattacker.get(defender);
+		    	// Death
+				int amm = (int) (plugin.playerListener.userinfo.get(((Player) defender).getDisplayName()).getBalance() * 0.05);
+				plugin.playerListener.cbal(
+						((Player) defender).getDisplayName(),
+						-amm
+				);
+				plugin.playerListener.cbal(
+						((Player) attacker).getDisplayName(),
+						amm
+				);
+				plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), ((Player) attacker).getDisplayName() + " got " + amm + " ISK for killing " + ((Player) defender).getDisplayName());
+	    	}
+    		plugin.mf.spawn((Player) defender);
     	}
     	// DMC
     	//event.getDrops()

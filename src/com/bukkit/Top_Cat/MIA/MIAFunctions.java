@@ -398,6 +398,12 @@ public class MIAFunctions {
         si.update();
     }
     
+    public void spawn(Player p) {
+    	World w = p.getWorld();
+    	w.loadChunk(467, -325);
+    	p.teleportTo(new Location(w, 467d, 114d, -325d, 180, 0));
+    }
+    
     public void ePortal(Block sign, World w, Material m) {
     	Integer[] l = new Integer[3];
 		l[0] = sign.getX();

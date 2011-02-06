@@ -96,6 +96,7 @@ public class MIAPlayerListener extends PlayerListener {
 				
 		    	nam = "§0[G]§f " + event.getPlayer().getDisplayName();
 		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0);
+		    	plugin.mf.spawn(event.getPlayer());
 			}
 			userinfo.put(r.getString("name"), op);
 		} catch (SQLException e) {
@@ -247,6 +248,8 @@ public class MIAPlayerListener extends PlayerListener {
     				plugin.mf.sendmsg(event.getPlayer(), "§bCorrect usage is: /shop <sell/buy> [id] [ammount]");
     			}
     		}
+    	} else if (com.equalsIgnoreCase("/spawn")) {
+    		plugin.mf.spawn(event.getPlayer());
     	} else {
     		canc = false;
     	}
