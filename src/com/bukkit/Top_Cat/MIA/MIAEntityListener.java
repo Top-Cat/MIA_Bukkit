@@ -80,7 +80,7 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityDeath(EntityDeathEvent event) {
     	Entity defender = event.getEntity();
-    	if (defender instanceof Player) {
+    	if (defender instanceof Player && lastattacker.containsKey(defender)) {
     		Player attacker = lastattacker.get(defender);
 	    	// Death
 			int amm = (int) (plugin.playerListener.userinfo.get(((Player) defender).getDisplayName()).getBalance() * 0.05);
