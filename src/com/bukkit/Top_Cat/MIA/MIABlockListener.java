@@ -76,7 +76,7 @@ public class MIABlockListener extends BlockListener {
 		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}
-    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {
+    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {	
     		if (b.contains(event.getBlock())) {
 	    		event.setCancelled(true);
 	    		event.getBlock().setType(Material.AIR);
@@ -397,7 +397,7 @@ public class MIABlockListener extends BlockListener {
     	}
     	
     	if (event.getBlock().getType() == Material.STONE_BUTTON) {
-    		HashMap<String, String> gd = plugin.mf.gateData(event.getBlock(), event.getPlayer().getWorld());
+    		HashMap<String, String> gd = plugin.mf.gateData(event.getBlock());
     		int p = -1;
     		int xo = 0;
     		int zo = 0;
@@ -437,10 +437,10 @@ public class MIABlockListener extends BlockListener {
 	    		sis.setLine(3, "*" + event.getPlayer().getName() + "*");
 	    		sis.update();*/
     			
-	    		Integer[] l = plugin.mf.gateSign(s.get(p), event.getPlayer().getWorld());
+	    		Integer[] l = plugin.mf.gateSign(s.get(p));
 	    		//plugin.get
-	    		plugin.mf.openportal(w.getBlockAt(l[0], l[1], l[2]), w);
-	    		plugin.mf.openportal(si, w);
+	    		plugin.mf.openportal(plugin.getServer().getWorlds().get(l[3]).getBlockAt(l[0], l[1], l[2]));
+	    		plugin.mf.openportal(si);
 
 	    		java.util.Date time = new java.util.Date();
 				Integer tnow = (int) Math.round(((double) time.getTime() / 1000));
@@ -448,10 +448,10 @@ public class MIABlockListener extends BlockListener {
     			Integer[] gstat = new Integer[4];
     			gstat[0] = plugin.mf.gateId(s.get(p));
     			gstat[1] = event.getPlayer().getEntityId();
-    			gstat[2] = Integer.parseInt( plugin.mf.gateData(si, event.getPlayer().getWorld()).get("Id") );
+    			gstat[2] = Integer.parseInt( plugin.mf.gateData(si).get("Id") );
     			gstat[3] = tnow;
     			Integer[] gstat2 = new Integer[4];
-    			gstat2[0] = Integer.parseInt( plugin.mf.gateData(si, event.getPlayer().getWorld()).get("Id") );
+    			gstat2[0] = Integer.parseInt( plugin.mf.gateData(si).get("Id") );
     			gstat2[1] = 0;
     			gstat2[2] = plugin.mf.gateId(s.get(p));
     			gstat2[3] = tnow;
@@ -461,9 +461,9 @@ public class MIABlockListener extends BlockListener {
     			if (opengate.containsKey(si)) {
     				Integer[] gstat3 = opengate.get(si);
     				opengate.remove(si);
-    				Integer[] l = plugin.mf.gateSign(gstat3[2], event.getPlayer().getWorld());
+    				Integer[] l = plugin.mf.gateSign(gstat3[2]);
     				opengate.remove(w.getBlockAt(l[0], l[1], l[2]));
-        			plugin.mf.closeportal(event.getPlayer().getWorld().getBlockAt(l[0], l[1], l[2]), event.getPlayer().getWorld());
+        			plugin.mf.closeportal(plugin.getServer().getWorlds().get(l[3]).getBlockAt(l[0], l[1], l[2]), event.getPlayer().getWorld());
         			plugin.mf.closeportal(si, event.getPlayer().getWorld());
     			}
     			w.getBlockAt(event.getBlock().getX() + xo - zo, event.getBlock().getY() - 1, event.getBlock().getZ() + zo + xo).setType(Material.AIR);

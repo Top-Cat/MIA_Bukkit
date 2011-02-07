@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 import org.bukkit.Server;
+import org.bukkit.World.Environment;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -80,6 +81,10 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
         //pm.registerEvent(Event.Type.CREATURE_SPAWN, playerListener, Priority.Normal, this);
+        
+        if (getServer().getWorlds().size() == 1) {
+        	getServer().createWorld("Nether", Environment.NETHER);
+        }	
         
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
         PluginDescriptionFile pdfFile = this.getDescription();

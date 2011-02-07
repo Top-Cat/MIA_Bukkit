@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -144,6 +145,9 @@ public class MIAPlayerListener extends PlayerListener {
 			plugin.mf.sendmsg(plugin.getServer().getPlayer(coms[1]), "Player " + event.getPlayer().getDisplayName() + " requested to teleport to you!");
     	} else if (com.equalsIgnoreCase("/deny") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		tprequests.remove(event.getPlayer().getDisplayName());
+    	} else if (com.startsWith("/world") && coms.length > 1) {
+    		plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).loadChunk(0, 0);
+    		event.getPlayer().teleportTo(new Location(plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])), 0, plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).getHighestBlockYAt(0, 0), 0));
     	} else if (com.equalsIgnoreCase("/accept") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		System.out.println("Teleport?");
     		plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())).teleportTo(event.getPlayer());
@@ -300,8 +304,8 @@ public class MIAPlayerListener extends PlayerListener {
     	for (Integer[] i : plugin.blockListener.opengate.values()) {
     		if (event.getPlayer().getEntityId() == i[1]) {
     			World w = event.getPlayer().getWorld();
-    			Integer[] l = plugin.mf.gateSign(i[0], event.getPlayer().getWorld());
-    			Integer[] l2 = plugin.mf.gateSign(i[2], event.getPlayer().getWorld());
+    			Integer[] l = plugin.mf.gateSign(i[0]);
+    			Integer[] l2 = plugin.mf.gateSign(i[2]);
     			plugin.mf.closeportal(w.getBlockAt(l[0], l[1], l[2]), w);
     			plugin.mf.closeportal(w.getBlockAt(l2[0], l2[1], l2[2]), w);
     			blox[j++] = w.getBlockAt(l[0], l[1], l[2]);
@@ -318,11 +322,12 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
-    	Date time = new Date();
+	   	Date time = new Date();
     	World w = event.getPlayer().getWorld();
+    	List<World> ws = plugin.getServer().getWorlds();
     	if ((time.getTime() / 1000) - 5 > lastup) {
     		lastup = (int) (time.getTime() / 1000);
-    		Sign sign = ((Sign) w.getBlockAt(409, 4, -353).getState());
+    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
     		sign.setLine(1, sdf.	format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
     		time.setTime(time.getTime() - 18000000);
@@ -392,7 +397,7 @@ public class MIAPlayerListener extends PlayerListener {
     	}*/
     	for (Block i : plugin.blockListener.opengate.keySet()) {
     		if (event.getPlayer().getEntityId() == plugin.blockListener.opengate.get(i)[1]) {
-	    		Integer rot = Integer.parseInt(plugin.mf.gateData(i, w).get("rot"));
+	    		Integer rot = Integer.parseInt(plugin.mf.gateData(i).get("rot"));
 	    		
 	    		int xo = 0;
 	    		int zo = 0;
@@ -424,11 +429,11 @@ public class MIAPlayerListener extends PlayerListener {
 	    		
 	    		Integer[] b = plugin.blockListener.opengate.get(i);
 				Integer tnow = (int) Math.round(((double) time.getTime() / 1000));
-				Integer[] l = plugin.mf.gateSign(b[0], w);
+				Integer[] l = plugin.mf.gateSign(b[0]);
 				if (b[3] + 90 < tnow) {
 	    			plugin.blockListener.opengate.remove(i);
-	    			plugin.blockListener.opengate.remove(w.getBlockAt(l[0], l[1], l[2]));
-	    			plugin.mf.closeportal(w.getBlockAt(l[0], l[1], l[2]), w);
+	    			plugin.blockListener.opengate.remove(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]));
+	    			plugin.mf.closeportal(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]), w);
 	    			plugin.mf.closeportal(i, w);
 	    		}
 	    		 
@@ -453,13 +458,13 @@ public class MIAPlayerListener extends PlayerListener {
 	        		}
 	        		
 	        		
-	    			Location dest = new Location(w, l[0] + xo2, l[1] - 1, l[2] + zo2, r, 0);
+	    			Location dest = new Location(ws.get(l[3]), l[0] + xo2, l[1] - 1, l[2] + zo2, r, 0);
 	    			event.getPlayer().teleportTo(dest);
 	    			event.setTo(dest);
 	    			
 	    			plugin.blockListener.opengate.remove(i);
-	    			plugin.blockListener.opengate.remove(w.getBlockAt(l[0], l[1], l[2]));
-	    			plugin.mf.closeportal(w.getBlockAt(l[0], l[1], l[2]), w);
+	    			plugin.blockListener.opengate.remove(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]));
+	    			plugin.mf.closeportal(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]), w);
 	    			plugin.mf.closeportal(i, w);
 	    			
 	    			break;

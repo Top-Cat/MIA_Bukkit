@@ -126,12 +126,12 @@ public class MIAFunctions {
     
     ArrayList<Block> gateblocks = new ArrayList<Block>();
     
-    public void getGates(World w) {
+    public void getGates() {
     	if (gateblocks.size() == 0) {
 	    	PreparedStatement pr;
 	    	ArrayList<Block> out = new ArrayList<Block>();
 			try {
-				String q = "SELECT cblock FROM stargates";
+				String q = "SELECT cblock, world FROM stargates";
 				pr = plugin.conn.prepareStatement(q);
 				ResultSet r = pr.executeQuery();
 				while (r.next()) {
@@ -140,7 +140,7 @@ public class MIAFunctions {
 					for (int i = 0; i < 3; i++) {
 						l[i] = Integer.parseInt(so[i]);
 					}
-					out.add(w.getBlockAt(l[0], l[1], l[2]));
+					out.add(plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(l[0], l[1], l[2]));
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -183,38 +183,39 @@ public class MIAFunctions {
     	return 0;
     }
     
-    public Integer[] gateSign(Object gateid, World w) {
-    	Integer[] out = new Integer[3];
-    	HashMap<String, String> inf = gateData(gateid, w);
+    public Integer[] gateSign(Object gateid) {
+    	Integer[] out = new Integer[4];
+    	HashMap<String, String> inf = gateData(gateid);
 		String[] so = inf.get("cblock").split(",");
 		for (int i = 0; i < 3; i++) {
 			out[i] = Integer.parseInt(so[i]);
 		}
+		out[3] = Integer.parseInt(inf.get("world"));
     	return out;
     }
     
-    public HashMap<String, String> gateData(Block fromsign, World w) {
-    	getGates(w);
+    public HashMap<String, String> gateData(Block fromsign) {
+    	getGates();
     	if (fromsign.getType() == Material.STONE_BUTTON) {
     		for (Block i : gateblocks) {
-    			if ((i.getX() == fromsign.getX() && Math.abs(i.getZ() - fromsign.getZ()) == 3) || (i.getZ() == fromsign.getZ() && Math.abs(i.getX() - fromsign.getX()) == 3)) {
+    			if (i.getWorld() == fromsign.getWorld() && (i.getX() == fromsign.getX() && Math.abs(i.getZ() - fromsign.getZ()) == 3) || (i.getZ() == fromsign.getZ() && Math.abs(i.getX() - fromsign.getX()) == 3)) {
     				fromsign = i;
     				break;
     			}
     		}
     	}
-    	return gateData(gateId(gateName(fromsign)), w);
+    	return gateData(gateId(gateName(fromsign)));
     }
     
     public HashMap<String, String> gateData(String fromsign) {
     	return gateData(gateId(fromsign));
     }
     
-    public HashMap<String, String> gateData(Object gateid, World w) {
+    public HashMap<String, String> gateData(Object gateid) {
     	if (gateid instanceof String) {
     		return gateData((String) gateid);
     	} else if (gateid instanceof Block) {
-    		return gateData((Block) gateid, w);
+    		return gateData((Block) gateid);
     	} else if (gateid instanceof Integer) {
     		return gateData((Integer) gateid);
     	}
@@ -234,6 +235,7 @@ public class MIAFunctions {
 				if (r.first()) {
 					out.put("Id", r.getString("Id"));
 					out.put("name", r.getString("name"));
+					out.put("world", r.getString("world"));
 					out.put("cblock", r.getString("cblock"));
 					out.put("rot", r.getString("rot"));
 					out.put("network", r.getString("network"));
@@ -416,19 +418,19 @@ public class MIAFunctions {
     	return false;
     }
     
-    public void openportal(Block sign, World w) {
-    	w.loadChunk(w.getChunkAt(sign));
-    	ePortal(sign, w, Material.FIRE);
+    public void openportal(Block sign) {
+    	sign.getWorld().loadChunk(sign.getWorld().getChunkAt(sign));
+    	ePortal(sign, Material.FIRE);
     }
     
     public void closeportal(Block sign, World w) {
-    	ePortal(sign, w, Material.AIR);
+    	ePortal(sign, Material.AIR);
     	
 		Sign si = (Sign) sign.getState();
 		si.setLine(0, "--" + plugin.mf.gateName(sign) + "--");
 		si.setLine(1, "Right click to");
         si.setLine(2, "use the gate");
-        si.setLine(3, " (" + plugin.mf.gateData(sign, w).get("network") + ") ");
+        si.setLine(3, " (" + plugin.mf.gateData(sign).get("network") + ") ");
         si.update();
     }
     
@@ -438,14 +440,14 @@ public class MIAFunctions {
     	p.teleportTo(new Location(w, 467d, 114d, -325d, 180, 0));
     }
     
-    public void ePortal(Block sign, World w, Material m) {
+    public void ePortal(Block sign, Material m) {
     	Integer[] l = new Integer[3];
 		l[0] = sign.getX();
 		l[1] = sign.getY();
 		l[2] = sign.getZ();
 		
 		
-		Integer rot = Integer.parseInt(gateData(sign, w).get("rot"));
+		Integer rot = Integer.parseInt(gateData(sign).get("rot"));
 
 		int xo2 = 1;
 		int zo2 = -1;
@@ -460,7 +462,7 @@ public class MIAFunctions {
 			zo2 = 1;
 		}
 
-		w.getBlockAt(l[0] + xo2, l[1] - 1, l[2] + zo2).setType(m);
+		sign.getWorld().getBlockAt(l[0] + xo2, l[1] - 1, l[2] + zo2).setType(m);
     }
     
 }
