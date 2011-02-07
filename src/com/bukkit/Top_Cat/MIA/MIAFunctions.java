@@ -39,7 +39,7 @@ public class MIAFunctions {
     	if (towns.size() == 0) {
 	    	PreparedStatement pr;
 			try {
-				String q = "SELECT a.center, a.Id, b.radius FROM towns as a, town_type as b WHERE a.ttype = b.Id";
+				String q = "SELECT a.center, a.world, a.Id, b.radius FROM towns as a, town_type as b WHERE a.ttype = b.Id";
 				pr = plugin.conn.prepareStatement(q);
 				ResultSet r = pr.executeQuery();
 				while (r.next()) {
