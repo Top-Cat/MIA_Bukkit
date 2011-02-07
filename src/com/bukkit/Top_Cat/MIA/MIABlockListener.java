@@ -36,7 +36,7 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
-    	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
+    	int town = plugin.mf.intown(event.getBlock());
 		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		} else {
@@ -72,7 +72,7 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
-    	int town = plugin.mf.intown(event.getBlock().getX(), event.getBlock().getZ());
+    	int town = plugin.mf.intown(event.getBlock());
 		if (town > 0 && town != plugin.mf.playertownId(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}

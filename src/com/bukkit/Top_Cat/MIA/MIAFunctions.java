@@ -22,20 +22,20 @@ public class MIAFunctions {
 	}
     
     public int intown(Block b) {
-    	return intown(b.getX(), b.getZ());
+    	return intown(b.getX(), b.getZ(), b.getWorld());
     }
     
     public int intown(Location l) {
-    	return intown(l.getBlockX(), l.getBlockZ());
+    	return intown(l.getBlockX(), l.getBlockZ(), l.getWorld());
     }
     
     public int intown(Player p) {
-    	return intown(p.getLocation().getBlockX(), p.getLocation().getBlockZ());
+    	return intown(p.getLocation().getBlockX(), p.getLocation().getBlockZ(), p.getWorld());
     }
     
     public HashMap<String[], Integer[]> towns = new HashMap<String[], Integer[]>();
     
-    public int intown(int x, int z) {
+    public int intown(int x, int z, World w) {
     	if (towns.size() == 0) {
 	    	PreparedStatement pr;
 			try {
@@ -44,6 +44,7 @@ public class MIAFunctions {
 				ResultSet r = pr.executeQuery();
 				while (r.next()) {
 					String c = r.getString("center");
+					c += "," + r.getString("world");
 					String[] cs = c.split(",");
 					Integer[] v = new Integer[2];
 					v[0] = r.getInt("radius");
@@ -56,11 +57,13 @@ public class MIAFunctions {
 			}
     	}
     	for (String[] i : towns.keySet()) {
-    		Integer[] v = towns.get(i);
-			double dist = Math.round(Math.sqrt(Math.pow(x - Integer.parseInt(i[0]), 2) + Math.pow(z - Integer.parseInt(i[1]), 2)));
-			if (dist <= v[0]) {
-				return v[1];
-			}
+    		if (plugin.getServer().getWorlds().indexOf(w) == Integer.parseInt(i[0])) {
+	    		Integer[] v = towns.get(i);
+				double dist = Math.round(Math.sqrt(Math.pow(x - Integer.parseInt(i[1]), 2) + Math.pow(z - Integer.parseInt(i[2]), 2)));
+				if (dist <= v[0]) {
+					return v[1];
+				}
+    		}
     	}
     	return 0;
     }
