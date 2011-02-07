@@ -294,7 +294,7 @@ public class MIAFunctions {
     public int inzone(Player ps) {
     	PreparedStatement pr;
 		try {
-			String q = "SELECT corners, Id FROM zones";
+			String q = "SELECT corners, world, Id FROM zones";
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery()	;
 			while (r.next()) {
@@ -303,7 +303,7 @@ public class MIAFunctions {
 				Integer[] cs = intarray(bls[0].split(","));
 				Integer[] cs2 = intarray(bls[1].split(","));
 				Location l = ps.getLocation();
-				if (l.getBlockX() <= Math.max(cs[0], cs2[0]) && l.getBlockX() >= Math.min(cs[0], cs2[0]) && l.getBlockY() <= Math.max(cs[1], cs2[1]) && l.getBlockY() >= Math.min(cs[1], cs2[1]) && l.getBlockZ() <= Math.max(cs[2], cs2[2]) && l.getBlockZ() >= Math.min(cs[2], cs2[2])) {
+				if (plugin.getServer().getWorlds().indexOf(l.getWorld()) == r.getInt("world") && l.getBlockX() <= Math.max(cs[0], cs2[0]) && l.getBlockX() >= Math.min(cs[0], cs2[0]) && l.getBlockY() <= Math.max(cs[1], cs2[1]) && l.getBlockY() >= Math.min(cs[1], cs2[1]) && l.getBlockZ() <= Math.max(cs[2], cs2[2]) && l.getBlockZ() >= Math.min(cs[2], cs2[2])) {
 					// In zone!
 					return r.getInt("Id");
 				}
