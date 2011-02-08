@@ -57,9 +57,9 @@ public class MIAFunctions {
 			}
     	}
     	for (String[] i : towns.keySet()) {
-    		if (plugin.getServer().getWorlds().indexOf(w) == Integer.parseInt(i[0])) {
+    		if (plugin.getServer().getWorlds().indexOf(w) == Integer.parseInt(i[2])) {
 	    		Integer[] v = towns.get(i);
-				double dist = Math.round(Math.sqrt(Math.pow(x - Integer.parseInt(i[1]), 2) + Math.pow(z - Integer.parseInt(i[2]), 2)));
+				double dist = Math.round(Math.sqrt(Math.pow(x - Integer.parseInt(i[0]), 2) + Math.pow(z - Integer.parseInt(i[1]), 2)));
 				if (dist <= v[0]) {
 					return v[1];
 				}
@@ -70,6 +70,7 @@ public class MIAFunctions {
     
     public void updatestats(HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats, HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw) {
     	PreparedStatement pr;
+		String u = "";
 		try {
 			String q = "SELECT * FROM stats";
 			pr = plugin.conn.prepareStatement(q);
@@ -83,8 +84,9 @@ public class MIAFunctions {
 							if (!overw.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"))) {
 								ad = "count + ";
 							}
-							String u = "UPDATE stats SET count = " + ad + amm + " WHERE Id = " + r.getInt("Id");
+							u = "UPDATE stats SET count = " + ad + amm + " WHERE Id = " + r.getInt("Id");
 							pr = plugin.conn.prepareStatement(u);
+							System.out.println(u);
 							pr.executeUpdate();
 							stats.get(r.getString("player")).get(r.getInt("type")).remove(r.getInt("blockid"));					}
 					}
@@ -94,7 +96,7 @@ public class MIAFunctions {
 				for (Integer p2 : stats.get(p).keySet()) {
 					for (Integer p3 : stats.get(p).get(p2).keySet()) {
 						int amm = stats.get(p).get(p2).get(p3);
-						String u = "INSERT INTO stats (player, type, blockid, count) VALUES ('" + p + "', '" + p2 + "', '" + p3 + "', '" + amm + "')";
+						u = "INSERT INTO stats (player, type, blockid, count) VALUES ('" + p + "', '" + p2 + "', '" + p3 + "', '" + amm + "')";
 						pr = plugin.conn.prepareStatement(u);
 						pr.executeUpdate();
 					}
@@ -488,6 +490,7 @@ public class MIAFunctions {
     	String p = pl.getDisplayName();
     	if (updatec++ > 50) {
     		updatec = 0;
+    		System.out.println("Update, is this too frequent?");
     		updatestats(stats, overw);
     	}
 		if (!stats.containsKey(p)){

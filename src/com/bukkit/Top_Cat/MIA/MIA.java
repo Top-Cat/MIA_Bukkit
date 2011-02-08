@@ -2,6 +2,7 @@ package com.bukkit.Top_Cat.MIA;
 
 import java.io.File;
 import java.sql.DriverManager;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.bukkit.entity.Player;
@@ -92,6 +93,10 @@ public class MIA extends JavaPlugin {
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
         
         playerListener.loadallusers();
+        for (Player i : getServer().getOnlinePlayers()) {
+        	Date time = new Date();
+    		playerListener.logintimes.put(i, time.getTime() / 1000);
+        }
     }
     public void onDisable() {
         // TODO: Place any custom disable code here
@@ -99,6 +104,11 @@ public class MIA extends JavaPlugin {
         // NOTE: All registered events are automatically unregistered when a plugin is disabled
 
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
+    	for (Player i : getServer().getOnlinePlayers()) {
+    		Date time = new Date();
+    		mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));        	
+        }
+    	
     	mf.updatestats();
         System.out.println("Goodbye world!");
     }

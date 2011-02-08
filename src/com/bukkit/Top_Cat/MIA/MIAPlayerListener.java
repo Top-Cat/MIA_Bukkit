@@ -341,14 +341,31 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
-    	if (event.getFrom() != event.getTo()) {
+    	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}
 	   	Date time = new Date();
     	World w = event.getPlayer().getWorld();
     	List<World> ws = plugin.getServer().getWorlds();
     	if ((time.getTime() / 1000) - 5 > lastup) {
-    		System.out.println(ws.get(0).getFullTime());
+    		System.out.println(ws.get(0).getTime());
+    		long mtime = ws.get(0).getTime() + 6000;
+    		if (mtime > 24000) {
+    			mtime -= 24000;
+    		}
+    		int hours = (int) Math.floor(mtime / 1000);
+    		mtime = (((mtime - (hours * 1000)) * 60)  / 1000);
+    		String mp = "";
+    		String hp = "";
+    		if (hours < 10)
+    			hp = "0";
+    		if (mtime < 10)
+    			mp = "0";
+    		
+    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
+    		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
+    		mtsign.update();
+    		
     		lastup = (int) (time.getTime() / 1000);
     		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
