@@ -68,7 +68,7 @@ public class MIAFunctions {
     	return 0;
     }
     
-    public void updatestats(HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats) {
+    public void updatestats(HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats, HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw) {
     	PreparedStatement pr;
 		try {
 			String q = "SELECT * FROM stats";
@@ -79,7 +79,11 @@ public class MIAFunctions {
 					if (stats.get(r.getString("player")).containsKey(r.getInt("type"))) {
 						if (stats.get(r.getString("player")).get(r.getInt("type")).containsKey(r.getInt("blockid"))) {
 							int amm = stats.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"));
-							String u = "UPDATE stats SET count = count + " + amm + " WHERE Id = " + r.getInt("Id");
+							String ad = "";
+							if (!overw.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"))) {
+								ad = "count + ";
+							}
+							String u = "UPDATE stats SET count = " + ad + amm + " WHERE Id = " + r.getInt("Id");
 							pr = plugin.conn.prepareStatement(u);
 							pr.executeUpdate();
 							stats.get(r.getString("player")).get(r.getInt("type")).remove(r.getInt("blockid"));					}
@@ -466,6 +470,45 @@ public class MIAFunctions {
 		}
 
 		sign.getWorld().getBlockAt(l[0] + xo2, l[1] - 1, l[2] + zo2).setType(m);
+    }
+    
+    HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
+    HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw = new HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>>();
+    int updatec = 0;
+    
+    public void updatestats(Player p, int type, int id) {
+    	updatestats(p, type, id, 1, false);
+    }
+    
+    public void updatestats(Player p, int type, int id, int amm) {
+    	updatestats(p, type, id, amm, false);
+    }
+    
+    public void updatestats(Player pl, int type, int id, int amm, Boolean overwrite) {
+    	String p = pl.getDisplayName();
+    	if (updatec++ > 50) {
+    		updatec = 0;
+    		updatestats(stats, overw);
+    	}
+		if (!stats.containsKey(p)){
+			stats.put(p, new HashMap<Integer, HashMap<Integer, Integer>>());
+			overw.put(p, new HashMap<Integer, HashMap<Integer, Boolean>>());
+		}
+		if (!stats.get(p).containsKey(type)){
+			stats.get(p).put(type, new HashMap<Integer, Integer>());
+			overw.get(p).put(type, new HashMap<Integer, Boolean>());
+		}
+		HashMap<Integer, Integer> pblocks = stats.get(p).get(type);
+		overw.get(p).get(type).put(id, overwrite);
+		if (pblocks.containsKey(id)) {
+			pblocks.put(id, pblocks.get(id) + amm);
+		} else {
+			pblocks.put(id, amm);
+		}
+    }
+    
+    public void updatestats() {
+    	updatestats(stats, overw);
     }
     
 }

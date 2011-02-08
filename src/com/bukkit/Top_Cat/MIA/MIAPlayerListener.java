@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -76,6 +77,8 @@ public class MIAPlayerListener extends PlayerListener {
 		}
     }
     
+    HashMap<Player, Long> logintimes = new HashMap<Player, Long>();
+    
     @Override
     public void onPlayerJoin(PlayerEvent event) {    	
     	String nam = event.getPlayer().getDisplayName();
@@ -105,6 +108,11 @@ public class MIAPlayerListener extends PlayerListener {
 			e.printStackTrace();
 		}
 		
+		Date time = new Date();
+		plugin.mf.updatestats(event.getPlayer(), 2, 1, (int) (time.getTime() / 1000), true);
+		plugin.mf.updatestats(event.getPlayer(), 2, 3, 1);
+		logintimes.put(event.getPlayer(), time.getTime() / 1000);
+		
 		String msg = nam + " joined!";
 		
 		try {
@@ -131,10 +139,15 @@ public class MIAPlayerListener extends PlayerListener {
 		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), msg);
     }
     
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId());
+    }
+    
     HashMap<String, String> tprequests = new HashMap<String, String>();
     
     @Override
     public void onPlayerCommand(PlayerChatEvent event) {
+    	plugin.mf.updatestats(event.getPlayer(), 2, 7, 1);
     	boolean canc = true;
     	String com = event.getMessage();
 		String coms[] = com.split(" ");
@@ -148,9 +161,11 @@ public class MIAPlayerListener extends PlayerListener {
     	} else if (com.startsWith("/world") && coms.length > 1) {
     		plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).loadChunk(0, 0);
     		event.getPlayer().teleportTo(new Location(plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])), 0, plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).getHighestBlockYAt(0, 0), 0));
+    		plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
     	} else if (com.equalsIgnoreCase("/accept") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		System.out.println("Teleport?");
     		plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())).teleportTo(event.getPlayer());
+    		plugin.mf.updatestats(plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())), 2, 5, 1);
     		tprequests.remove(event.getPlayer().getDisplayName());
     	} else if (com.equals("/getpos")) {
     		Player[] p = new Player[1];
@@ -299,6 +314,11 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerQuit(PlayerEvent event) {
+    	Date time = new Date();
+		plugin.mf.updatestats(event.getPlayer(), 2, 2, (int) (time.getTime() / 1000), true);
+		plugin.mf.updatestats(event.getPlayer(), 2, 4, (int) ((time.getTime() / 1000) - logintimes.get(event.getPlayer())));
+		
+		
     	Block[] blox = new Block[plugin.blockListener.opengate.size()];
     	int j = 0;
     	for (Integer[] i : plugin.blockListener.opengate.values()) {
@@ -318,18 +338,21 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     int lastup = 0;
-    String[] sign_rss = {"Top_Cat wins!", "Lol at you...", "Meow", "Balls to you!", "Bigger than us"};
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
+    	if (event.getFrom() != event.getTo()) {
+    		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
+    	}
 	   	Date time = new Date();
     	World w = event.getPlayer().getWorld();
     	List<World> ws = plugin.getServer().getWorlds();
     	if ((time.getTime() / 1000) - 5 > lastup) {
+    		System.out.println(ws.get(0).getFullTime());
     		lastup = (int) (time.getTime() / 1000);
     		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
-    		sign.setLine(1, sdf.	format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
+    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
     		time.setTime(time.getTime() - 18000000);
     		sign.setLine(2, sdf.format(time) + " EST");
     		time.setTime(time.getTime() - 10800000);
@@ -460,6 +483,7 @@ public class MIAPlayerListener extends PlayerListener {
 	        		
 	    			Location dest = new Location(ws.get(l[3]), l[0] + xo2, l[1] - 1, l[2] + zo2, r, 0);
 	    			event.getPlayer().teleportTo(dest);
+	    			plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
 	    			event.setTo(dest);
 	    			
 	    			plugin.blockListener.opengate.remove(i);
