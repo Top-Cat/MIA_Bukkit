@@ -6,13 +6,15 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   //private int town;
   private String name;
   private String prefix;
+  private int id;
   
   // (snip ctor, setters, etc.)
 
-  public OnlinePlayer(int bal, int cape, String name, String prefix, int town) {
+  public OnlinePlayer(int bal, int cape, String name, String prefix, int town, int id) {
 	  ammount = bal;
 	  this.name = name;
 	  this.prefix = prefix;
+	  this.id = id;
   }
   
   public int getBalance() {
@@ -20,6 +22,10 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   }
   public String getName() {
     return name;
+  }
+  
+  public int getId() {
+	    return id;
   }
   
   public String getPrefix() {

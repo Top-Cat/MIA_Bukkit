@@ -75,7 +75,7 @@ public class MIAPlayerListener extends PlayerListener {
 			ResultSet r = pr.executeQuery();
 			OnlinePlayer op = null;
 			while (r.next()) {
-				op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"));
+				op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"), r.getInt("Id"));
 				userinfo.put(r.getString("name"), op);
 			}
 		} catch (SQLException e) {
@@ -98,15 +98,17 @@ public class MIAPlayerListener extends PlayerListener {
 			OnlinePlayer op = null;	
 			if (r.next()) {
 		    	nam = r.getString("prefix") + "§f " + r.getString("name");
-		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"));
+		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"));
 			} else {
 				// User doesn't exist! Make a new record
 				String q2 = "INSERT INTO users (name) VALUES('" + event.getPlayer().getDisplayName() + "')";
 				PreparedStatement pr2 = plugin.conn.prepareStatement(q2);
 				pr2.executeUpdate();
 				
+				r = pr2.getGeneratedKeys();
+				
 		    	nam = "§0[G]§f " + event.getPlayer().getDisplayName();
-		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0);
+		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0, r.getInt(1));
 		    	plugin.mf.spawn(event.getPlayer());
 			}
 			userinfo.put(r.getString("name"), op);

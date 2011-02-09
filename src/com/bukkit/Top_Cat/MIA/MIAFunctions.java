@@ -362,6 +362,10 @@ public class MIAFunctions {
     	return 0;
     }
     
+    public boolean ownzone(Player p) {
+    	return plugin.playerListener.userinfo.get(p.getDisplayName()).getId() == inzoneProp(p, "owner");
+    }
+    
     public void changestock(int zone, int itemid, int itemamm) {
     	PreparedStatement pr;
 		try {
