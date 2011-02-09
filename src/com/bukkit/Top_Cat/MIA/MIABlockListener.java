@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockInteractEvent;
@@ -452,8 +453,8 @@ public class MIABlockListener extends BlockListener {
     }
     
     @Override
-    public void onBlockRedstoneChange(BlockFromToEvent event) {
-    	//Check all blocks around for power?
+    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
+    	
     }
     
     @Override

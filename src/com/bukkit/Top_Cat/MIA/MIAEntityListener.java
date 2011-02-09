@@ -38,8 +38,14 @@ public class MIAEntityListener extends EntityListener {
     
     public boolean onDamage(Entity attacker, Entity defender, int damage) {
     	if (defender instanceof Player) {
-	    	
-	    	if (plugin.mf.intown(defender.getLocation()) > 0) {
+	    	boolean zonea = false;
+	    	if (attacker instanceof Player) {
+	    		zonea = plugin.mf.inzoneProp(((Player) defender), "PvP") == 0;
+	    	} else {
+	    		zonea = plugin.mf.inzoneProp(((Player) defender), "mobs") == 0;
+	    	}
+    		
+	    	if (plugin.mf.intown(defender.getLocation()) > 0 || zonea) {
 	        	return true;
 	    	} else if (attacker instanceof Player) {
 	    		if ((((Player) defender).getDisplayName().equalsIgnoreCase("Top_Cat") || ((Player) defender).getDisplayName().equalsIgnoreCase("Welsh_Sniper")) && ((Player) attacker).getDisplayName().equalsIgnoreCase("Gigthank")) {
@@ -102,7 +108,7 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
     	for (Block i : event.blockList()) {
-        	if (plugin.mf.intown(i) > 0) {
+        	if (plugin.mf.intown(i) > 0 || plugin.mf.inzoneProp(i, "mobs") == 0) {
         		event.setCancelled(true);
         	}
     	}

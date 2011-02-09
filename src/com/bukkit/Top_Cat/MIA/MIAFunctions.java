@@ -326,6 +326,42 @@ public class MIAFunctions {
     	return 0;
     }
     
+    public int inzoneProp(Player ps, String prop) {
+    	return inzoneProp(ps.getLocation(), prop);
+    }
+    
+    public int inzoneProp(Block ps, String prop) {
+    	return inzoneProp(ps.getLocation(), prop);
+    }
+    
+    public int inzoneProp(Location ps, String prop) {
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT corners, world, " + prop + " FROM zones";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery()	;
+			while (r.next()) {
+				String c = r.getString("corners");
+				String[] bls = c.split(":");
+				Integer[] cs = intarray(bls[0].split(","));
+				Integer[] cs2 = intarray(bls[1].split(","));
+				if (plugin.getServer().getWorlds().indexOf(ps.getWorld()) == r.getInt("world") && ps.getBlockX() <= Math.max(cs[0], cs2[0]) && ps.getBlockX() >= Math.min(cs[0], cs2[0]) && ps.getBlockY() <= Math.max(cs[1], cs2[1]) && ps.getBlockY() >= Math.min(cs[1], cs2[1]) && ps.getBlockZ() <= Math.max(cs[2], cs2[2]) && ps.getBlockZ() >= Math.min(cs[2], cs2[2])) {
+					// In zone!
+					return r.getInt(prop);
+				}
+				
+				//double dist = Math.sqrt(Math.pow(x - Integer.parseInt(cs[0]), 2) + Math.pow(z - Integer.parseInt(cs[1]), 2));
+				//if (dist <= r.getInt("radius")) {
+					//return r.getInt("Id");
+				//}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return 0;
+    }
+    
     public void changestock(int zone, int itemid, int itemamm) {
     	PreparedStatement pr;
 		try {
