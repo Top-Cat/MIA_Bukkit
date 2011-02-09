@@ -99,7 +99,7 @@ public class MIAEntityListener extends EntityListener {
 				);
 				plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), ((Player) attacker).getDisplayName() + " got " + amm + " ISK for killing " + ((Player) defender).getDisplayName());
 	    	}
-    		plugin.mf.spawn((Player) defender);
+    		//plugin.mf.spawn((Player) defender);
     	}
     	// DMC
     	//event.getDrops()
