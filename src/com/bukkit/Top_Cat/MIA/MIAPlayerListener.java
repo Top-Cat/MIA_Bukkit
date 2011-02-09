@@ -14,9 +14,9 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MobType;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -381,7 +381,7 @@ public class MIAPlayerListener extends PlayerListener {
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
     	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
-    		if (i instanceof Creeper && plugin.mf.intown(i.getLocation()) > 0) {
+    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
     			i.setHealth(0);
     		}
     	}
