@@ -28,7 +28,6 @@ public class MIA extends JavaPlugin {
     private final MIAEntityListener entityListener = new MIAEntityListener(this);
     public final MIABlockListener blockListener = new MIABlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
-    static String sqlhost = "192.168.1.250";
     MIAFunctions mf = new MIAFunctions(this);
     Connection conn;
     
@@ -38,8 +37,7 @@ public class MIA extends JavaPlugin {
         try {
         	Class.forName("com.mysql.jdbc.Driver").newInstance();
         	// Step 2: Establish the connection to the database. 
-            String url = "jdbc:mysql://" + sqlhost + ":3306/minec";
-            conn = DriverManager.getConnection(url + "?autoReconnect=true&user=root&password=miaclann");
+            conn = DriverManager.getConnection(new sqllogin().url);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,6 +66,7 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, playerListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Normal, this);

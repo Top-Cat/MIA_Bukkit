@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
@@ -307,6 +308,11 @@ public class MIAPlayerListener extends PlayerListener {
     
     private String capitalCase(String s){
     	return s.toUpperCase().charAt(0) + s.toLowerCase().substring(1);
+    }
+    
+    @Override
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+    	plugin.mf.spawn(event.getPlayer());
     }
     
     @Override
