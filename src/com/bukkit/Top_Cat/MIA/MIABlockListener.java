@@ -63,7 +63,7 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockInteract(BlockInteractEvent event) {
-    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) && !plugin.mf.inowntown((Player) event.getEntity()) && plugin.mf.intown((Player) event.getEntity()) > 0) {
+    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE || event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) && !plugin.mf.inowntown((Player) event.getEntity()) && plugin.mf.intown((Player) event.getEntity()) > 0) {
     		plugin.mf.sendmsg((Player) event.getEntity(), "§4This object is locked!");
     		event.setCancelled(true);
     	}
