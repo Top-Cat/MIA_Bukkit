@@ -18,12 +18,15 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MobType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
@@ -144,7 +147,20 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
+    	System.out.println("DROP");
     	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId());
+    }
+    
+    public void onPlayerAnimation(PlayerAnimationEvent event) {
+    	if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
+    		plugin.mf.updatestats(event.getPlayer(), 2, 10);
+    	}
+    }
+    
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+    	if (event.getPlayer().isSneaking()) {
+    		plugin.mf.updatestats(event.getPlayer(), 2, 11);
+    	}
     }
     
     HashMap<String, String> tprequests = new HashMap<String, String>();
