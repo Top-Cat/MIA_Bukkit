@@ -14,6 +14,9 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MobType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -269,11 +272,41 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	} else if (com.equalsIgnoreCase("/spawn")) {
     		plugin.mf.spawn(event.getPlayer());
+    	} else if (coms[0].equalsIgnoreCase("/mspawn")){
+    		MobType mt = MobType.fromName(coms[1].equalsIgnoreCase("PigZombie") ? "PigZombie" : capitalCase(coms[1]));
+    		int[] ignore = {8, 9};
+    		org.bukkit.block.Block blk = (new TargetBlock(event.getPlayer(), 300, 0.2, ignore)).getTargetBlock();
+    		if(mt == null){
+    			event.getPlayer().sendMessage("Invalid mob type.");
+    			return;
+    		}
+    		if(!event.getPlayer().isOp()){
+    			event.getPlayer().sendMessage("You are not authorized to use that command.");
+    			return;
+    		}
+    		if(coms.length != 2){
+    			event.getPlayer().sendMessage("Correct usage is: /mspawn <Mob Name>");
+    			return;
+    		}
+    		if(blk == null){
+    			event.getPlayer().sendMessage("You must be looking at a Mob Spawner.");
+    			return;
+    		}
+    		if(blk.getTypeId() != 52){
+    			event.getPlayer().sendMessage("You must be looking at a Mob Spawner.");
+    			return;
+    		}
+    		((org.bukkit.block.MobSpawner) blk.getState()).setMobType(mt);
+    		event.getPlayer().sendMessage("Mob spawner set as " + mt.getName().toLowerCase() + ".");
     	} else {
     		canc = false;
     	}
     	if (canc)
     		event.setCancelled(true);
+    }
+    
+    private String capitalCase(String s){
+    	return s.toUpperCase().charAt(0) + s.toLowerCase().substring(1);
     }
     
     @Override
@@ -341,6 +374,11 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
+    	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
+    		if (i instanceof Creeper && plugin.mf.intown(i.getLocation()) > 0) {
+    			i.setHealth(0);
+    		}
+    	}
     	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}
