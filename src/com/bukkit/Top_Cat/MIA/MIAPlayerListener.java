@@ -489,7 +489,7 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	}
     	
-    	if (plugin.mf.heal(event.getPlayer())) {
+    	if (plugin.mf.inzoneR(event.getPlayer()).heal()) {
     		int newh = event.getPlayer().getHealth() + 1;
     		if (newh > 20) {
     			newh = 20;

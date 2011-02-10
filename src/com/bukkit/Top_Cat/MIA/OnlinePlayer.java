@@ -3,7 +3,7 @@ package com.bukkit.Top_Cat.MIA;
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
   //private int cape;
-  //private int town;
+  private int town;
   private String name;
   private String prefix;
   private int id;
@@ -15,6 +15,7 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 	  this.name = name;
 	  this.prefix = prefix;
 	  this.id = id;
+	  this.town = town;
   }
   
   public int getBalance() {
@@ -30,6 +31,10 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   
   public String getPrefix() {
 	  return prefix;
+  }
+  
+  public int getTown() {
+	  return town;
   }
   
   public boolean cbal(int amm) {

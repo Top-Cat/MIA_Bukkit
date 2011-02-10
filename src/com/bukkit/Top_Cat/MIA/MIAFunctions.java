@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -259,20 +260,7 @@ public class MIAFunctions {
     }
     
     public int playertownId(Player p) {
-    	PreparedStatement pr;
-		try {
-			String q = "SELECT town FROM users WHERE name = '" + p.getName() + "'";
-			pr = plugin.conn.prepareStatement(q);
-			ResultSet r = pr.executeQuery();
-			if (r.first()) {
-				return r.getInt("town");
-			}
-			//while (r.next()) {
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return 0;
+    	return plugin.playerListener.userinfo.get(p.getDisplayName()).getTown();
     }
     
     public void sendmsg(Player rec, String msg) {
@@ -297,73 +285,56 @@ public class MIAFunctions {
 		return out;
     }
     
+    List<Zone> zones;
+    
+    public void cache_zones() {
+    	zones.clear();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM zones";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery()	;
+			while (r.next()) {
+				String c = r.getString("corners");
+				String[] bls = c.split(":");
+				Integer[] cs = intarray(bls[0].split(","));
+				Integer[] cs2 = intarray(bls[1].split(","));
+				Block b1 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs[0], cs[1], cs[2]);
+				Block b2 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs2[0], cs2[1], cs2[2]);
+				zones.add(new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getInt("owner")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     public int inzone(Player ps) {
-    	PreparedStatement pr;
-		try {
-			String q = "SELECT corners, world, Id FROM zones";
-			pr = plugin.conn.prepareStatement(q);
-			ResultSet r = pr.executeQuery()	;
-			while (r.next()) {
-				String c = r.getString("corners");
-				String[] bls = c.split(":");
-				Integer[] cs = intarray(bls[0].split(","));
-				Integer[] cs2 = intarray(bls[1].split(","));
-				Location l = ps.getLocation();
-				if (plugin.getServer().getWorlds().indexOf(l.getWorld()) == r.getInt("world") && l.getBlockX() <= Math.max(cs[0], cs2[0]) && l.getBlockX() >= Math.min(cs[0], cs2[0]) && l.getBlockY() <= Math.max(cs[1], cs2[1]) && l.getBlockY() >= Math.min(cs[1], cs2[1]) && l.getBlockZ() <= Math.max(cs[2], cs2[2]) && l.getBlockZ() >= Math.min(cs[2], cs2[2])) {
-					// In zone!
-					return r.getInt("Id");
-				}
-				
-				//double dist = Math.sqrt(Math.pow(x - Integer.parseInt(cs[0]), 2) + Math.pow(z - Integer.parseInt(cs[1]), 2));
-				//if (dist <= r.getInt("radius")) {
-					//return r.getInt("Id");
-				//}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return 0;
+    	return inzoneR(ps).getId();
     }
     
-    public int inzoneProp(Player ps, String prop) {
-    	return inzoneProp(ps.getLocation(), prop);
+    public Zone inzoneR(Player ps) {
+    	return inzoneR(ps.getLocation());
     }
     
-    public int inzoneProp(Block ps, String prop) {
-    	return inzoneProp(ps.getLocation(), prop);
+    public Zone inzoneR(Block ps) {
+    	return inzoneR(ps.getLocation());
     }
     
-    public int inzoneProp(Location ps, String prop) {
-    	PreparedStatement pr;
-		try {
-			String q = "SELECT corners, world, " + prop + " FROM zones";
-			pr = plugin.conn.prepareStatement(q);
-			ResultSet r = pr.executeQuery()	;
-			while (r.next()) {
-				String c = r.getString("corners");
-				String[] bls = c.split(":");
-				Integer[] cs = intarray(bls[0].split(","));
-				Integer[] cs2 = intarray(bls[1].split(","));
-				if (plugin.getServer().getWorlds().indexOf(ps.getWorld()) == r.getInt("world") && ps.getBlockX() <= Math.max(cs[0], cs2[0]) && ps.getBlockX() >= Math.min(cs[0], cs2[0]) && ps.getBlockY() <= Math.max(cs[1], cs2[1]) && ps.getBlockY() >= Math.min(cs[1], cs2[1]) && ps.getBlockZ() <= Math.max(cs[2], cs2[2]) && ps.getBlockZ() >= Math.min(cs[2], cs2[2])) {
-					// In zone!
-					return r.getInt(prop);
-				}
-				
-				//double dist = Math.sqrt(Math.pow(x - Integer.parseInt(cs[0]), 2) + Math.pow(z - Integer.parseInt(cs[1]), 2));
-				//if (dist <= r.getInt("radius")) {
-					//return r.getInt("Id");
-				//}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return 0;
+    public Zone inzoneR(Location ps) {
+    	if (towns.size() == 0)
+    		cache_zones();
+    	
+    	for (Zone i : zones) {
+    		if (i.inZone(ps)) {
+    			return i;
+    		}
+    	}
+    	return null;
     }
     
     public boolean ownzone(Player p) {
-    	return plugin.playerListener.userinfo.get(p.getDisplayName()).getId() == inzoneProp(p, "owner");
+    	return inzoneR(p).ownzone(p);
     }
     
     public void changestock(int zone, int itemid, int itemamm) {
@@ -397,37 +368,6 @@ public class MIAFunctions {
 			e.printStackTrace();
 		}
     	return out;
-    }
-    
-    public boolean heal(Player ps) {
-    	PreparedStatement pr;
-		try {
-			String q = "SELECT corners, healing FROM zones";
-			pr = plugin.conn.prepareStatement(q);
-			ResultSet r = pr.executeQuery()	;
-			while (r.next()) {
-				String c = r.getString("corners");
-				String[] bls = c.split(":");
-				Integer[] cs = intarray(bls[0].split(","));
-				Integer[] cs2 = intarray(bls[1].split(","));
-				Location l = ps.getLocation();
-				if (l.getBlockX() <= Math.max(cs[0], cs2[0]) && l.getBlockX() >= Math.min(cs[0], cs2[0]) && l.getBlockY() <= Math.max(cs[1], cs2[1]) && l.getBlockY() >= Math.min(cs[1], cs2[1]) && l.getBlockZ() <= Math.max(cs[2], cs2[2]) && l.getBlockZ() >= Math.min(cs[2], cs2[2])) {
-					// In zone!
-					if ((Math.random() * 500) < r.getInt("healing")) {
-		    			return true;
-		    		}
-				}
-				
-				//double dist = Math.sqrt(Math.pow(x - Integer.parseInt(cs[0]), 2) + Math.pow(z - Integer.parseInt(cs[1]), 2));
-				//if (dist <= r.getInt("radius")) {
-					//return r.getInt("Id");
-				//}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return false;
     }
     
     public HashMap<String, String> towninfo(int townid) {

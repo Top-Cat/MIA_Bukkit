@@ -40,9 +40,9 @@ public class MIAEntityListener extends EntityListener {
     	if (defender instanceof Player) {
 	    	boolean zonea = false;
 	    	if (attacker instanceof Player) {
-	    		zonea = plugin.mf.inzoneProp(((Player) defender), "PvP") == 0;
+	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isPvP();
 	    	} else {
-	    		zonea = plugin.mf.inzoneProp(((Player) defender), "mobs") == 0;
+	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isMobs();
 	    	}
     		
 	    	if (plugin.mf.intown(defender.getLocation()) > 0 || zonea) {
@@ -109,7 +109,7 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
     	for (Block i : event.blockList()) {
-        	if (plugin.mf.intown(i) > 0 || plugin.mf.inzoneProp(i, "mobs") == 0) {
+        	if (plugin.mf.intown(i) > 0 || plugin.mf.inzoneR(i).isMobs()) {
         		event.setCancelled(true);
         	}
     	}
