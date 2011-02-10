@@ -76,7 +76,6 @@ public class MIAPlayerListener extends PlayerListener {
     		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
     		mtsign.update();
     		
-    		lastup = (int) (time.getTime() / 1000);
     		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
     		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
@@ -446,8 +445,6 @@ public class MIAPlayerListener extends PlayerListener {
     		plugin.blockListener.opengate.remove(b);
     	}
     }
-    
-    int lastup = 0;
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
