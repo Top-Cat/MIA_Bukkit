@@ -68,6 +68,7 @@ public class MIAEntityListener extends EntityListener {
 		    	}
 	    	}
     	}
+    	plugin.mf.updatestats((Player) defender, 2, 12, damage);
     	return false;
     }
     

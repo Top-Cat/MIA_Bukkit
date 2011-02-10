@@ -86,7 +86,7 @@ public class MIAFunctions {
 							}
 							u = "UPDATE stats SET count = " + ad + amm + " WHERE Id = " + r.getInt("Id");
 							pr = plugin.conn.prepareStatement(u);
-							System.out.println(u);
+							//System.out.println(u);
 							pr.executeUpdate();
 							stats.get(r.getString("player")).get(r.getInt("type")).remove(r.getInt("blockid"));					}
 					}
@@ -528,7 +528,7 @@ public class MIAFunctions {
     
     public void updatestats(Player pl, int type, int id, int amm, Boolean overwrite) {
     	String p = pl.getDisplayName();
-    	if (updatec++ > 50) {
+    	if (updatec++ > 100) {
     		updatec = 0;
     		System.out.println("Update, is this too frequent?");
     		updatestats(stats, overw);
