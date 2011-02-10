@@ -44,7 +44,8 @@ public class MIAPlayerListener extends PlayerListener {
     final timer timer;
     
     public class timer implements Runnable {
-
+    	int updatec = 0;
+    	
 		@Override
 		public void run() {
 	    	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
@@ -55,37 +56,38 @@ public class MIAPlayerListener extends PlayerListener {
 	    	
 	    	Date time = new Date();
 	    	List<World> ws = plugin.getServer().getWorlds();
-	    	if ((time.getTime() / 1000) - 5 > lastup) {
-	    		//System.out.println(ws.get(0).getTime());
-	    		long mtime = ws.get(0).getTime() + 6000;
-	    		if (mtime > 24000) {
-	    			mtime -= 24000;
-	    		}
-	    		int hours = (int) Math.floor(mtime / 1000);
-	    		mtime = (((mtime - (hours * 1000)) * 60)  / 1000);
-	    		String mp = "";
-	    		String hp = "";
-	    		if (hours < 10)
-	    			hp = "0";
-	    		if (mtime < 10)
-	    			mp = "0";
-	    		
-	    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
-	    		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
-	    		mtsign.update();
-	    		
-	    		lastup = (int) (time.getTime() / 1000);
-	    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
-	    		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
-	    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
-	    		time.setTime(time.getTime() - 18000000);
-	    		sign.setLine(2, sdf.format(time) + " EST");
-	    		time.setTime(time.getTime() - 10800000);
-	    		sign.setLine(3, sdf.format(time) + " PST");
-	    		sign.update();
-	    	}
+    		//System.out.println(ws.get(0).getTime());
+    		long mtime = ws.get(0).getTime() + 6000;
+    		if (mtime > 24000) {
+    			mtime -= 24000;
+    		}
+    		int hours = (int) Math.floor(mtime / 1000);
+    		mtime = (((mtime - (hours * 1000)) * 60)  / 1000);
+    		String mp = "";
+    		String hp = "";
+    		if (hours < 10)
+    			hp = "0";
+    		if (mtime < 10)
+    			mp = "0";
+    		
+    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
+    		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
+    		mtsign.update();
+    		
+    		lastup = (int) (time.getTime() / 1000);
+    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
+    		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
+    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
+    		time.setTime(time.getTime() - 18000000);
+    		sign.setLine(2, sdf.format(time) + " EST");
+    		time.setTime(time.getTime() - 10800000);
+    		sign.setLine(3, sdf.format(time) + " PST");
+    		sign.update();
 	    	
-	    	plugin.mf.updatestats();
+    		if (updatec++ > 6) {
+    			updatec = 0;
+    			plugin.mf.updatestats();
+    		}
 		}
     	
     }

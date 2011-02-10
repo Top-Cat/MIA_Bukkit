@@ -516,7 +516,6 @@ public class MIAFunctions {
     
     HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
     HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw = new HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>>();
-    //int updatec = 0;
     
     public void updatestats(Player p, int type, int id) {
     	updatestats(p, type, id, 1, false);
