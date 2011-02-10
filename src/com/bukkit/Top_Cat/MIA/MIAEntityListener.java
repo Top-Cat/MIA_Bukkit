@@ -67,8 +67,8 @@ public class MIAEntityListener extends EntityListener {
 		    		lastattacker.put((Player) defender, (Player) attacker);
 		    	}
 	    	}
+	    	plugin.mf.updatestats((Player) defender, 2, 12, damage);
     	}
-    	plugin.mf.updatestats((Player) defender, 2, 12, damage);
     	return false;
     }
     
