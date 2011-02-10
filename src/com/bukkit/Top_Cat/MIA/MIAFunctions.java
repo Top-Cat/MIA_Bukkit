@@ -20,6 +20,9 @@ public class MIAFunctions {
     
     public MIAFunctions(MIA instance) {
         plugin = instance;
+        
+        sblock = plugin.getServer().getWorlds().get(0).getBlockAt(409, 4, -354);
+        gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, 0);
 	}
     
     public int intown(Block b) {
@@ -285,7 +288,9 @@ public class MIAFunctions {
 		return out;
     }
     
-    List<Zone> zones;
+    List<Zone> zones = new ArrayList<Zone>();
+    Block sblock;
+    Zone gzone;
     
     public void cache_zones() {
     	zones.clear();
@@ -322,7 +327,7 @@ public class MIAFunctions {
     }
     
     public Zone inzoneR(Location ps) {
-    	if (towns.size() == 0)
+    	if (zones.size() == 0)
     		cache_zones();
     	
     	for (Zone i : zones) {
@@ -330,7 +335,7 @@ public class MIAFunctions {
     			return i;
     		}
     	}
-    	return null;
+    	return gzone;
     }
     
     public boolean ownzone(Player p) {
