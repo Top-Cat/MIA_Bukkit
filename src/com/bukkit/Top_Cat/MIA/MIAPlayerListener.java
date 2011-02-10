@@ -410,7 +410,7 @@ public class MIAPlayerListener extends PlayerListener {
     	World w = event.getPlayer().getWorld();
     	List<World> ws = plugin.getServer().getWorlds();
     	if ((time.getTime() / 1000) - 5 > lastup) {
-    		System.out.println(ws.get(0).getTime());
+    		//System.out.println(ws.get(0).getTime());
     		long mtime = ws.get(0).getTime() + 6000;
     		if (mtime > 24000) {
     			mtime -= 24000;
