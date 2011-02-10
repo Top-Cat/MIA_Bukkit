@@ -57,7 +57,8 @@ public class MIA extends JavaPlugin {
 
     public void onEnable() {
         // TODO: Place any custom enable code here including the registration of any events
-
+    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 100);
+    	
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);

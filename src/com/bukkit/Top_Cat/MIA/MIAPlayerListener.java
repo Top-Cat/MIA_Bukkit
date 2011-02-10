@@ -41,11 +41,60 @@ import com.maxmind.geoip.regionName;
  */
 public class MIAPlayerListener extends PlayerListener {
     private final MIA plugin;
+    final timer timer;
+    
+    public class timer implements Runnable {
+
+		@Override
+		public void run() {
+	    	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
+	    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
+	    			i.setHealth(0);
+	    		}
+	    	}
+	    	
+	    	Date time = new Date();
+	    	List<World> ws = plugin.getServer().getWorlds();
+	    	if ((time.getTime() / 1000) - 5 > lastup) {
+	    		//System.out.println(ws.get(0).getTime());
+	    		long mtime = ws.get(0).getTime() + 6000;
+	    		if (mtime > 24000) {
+	    			mtime -= 24000;
+	    		}
+	    		int hours = (int) Math.floor(mtime / 1000);
+	    		mtime = (((mtime - (hours * 1000)) * 60)  / 1000);
+	    		String mp = "";
+	    		String hp = "";
+	    		if (hours < 10)
+	    			hp = "0";
+	    		if (mtime < 10)
+	    			mp = "0";
+	    		
+	    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
+	    		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
+	    		mtsign.update();
+	    		
+	    		lastup = (int) (time.getTime() / 1000);
+	    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
+	    		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
+	    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
+	    		time.setTime(time.getTime() - 18000000);
+	    		sign.setLine(2, sdf.format(time) + " EST");
+	    		time.setTime(time.getTime() - 10800000);
+	    		sign.setLine(3, sdf.format(time) + " PST");
+	    		sign.update();
+	    	}
+	    	
+	    	plugin.mf.updatestats();
+		}
+    	
+    }
 
     HashMap<String, OnlinePlayer> userinfo = new HashMap<String, OnlinePlayer>();
     
     public MIAPlayerListener(MIA instance) {
         plugin = instance;
+        timer = new timer();
     }
     
     public boolean cbal(String target, int ammount) {
@@ -398,46 +447,12 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
-    	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
-    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
-    			i.setHealth(0);
-    		}
-    	}
     	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}
 	   	Date time = new Date();
     	World w = event.getPlayer().getWorld();
     	List<World> ws = plugin.getServer().getWorlds();
-    	if ((time.getTime() / 1000) - 5 > lastup) {
-    		//System.out.println(ws.get(0).getTime());
-    		long mtime = ws.get(0).getTime() + 6000;
-    		if (mtime > 24000) {
-    			mtime -= 24000;
-    		}
-    		int hours = (int) Math.floor(mtime / 1000);
-    		mtime = (((mtime - (hours * 1000)) * 60)  / 1000);
-    		String mp = "";
-    		String hp = "";
-    		if (hours < 10)
-    			hp = "0";
-    		if (mtime < 10)
-    			mp = "0";
-    		
-    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
-    		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
-    		mtsign.update();
-    		
-    		lastup = (int) (time.getTime() / 1000);
-    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
-    		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
-    		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
-    		time.setTime(time.getTime() - 18000000);
-    		sign.setLine(2, sdf.format(time) + " EST");
-    		time.setTime(time.getTime() - 10800000);
-    		sign.setLine(3, sdf.format(time) + " PST");
-    		sign.update();
-    	}
     	
     	if (Math.sqrt(Math.pow(event.getTo().getBlockX() - 466, 2) + Math.pow(event.getTo().getBlockZ() + 303, 2)) > 1000) {
     		if (Math.sqrt(Math.pow(event.getFrom().getBlockX() - 466, 2) + Math.pow(event.getFrom().getBlockZ() + 303, 2)) < 1000) {

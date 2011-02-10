@@ -516,7 +516,7 @@ public class MIAFunctions {
     
     HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
     HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw = new HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>>();
-    int updatec = 0;
+    //int updatec = 0;
     
     public void updatestats(Player p, int type, int id) {
     	updatestats(p, type, id, 1, false);
@@ -528,11 +528,11 @@ public class MIAFunctions {
     
     public void updatestats(Player pl, int type, int id, int amm, Boolean overwrite) {
     	String p = pl.getDisplayName();
-    	if (updatec++ > 100) {
+    	/*if (updatec++ > 100) {
     		updatec = 0;
     		System.out.println("Update, is this too frequent?");
     		updatestats(stats, overw);
-    	}
+    	}*/
 		if (!stats.containsKey(p)){
 			stats.put(p, new HashMap<Integer, HashMap<Integer, Integer>>());
 			overw.put(p, new HashMap<Integer, HashMap<Integer, Boolean>>());
