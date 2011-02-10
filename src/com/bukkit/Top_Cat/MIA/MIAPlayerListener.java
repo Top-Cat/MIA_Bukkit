@@ -48,11 +48,13 @@ public class MIAPlayerListener extends PlayerListener {
     	
 		@Override
 		public void run() {
-	    	for (LivingEntity i : plugin.getServer().getWorlds().get(0).getLivingEntities()) {
-	    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
-	    			i.setHealth(0);
-	    		}
-	    	}
+			for (World j : plugin.getServer().getWorlds()) {
+		    	for (LivingEntity i : j.getLivingEntities()) {
+		    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
+		    			i.setHealth(0);
+		    		}
+		    	}
+			}
 	    	
 	    	Date time = new Date();
 	    	List<World> ws = plugin.getServer().getWorlds();
