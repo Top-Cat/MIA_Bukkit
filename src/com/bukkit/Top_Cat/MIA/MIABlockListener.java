@@ -447,8 +447,7 @@ public class MIABlockListener extends BlockListener {
     	}
     	
     	if (event.getItemInHand().getType() == Material.STICK) {
-    		int town = plugin.mf.intown(event.getBlock());
-    		plugin.mf.sendmsg(event.getPlayer(), "Block belongs to: " + plugin.mf.towninfo(town).get("name"));
+    		plugin.mf.sendmsg(event.getPlayer(), "Block belongs to: " + plugin.mf.inzoneR(event.getBlock()).getName());
     	}
     }
     

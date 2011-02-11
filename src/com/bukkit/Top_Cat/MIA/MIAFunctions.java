@@ -30,18 +30,6 @@ public class MIAFunctions {
     	cache_zones();
     }
     
-    public int intown(Block b) {
-    	return intown(b.getX(), b.getZ(), b.getWorld());
-    }
-    
-    public int intown(Location l) {
-    	return intown(l.getBlockX(), l.getBlockZ(), l.getWorld());
-    }
-    
-    public int intown(Player p) {
-    	return intown(p.getLocation().getBlockX(), p.getLocation().getBlockZ(), p.getWorld());
-    }
-    
     public List<Town> towns = new ArrayList<Town>();
     
     public void cache_towns() {
@@ -64,7 +52,9 @@ public class MIAFunctions {
 				}
 				
 				Block b = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(Integer.parseInt(cs[0]), Integer.parseInt(cs[1]), Integer.parseInt(cs[2]));
-				towns.add(new Town(plugin, r.getInt("Id"), b, r.getString("name"), r.getInt("mayor"), Town.towntypes.TOWN, usrs));
+				Town t = new Town(plugin, r.getInt("Id"), b, r.getString("name"), r.getInt("mayor"), Town.towntypes.TOWN, usrs);
+				towns.add(t);
+				zones.add(t);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -72,16 +62,40 @@ public class MIAFunctions {
 		}
     }
     
-    public int intown(int x, int z, World w) {
+    public int intown(Block b) {
+    	return intownR(b).getId();
+    }
+    
+    public int intown(Location l) {
+    	return intownR(l).getId();
+    }
+    
+    public int intown(Player p) {
+    	return intownR(p).getId();
+    }
+    
+    public Town intownR(Block b) {
+    	return intownR(b.getX(), b.getZ(), b.getWorld());
+    }
+    
+    public Town intownR(Location l) {
+    	return intownR(l.getBlockX(), l.getBlockZ(), l.getWorld());
+    }
+    
+    public Town intownR(Player p) {
+    	return intownR(p.getLocation().getBlockX(), p.getLocation().getBlockZ(), p.getWorld());
+    }
+    
+    public Town intownR(int x, int z, World w) {
     	if (towns.size() == 0)
     		cache_towns();
     	
     	for (Town i : towns) {
     		if (i.inZone(new Location(w, x, 0, z))) {
-	    		return i.getId();
+	    		return i;
     		}
     	}
-    	return 0;
+    	return null;
     }
     
     public void updatestats(HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats, HashMap<String, HashMap<Integer, HashMap<Integer, Boolean>>> overw) {
@@ -385,31 +399,6 @@ public class MIAFunctions {
 			e.printStackTrace();
 		}
     	return out;
-    }
-    
-    public HashMap<String, String> towninfo(int townid) {
-    	HashMap<String, String> out = new HashMap<String, String>();
-    	out.put("name", "everywhere");
-    	if (townid > 0) {
-	    	PreparedStatement pr;
-			try {	
-				String q = "SELECT towns.*, town_type.radius, ua.name as uname, COUNT(ub.Id) as pop FROM towns, town_type, users as ua, users as ub WHERE towns.ttype = town_type.Id and ua.id = towns.mayor and ub.town = towns.Id and towns.Id = '" + townid + "'";
-				pr = plugin.conn.prepareStatement(q);
-				ResultSet r = pr.executeQuery();
-				if (r.first()) {
-					out.put("name", r.getString("Name"));
-					out.put("radius", r.getString("radius"));
-					out.put("mayor", r.getString("mayor"));
-					out.put("mayorname", r.getString("uname"));
-					out.put("pop", r.getString("pop"));
-				}
-				//while (r.next()) {
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    	}
-		return out;
     }
     
     public boolean inowntown(Player p) {

@@ -500,13 +500,13 @@ public class MIAPlayerListener extends PlayerListener {
     		event.getPlayer().setHealth(newh);
     	}
     	
-    	int town1 = plugin.mf.intown(event.getFrom());
-    	int town2 = plugin.mf.intown(event.getTo());
+    	Town town1 = plugin.mf.intownR(event.getFrom());
+    	Town town2 = plugin.mf.intownR(event.getTo());
     	if (town1 != town2) {
-    		if (town1 == 0) {
-    			plugin.mf.sendmsg(event.getPlayer(), "§6Welcome to " + plugin.mf.towninfo(town2).get("name"));
+    		if (town1 == null) {
+    			plugin.mf.sendmsg(event.getPlayer(), "§6Welcome to " + town2.getName());
     		} else {
-    			plugin.mf.sendmsg(event.getPlayer(), "§6Now leaving " + plugin.mf.towninfo(town1).get("name"));
+    			plugin.mf.sendmsg(event.getPlayer(), "§6Now leaving " + town1.getName());
     		}
     	}
     	
