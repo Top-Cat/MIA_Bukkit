@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,6 +16,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.http.AccessToken;
+import twitter4j.http.RequestToken;
+
 public class MIAFunctions {
     private final MIA plugin;
     
@@ -23,7 +31,30 @@ public class MIAFunctions {
         
         sblock = plugin.getServer().getWorlds().get(0).getBlockAt(409, 4, -354);
         gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, 0);
-	}
+    }
+    
+    RequestToken requestToken;
+    Twitter twitter;
+    
+    public void post_tweet(String s) {
+    	Date time = new Date();
+    	s += " (" + String.valueOf(Math.round(time.getTime() * 1000)).substring(5) + ")";
+    	
+        twitter = new TwitterFactory().getInstance();
+        AccessToken accessToken = new AccessToken("230579503-0RN929B5ILKn1uQWRCF4xEVzJJmBn7agUHC9Omu7", "YhVjQ36Y4uGh4Ov94YVxqty1O8cGa3wCdKxMhA3VkEQ");
+        twitter.setOAuthConsumer("oKfO8Vs0YZX7NwS8HInt2A", "egyqjiGY8w4USMvKBblpClIy7kh5qxC4DOra8iM4m4");
+        twitter.setOAuthAccessToken(accessToken);
+        
+        Status status;
+		try {
+			status = twitter.updateStatus(s);
+	        System.out.println("Successfully updated the status to [" + status.getText() + "].");
+		} catch (TwitterException e) {
+			System.out.println("Didn't update status. " + e); 
+			//e.printStackTrace();
+		}
+        
+    }
     
     public void rebuild_cache() {
     	cache_zones();
@@ -84,6 +115,18 @@ public class MIAFunctions {
     		return intownR(p).getId();
     	}
     	return 0;
+    }
+    
+    public Town townR(Player p) {
+    	if (towns.size() == 0)
+    		rebuild_cache();
+    	
+    	for (Town i : towns) {
+    		if (i.intown(p)) {
+	    		return i;
+    		}
+    	}
+    	return null;
     }
     
     public Town intownR(Block b) {

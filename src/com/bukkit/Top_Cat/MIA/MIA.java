@@ -51,6 +51,8 @@ public class MIA extends JavaPlugin {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		mf.post_tweet("The Minecraft server has started!");
     }
 
    
@@ -100,6 +102,7 @@ public class MIA extends JavaPlugin {
     		playerListener.logintimes.put(i, time.getTime() / 1000);
         }
     }
+    
     public void onDisable() {
         // TODO: Place any custom disable code here
 

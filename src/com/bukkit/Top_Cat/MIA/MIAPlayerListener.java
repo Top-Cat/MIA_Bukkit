@@ -145,7 +145,7 @@ public class MIAPlayerListener extends PlayerListener {
     HashMap<Player, Long> logintimes = new HashMap<Player, Long>();
     
     @Override
-    public void onPlayerJoin(PlayerEvent event) {    	
+    public void onPlayerJoin(PlayerEvent event) {
     	String nam = event.getPlayer().getDisplayName();
     	
     	PreparedStatement pr;
@@ -204,6 +204,7 @@ public class MIAPlayerListener extends PlayerListener {
 		}
 		
 		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), msg);
+		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
@@ -389,13 +390,14 @@ public class MIAPlayerListener extends PlayerListener {
     @Override
     public void onPlayerRespawn(PlayerRespawnEvent event) {
     	plugin.mf.spawn(event.getPlayer());
+    	plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " died! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
     }
     
     @Override
     public void onPlayerChat(PlayerChatEvent event) {
     	String tw = "";
     	String prefix = userinfo.get(event.getPlayer().getDisplayName()).getPrefix();
-    	Player[] p = plugin.mf.intownR(event.getPlayer()).getplayers();
+    	Player[] p = plugin.mf.townR(event.getPlayer()).getplayers();
 		
 		if (p == null) {
 			p = plugin.getServer().getOnlinePlayers();

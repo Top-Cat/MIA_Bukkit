@@ -3,22 +3,21 @@ TODO
 {FEATURES}
 -Minecart Mania
 -Spawn lapis where randomed
--Twitter Events
 -Spleef + Timed Maze
 -Damage taken/healed + Item pickup/drop Stats
 -DMC
 -Dynamic online map
--Town info caching?
 ~Bridge/Door/Gate by Redstone
-~NPCs
+~NPCs (Tweet completed quests)
 ~Auto Signs
 ~Cape selection + remake mod
+-Parent zones
 
 {LOLWUT}
 -Relative position for lifts ???
 
 {INTERACTIONS}
 -Stock, create, destroy shops
--Create, manage zones
+-Create, manage zones - only inside owned zones
 -Alliances
 -Allow create stargates by mayors
