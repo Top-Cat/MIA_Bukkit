@@ -35,14 +35,15 @@ public class MIAFunctions {
     
     RequestToken requestToken;
     Twitter twitter;
+    sqllogin sqllogin = new sqllogin();
     
     public void post_tweet(String s) {
     	Date time = new Date();
     	s += " (" + String.valueOf(Math.round(time.getTime() * 1000)).substring(5) + ")";
     	
         twitter = new TwitterFactory().getInstance();
-        AccessToken accessToken = new AccessToken("230579503-0RN929B5ILKn1uQWRCF4xEVzJJmBn7agUHC9Omu7", "YhVjQ36Y4uGh4Ov94YVxqty1O8cGa3wCdKxMhA3VkEQ");
-        twitter.setOAuthConsumer("oKfO8Vs0YZX7NwS8HInt2A", "egyqjiGY8w4USMvKBblpClIy7kh5qxC4DOra8iM4m4");
+        AccessToken accessToken = sqllogin.accessToken;
+        twitter.setOAuthConsumer(sqllogin.consumerKey, consumerSecret);
         twitter.setOAuthAccessToken(accessToken);
         
         Status status;
