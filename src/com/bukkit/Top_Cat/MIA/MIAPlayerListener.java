@@ -85,12 +85,15 @@ public class MIAPlayerListener extends PlayerListener {
     		sign.setLine(3, sdf.format(time) + " PST");
     		sign.update();
 	    	
-    		if (updatec++ > 6) {
-    			updatec = 0;
+    		if (updatec++ % 6 == 0) {
     			for (Player k : plugin.getServer().getOnlinePlayers()) {
     				plugin.mf.updatestats(k, 2, 13, k.getHealth(), true);
     			}
     			plugin.mf.updatestats();
+    		}
+    		if (updatec > 60) {
+    			updatec = 0;
+    			plugin.mf.rebuild_cache();
     		}
 		}
     	

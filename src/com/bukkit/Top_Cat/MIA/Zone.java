@@ -83,10 +83,12 @@ class Zone {
 				if (l.getWorld() == b1.getWorld() && l.getBlockX() <= Math.max(b1.getX(), b2.getX()) && l.getBlockX() >= Math.min(b1.getX(), b2.getX()) && l.getBlockY() <= Math.max(b1.getY(), b2.getY()) && l.getBlockY() >= Math.min(b1.getY(), b2.getY()) && l.getBlockZ() <= Math.max(b1.getZ(), b2.getZ()) && l.getBlockZ() >= Math.min(b1.getZ(), b2.getZ())) {
 					return true;
 				}
+				break;
 			case SQUARE:
 				if (l.getWorld() == b1.getWorld() && l.getBlockX() <= Math.max(b1.getX(), b2.getX()) && l.getBlockX() >= Math.min(b1.getX(), b2.getX()) && l.getBlockZ() <= Math.max(b1.getZ(), b2.getZ()) && l.getBlockZ() >= Math.min(b1.getZ(), b2.getZ())) {
 					return true;
 				}
+				break;
 			case CIRCLE:
 				// circle center b1, b2 is on the perimiter
 				double dist = Math.round(Math.sqrt(Math.pow(b1.getX() - b2.getX(), 2) + Math.pow(b1.getZ() - b2.getZ(), 2))); // Circle radius
@@ -94,12 +96,14 @@ class Zone {
 				if (dist2 <= dist) {
 					return true;
 				}
+				break;
 			case SPHERE:
 				double dist3 = Math.round(Math.sqrt(Math.pow(b1.getX() - b2.getX(), 2) + Math.pow(b1.getY() - b2.getY(), 2) + Math.pow(b1.getZ() - b2.getZ(), 2))); // Circle radius
 				double dist4 = Math.round(Math.sqrt(Math.pow(b1.getX() - l.getBlockX(), 2) + Math.pow(b1.getY() - l.getBlockY(), 2) + Math.pow(b1.getZ() - l.getBlockZ(), 2))); // Distance from center
 				if (dist4 <= dist3) {
 					return true;
 				}
+				break;
 		}
 		return false;
 	}

@@ -26,8 +26,8 @@ public class MIAFunctions {
 	}
     
     public void rebuild_cache() {
-    	cache_towns();
     	cache_zones();
+    	cache_towns();
     }
     
     public List<Town> towns = new ArrayList<Town>();
@@ -51,7 +51,7 @@ public class MIAFunctions {
 					usrs.add(r2.getString("name"));
 				}
 				
-				Block b = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(Integer.parseInt(cs[0]), Integer.parseInt(cs[1]), Integer.parseInt(cs[2]));
+				Block b = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(Integer.parseInt(cs[0]), 0, Integer.parseInt(cs[1]));
 				Town t = new Town(plugin, r.getInt("Id"), b, r.getString("name"), r.getInt("mayor"), Town.towntypes.TOWN, usrs);
 				towns.add(t);
 				zones.add(t);
@@ -63,15 +63,27 @@ public class MIAFunctions {
     }
     
     public int intown(Block b) {
-    	return intownR(b).getId();
+    	Town t = intownR(b);
+    	if (t != null) {
+    		return intownR(b).getId();
+    	}
+    	return 0;
     }
     
     public int intown(Location l) {
-    	return intownR(l).getId();
+    	Town t = intownR(l);
+    	if (t != null) {
+    		return intownR(l).getId();
+    	}
+    	return 0;
     }
     
     public int intown(Player p) {
-    	return intownR(p).getId();
+    	Town t = intownR(p);
+    	if (t != null) {
+    		return intownR(p).getId();
+    	}
+    	return 0;
     }
     
     public Town intownR(Block b) {
@@ -88,7 +100,7 @@ public class MIAFunctions {
     
     public Town intownR(int x, int z, World w) {
     	if (towns.size() == 0)
-    		cache_towns();
+    		rebuild_cache();
     	
     	for (Town i : towns) {
     		if (i.inZone(new Location(w, x, 0, z))) {
@@ -354,7 +366,7 @@ public class MIAFunctions {
     
     public Zone inzoneR(Location ps) {
     	if (zones.size() == 0)
-    		cache_zones();
+    		rebuild_cache();
     	
     	for (Zone i : zones) {
     		if (i.inZone(ps)) {
