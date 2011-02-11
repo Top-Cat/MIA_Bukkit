@@ -50,7 +50,7 @@ public class MIAPlayerListener extends PlayerListener {
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
 		    	for (LivingEntity i : j.getLivingEntities()) {
-		    		if (i instanceof Monster && plugin.mf.intown(i.getLocation()) > 0) {
+		    		if (i instanceof Monster && plugin.mf.inzoneR(i.getLocation()).isMobs()) {
 		    			i.setHealth(0);
 		    		}
 		    	}
@@ -393,29 +393,9 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerChat(PlayerChatEvent event) {
-    	Player[] p = null;
     	String tw = "";
     	String prefix = userinfo.get(event.getPlayer().getDisplayName()).getPrefix();
-    	PreparedStatement pr;
-		try {
-			String q = "SELECT prefix, name FROM users WHERE town > 0 and town = (SELECT town FROM users WHERE name = '" + event.getPlayer().getDisplayName() + "')";
-			pr = plugin.conn.prepareStatement(q);
-			ResultSet r = pr.executeQuery();
-			if (r.last()) {
-				p = new Player[r.getRow()];
-				r.beforeFirst();
-				int i = 0;
-				while (r.next()) {
-					Player t = plugin.getServer().getPlayer(r.getString("name"));
-					if (t != null) {
-						p[i++] = t;
-					}
-				}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	Player[] p = plugin.mf.intownR(event.getPlayer()).getplayers();
 		
 		if (p == null) {
 			p = plugin.getServer().getOnlinePlayers();

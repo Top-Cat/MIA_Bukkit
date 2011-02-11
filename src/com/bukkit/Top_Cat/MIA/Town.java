@@ -51,4 +51,19 @@ public class Town extends Zone {
 		}
 		return false;
 	}
+	
+	public List<String> getusers() {
+		return users;
+	}
+	
+	public Player[] getplayers() {
+		Player[] out = new Player[users.size()];
+		int j = 0;
+		for (String i : users) {
+			Player p = plugin.getServer().getPlayer(i);
+			if (p != null)
+				out[j++] = p;
+		}
+		return out;
+	}
 }
