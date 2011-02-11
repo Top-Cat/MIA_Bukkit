@@ -41,7 +41,7 @@ public class MIAEntityListener extends EntityListener {
     	if (defender instanceof Player) {
 	    	boolean zonea = false;
 	    	if (attacker instanceof Player) {
-	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isPvP();
+	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isPvP((Player) defender);
 	    	} else if (attacker instanceof Creature) {
 	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isMobs();
 	    	}

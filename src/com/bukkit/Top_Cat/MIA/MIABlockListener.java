@@ -35,7 +35,7 @@ public class MIABlockListener extends BlockListener {
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
     	int town = plugin.mf.intown(event.getBlock());
-    	if ((town > 0 && town != plugin.mf.playertownId(event.getPlayer()) || (plugin.mf.inzoneR(event.getBlock()).isProtected() && !plugin.mf.ownzone(event.getPlayer()))) && !event.getPlayer().isOp()) {
+    	if ((town > 0 && town != plugin.mf.playertownId(event.getPlayer()) || (plugin.mf.inzoneR(event.getBlock()).isProtected(event.getPlayer()) && !plugin.mf.ownzone(event.getPlayer()))) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		} else {
 			plugin.mf.updatestats(event.getPlayer(), 1, event.getBlock().getTypeId());
@@ -48,7 +48,7 @@ public class MIABlockListener extends BlockListener {
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
     	int town = plugin.mf.intown(event.getBlock());
-		if ((town > 0 && town != plugin.mf.playertownId(event.getPlayer()) || (plugin.mf.inzoneR(event.getBlock()).isProtected() && !plugin.mf.ownzone(event.getPlayer()))) && !event.getPlayer().isOp()) {
+		if ((town > 0 && town != plugin.mf.playertownId(event.getPlayer()) || (plugin.mf.inzoneR(event.getBlock()).isProtected(event.getPlayer()) && !plugin.mf.ownzone(event.getPlayer()))) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
 		}
     	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {	
@@ -63,7 +63,7 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockInteract(BlockInteractEvent event) {
-    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE || event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) && ((!plugin.mf.inowntown((Player) event.getEntity()) && plugin.mf.intown((Player) event.getEntity()) > 0) || (plugin.mf.inzoneR(event.getEntity().getLocation()).isChestProtected() && !plugin.mf.ownzone((Player) event.getEntity())))) {
+    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE || event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) && ((!plugin.mf.inowntown((Player) event.getEntity()) && plugin.mf.intown((Player) event.getEntity()) > 0) || (plugin.mf.inzoneR(event.getEntity().getLocation()).isChestProtected((Player) event.getEntity()) && !plugin.mf.ownzone((Player) event.getEntity())))) {
     		plugin.mf.sendmsg((Player) event.getEntity(), "§4This object is locked!");
     		event.setCancelled(true);
     	}

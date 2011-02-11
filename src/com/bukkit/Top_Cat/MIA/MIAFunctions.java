@@ -25,6 +25,11 @@ public class MIAFunctions {
         gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, 0);
 	}
     
+    public void rebuild_cache() {
+    	cache_towns();
+    	cache_zones();
+    }
+    
     public int intown(Block b) {
     	return intown(b.getX(), b.getZ(), b.getWorld());
     }
@@ -37,36 +42,43 @@ public class MIAFunctions {
     	return intown(p.getLocation().getBlockX(), p.getLocation().getBlockZ(), p.getWorld());
     }
     
-    public HashMap<String[], Integer[]> towns = new HashMap<String[], Integer[]>();
+    public List<Town> towns = new ArrayList<Town>();
+    
+    public void cache_towns() {
+    	towns.clear();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT a.*, b.radius FROM towns as a, town_type as b WHERE a.ttype = b.Id";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			while (r.next()) {
+				String[] cs = r.getString("center").split(",");
+				List<String> usrs = new ArrayList<String>();
+				
+				String q2 = "SELECT name FROM users WHERE town = '" + r.getInt("Id") + "'";
+				pr = plugin.conn.prepareStatement(q2);
+				ResultSet r2 = pr.executeQuery();
+				
+				while (r2.next()) {
+					usrs.add(r2.getString("name"));
+				}
+				
+				Block b = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(Integer.parseInt(cs[0]), Integer.parseInt(cs[1]), Integer.parseInt(cs[2]));
+				towns.add(new Town(plugin, r.getInt("Id"), b, r.getString("name"), r.getInt("mayor"), Town.towntypes.TOWN, usrs));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     
     public int intown(int x, int z, World w) {
-    	if (towns.size() == 0) {
-	    	PreparedStatement pr;
-			try {
-				String q = "SELECT a.center, a.world, a.Id, b.radius FROM towns as a, town_type as b WHERE a.ttype = b.Id";
-				pr = plugin.conn.prepareStatement(q);
-				ResultSet r = pr.executeQuery();
-				while (r.next()) {
-					String c = r.getString("center");
-					c += "," + r.getString("world");
-					String[] cs = c.split(",");
-					Integer[] v = new Integer[2];
-					v[0] = r.getInt("radius");
-					v[1] = r.getInt("Id");
-					towns.put(cs, v);
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    	}
-    	for (String[] i : towns.keySet()) {
-    		if (plugin.getServer().getWorlds().indexOf(w) == Integer.parseInt(i[2])) {
-	    		Integer[] v = towns.get(i);
-				double dist = Math.round(Math.sqrt(Math.pow(x - Integer.parseInt(i[0]), 2) + Math.pow(z - Integer.parseInt(i[1]), 2)));
-				if (dist <= v[0]) {
-					return v[1];
-				}
+    	if (towns.size() == 0)
+    		cache_towns();
+    	
+    	for (Town i : towns) {
+    		if (i.inZone(new Location(w, x, 0, z))) {
+	    		return i.getId();
     		}
     	}
     	return 0;
@@ -88,7 +100,7 @@ public class MIAFunctions {
 							if (!overw.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"))) {
 								ad = "count + '";
 							}
-							//u = "UPDATE stats SET count = " + ad + amm + "' WHERE Id = '" + r.getInt("Id") + "'";
+							u = "UPDATE stats SET count = " + ad + amm + "' WHERE Id = '" + r.getInt("Id") + "'";
 							pr = plugin.conn.prepareStatement(u);
 							//System.out.println(u);
 							pr.executeUpdate();
