@@ -50,7 +50,7 @@ public class MIAPlayerListener extends PlayerListener {
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
 		    	for (LivingEntity i : j.getLivingEntities()) {
-		    		if (i instanceof Monster && plugin.mf.inzoneR(i.getLocation()).isMobs()) {
+		    		if (i instanceof Monster && !plugin.mf.inzoneR(i.getLocation()).isMobs()) {
 		    			i.setHealth(0);
 		    		}
 		    	}
