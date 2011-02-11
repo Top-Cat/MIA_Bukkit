@@ -43,7 +43,7 @@ public class MIAFunctions {
     	
         twitter = new TwitterFactory().getInstance();
         AccessToken accessToken = sqllogin.accessToken;
-        twitter.setOAuthConsumer(sqllogin.consumerKey, consumerSecret);
+        twitter.setOAuthConsumer(sqllogin.consumerKey, sqllogin.consumerSecret);
         twitter.setOAuthAccessToken(accessToken);
         
         Status status;
