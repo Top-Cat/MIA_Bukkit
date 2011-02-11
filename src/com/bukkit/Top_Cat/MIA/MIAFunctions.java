@@ -84,11 +84,11 @@ public class MIAFunctions {
 					if (stats.get(r.getString("player")).containsKey(r.getInt("type"))) {
 						if (stats.get(r.getString("player")).get(r.getInt("type")).containsKey(r.getInt("blockid"))) {
 							int amm = stats.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"));
-							String ad = "";
+							String ad = "'";
 							if (!overw.get(r.getString("player")).get(r.getInt("type")).get(r.getInt("blockid"))) {
-								ad = "count + ";
+								ad = "count + '";
 							}
-							u = "UPDATE stats SET count = " + ad + amm + " WHERE Id = " + r.getInt("Id");
+							//u = "UPDATE stats SET count = " + ad + amm + "' WHERE Id = '" + r.getInt("Id") + "'";
 							pr = plugin.conn.prepareStatement(u);
 							//System.out.println(u);
 							pr.executeUpdate();
@@ -106,8 +106,8 @@ public class MIAFunctions {
 					}
 				}
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
+			System.out.println("Meow :" + u);
 			e.printStackTrace();
 		}
     }

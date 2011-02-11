@@ -87,6 +87,9 @@ public class MIAPlayerListener extends PlayerListener {
 	    	
     		if (updatec++ > 6) {
     			updatec = 0;
+    			for (Player k : plugin.getServer().getOnlinePlayers()) {
+    				plugin.mf.updatestats(k, 2, 13, k.getHealth(), true);
+    			}
     			plugin.mf.updatestats();
     		}
 		}

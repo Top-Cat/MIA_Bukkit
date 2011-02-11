@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
@@ -41,22 +42,22 @@ public class MIAEntityListener extends EntityListener {
 	    	boolean zonea = false;
 	    	if (attacker instanceof Player) {
 	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isPvP();
-	    	} else {
+	    	} else if (attacker instanceof Creature) {
 	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isMobs();
 	    	}
     		
-	    	if (plugin.mf.intown(defender.getLocation()) > 0 || zonea) {
+	    	if ((plugin.mf.intown(defender.getLocation()) > 0 && attacker instanceof Entity) || zonea) {
 	        	return true;
 	    	} else if (attacker instanceof Player) {
 	    		if ((((Player) defender).getDisplayName().equalsIgnoreCase("Top_Cat") || ((Player) defender).getDisplayName().equalsIgnoreCase("Welsh_Sniper")) && ((Player) attacker).getDisplayName().equalsIgnoreCase("Gigthank")) {
-	    			attacker.teleportTo(new Location(attacker.getWorld(), 645, 3, 200));
+	    			attacker.teleportTo(new Location(plugin.getServer().getWorlds().get(0), 645, 3, 200));
 	    			int xs = 643;
 	    			int zs = 198;
 	    			for (int i = 1; i < 6; i++) {
 	    				for (int j = 0; j < 5; j++) {
 	    					for (int k = 0; k < 5; k++) {
 	    						if (j == 0 || j == 4 || k == 0 || k == 4) {
-	    							attacker.getWorld().getBlockAt(j + xs, i, k + zs).setType(Material.OBSIDIAN);
+	    							plugin.getServer().getWorlds().get(0).getBlockAt(j + xs, i, k + zs).setType(Material.OBSIDIAN);
 	    						}
 	    					}
 	    				}
