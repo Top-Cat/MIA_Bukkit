@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
+import org.bukkit.event.entity.ExplosionPrimedEvent;
 
 /**
  * Handle events for all Player related events
@@ -41,12 +42,12 @@ public class MIAEntityListener extends EntityListener {
     	if (defender instanceof Player) {
 	    	boolean zonea = false;
 	    	if (attacker instanceof Player) {
-	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isPvP((Player) defender);
+	    		zonea = ((Zone) plugin.mf.insidezone(defender.getLocation(), true)).isPvP((Player) defender);
 	    	} else if (attacker instanceof Creature) {
-	    		zonea = plugin.mf.inzoneR(defender.getLocation()).isMobs();
+	    		zonea = ((Zone) plugin.mf.insidezone(defender.getLocation(), true)).isMobs();
 	    	}
     		
-	    	if ((plugin.mf.intown(defender.getLocation()) > 0 && attacker instanceof Entity) || zonea) {
+	    	if ((plugin.mf.insidetown(defender.getLocation()) > 0 && attacker instanceof Entity) || zonea) {
 	        	return true;
 	    	} else if (attacker instanceof Player) {
 	    		if ((((Player) defender).getDisplayName().equalsIgnoreCase("Top_Cat") || ((Player) defender).getDisplayName().equalsIgnoreCase("Welsh_Sniper")) && ((Player) attacker).getDisplayName().equalsIgnoreCase("Gigthank")) {
@@ -110,10 +111,16 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
     	for (Block i : event.blockList()) {
-        	if (plugin.mf.intown(i) > 0 || plugin.mf.inzoneR(i).isMobs()) {
+        	if (plugin.mf.insidetown(i) > 0 || ((Zone) plugin.mf.insidezone(i, true)).isMobs()) {
         		event.setCancelled(true);
         	}
     	}
+    }
+    
+    @Override
+    public void onExplosionPrimed(ExplosionPrimedEvent event) {
+    	//event.getRadius()
+    	
     }
 
     //Insert Player related code here

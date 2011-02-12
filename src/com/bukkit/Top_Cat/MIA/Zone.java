@@ -78,9 +78,18 @@ class Zone {
 	}
 	
 	public boolean inZone(Location l) {
+		return inZone(l, false);
+	}
+	
+	public boolean inZone(Location l, boolean debug) {
+		if (debug) {
+			System.out.println(b1.getX() + ", " + b2.getX());
+			System.out.println(l.getBlockX() <= Math.max(b1.getX(), b2.getX()));
+			System.out.println(l.getBlockX() >= Math.min(b1.getX(), b2.getX()));
+		}
 		switch (ts) {
 			case CUBE:
-				if (l.getWorld() == b1.getWorld() && l.getBlockX() <= Math.max(b1.getX(), b2.getX()) && l.getBlockX() >= Math.min(b1.getX(), b2.getX()) && l.getBlockY() <= Math.max(b1.getY(), b2.getY()) && l.getBlockY() >= Math.min(b1.getY(), b2.getY()) && l.getBlockZ() <= Math.max(b1.getZ(), b2.getZ()) && l.getBlockZ() >= Math.min(b1.getZ(), b2.getZ())) {
+				if (/*l.getWorld() == b1.getWorld() && */l.getBlockX() <= Math.max(b1.getX(), b2.getX()) && l.getBlockX() >= Math.min(b1.getX(), b2.getX()) && l.getBlockY() <= Math.max(b1.getY(), b2.getY()) && l.getBlockY() >= Math.min(b1.getY(), b2.getY()) && l.getBlockZ() <= Math.max(b1.getZ(), b2.getZ()) && l.getBlockZ() >= Math.min(b1.getZ(), b2.getZ())) {
 					return true;
 				}
 				break;

@@ -39,7 +39,7 @@ public class MIAFunctions {
     
     public void post_tweet(String s) {
     	Date time = new Date();
-    	s += " (" + String.valueOf(Math.round(time.getTime() * 1000)).substring(5) + ")";
+    	s += " (" + String.valueOf(Math.round(time.getTime() / 1000)).substring(5) + ")";
     	
         twitter = new TwitterFactory().getInstance();
         AccessToken accessToken = sqllogin.accessToken;
@@ -94,30 +94,6 @@ public class MIAFunctions {
 		}
     }
     
-    public int intown(Block b) {
-    	Town t = intownR(b);
-    	if (t != null) {
-    		return intownR(b).getId();
-    	}
-    	return 0;
-    }
-    
-    public int intown(Location l) {
-    	Town t = intownR(l);
-    	if (t != null) {
-    		return intownR(l).getId();
-    	}
-    	return 0;
-    }
-    
-    public int intown(Player p) {
-    	Town t = intownR(p);
-    	if (t != null) {
-    		return intownR(p).getId();
-    	}
-    	return 0;
-    }
-    
     public Town townR(Player p) {
     	if (towns.size() == 0)
     		rebuild_cache();
@@ -130,24 +106,39 @@ public class MIAFunctions {
     	return null;
     }
     
-    public Town intownR(Block b) {
-    	return intownR(b.getX(), b.getZ(), b.getWorld());
+    public int insidetown(Object o) {
+    	Object town = insidetown(o, false);
+    	if (town != null) {
+    		return ((Number) insidetown(o, false)).intValue();
+    	} else {
+    		return 0;
+    	}
     }
     
-    public Town intownR(Location l) {
-    	return intownR(l.getBlockX(), l.getBlockZ(), l.getWorld());
+    public Object insidetown(Object o, boolean ret) {
+    	Town t = null;
+    	if (o instanceof Block) {
+    		t = intownR(((Block) o).getLocation());
+    	} else if (o instanceof Location) {
+    		t = intownR((Location) o);
+    	} else if (o instanceof Player) {
+    		t = intownR(((Player) o).getLocation());
+    	}
+    	
+    	if (ret) {
+    		return t;
+    	} else if (t != null) {
+    		return t.getId();
+    	}
+		return null;
     }
     
-    public Town intownR(Player p) {
-    	return intownR(p.getLocation().getBlockX(), p.getLocation().getBlockZ(), p.getWorld());
-    }
-    
-    public Town intownR(int x, int z, World w) {
+    private Town intownR(Location l) {
     	if (towns.size() == 0)
     		rebuild_cache();
     	
     	for (Town i : towns) {
-    		if (i.inZone(new Location(w, x, 0, z))) {
+    		if (i.inZone(l)) {
 	    		return i;
     		}
     	}
@@ -396,19 +387,34 @@ public class MIAFunctions {
 		}
     }
     
-    public int inzone(Player ps) {
-    	return inzoneR(ps).getId();
+    public int insidezone(Object o) {
+    	Object zone = insidezone(o, false);
+    	if (zone != null) {
+    		return ((Number) zone).intValue();
+    	} else {
+    		return 0;
+    	}
     }
     
-    public Zone inzoneR(Player ps) {
-    	return inzoneR(ps.getLocation());
+    public Object insidezone(Object o, boolean ret) {
+    	Zone t = null;
+    	if (o instanceof Block) {
+    		t = inzoneR(((Block) o).getLocation());
+    	} else if (o instanceof Location) {
+    		t = inzoneR((Location) o);
+    	} else if (o instanceof Player) {
+    		t = inzoneR(((Player) o).getLocation());
+    	}
+    	
+    	if (ret) {
+    		return t;
+    	} else if (t != null) {
+    		return t.getId();
+    	}
+		return null;
     }
     
-    public Zone inzoneR(Block ps) {
-    	return inzoneR(ps.getLocation());
-    }
-    
-    public Zone inzoneR(Location ps) {
+    private Zone inzoneR(Location ps) {
     	if (zones.size() == 0)
     		rebuild_cache();
     	
@@ -421,7 +427,7 @@ public class MIAFunctions {
     }
     
     public boolean ownzone(Player p) {
-    	return inzoneR(p).ownzone(p);
+    	return ((Zone) insidezone(p, true)).ownzone(p);
     }
     
     public void changestock(int zone, int itemid, int itemamm) {
@@ -458,13 +464,13 @@ public class MIAFunctions {
     }
     
     public boolean inowntown(Player p) {
-    	if (playertownId(p) == intown(p))
+    	if (playertownId(p) == insidetown(p))
     		return true;
     	return false;
     }
     
     public boolean notothertown(Player p) {
-    	if (playertownId(p) == intown(p) || intown(p) == 0)
+    	if (playertownId(p) == insidetown(p) || insidetown(p) == 0)
     		return true;
     	return false;
     }
@@ -486,7 +492,7 @@ public class MIAFunctions {
     }
     
     public void spawn(Player p) {
-    	World w = p.getWorld();
+    	World w = plugin.getServer().getWorlds().get(0);
     	w.loadChunk(467, -325);
     	p.teleportTo(new Location(w, 467d, 114d, -325d, 180, 0));
     }

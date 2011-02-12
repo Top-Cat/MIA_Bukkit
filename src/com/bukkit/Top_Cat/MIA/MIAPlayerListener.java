@@ -50,7 +50,7 @@ public class MIAPlayerListener extends PlayerListener {
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
 		    	for (LivingEntity i : j.getLivingEntities()) {
-		    		if (i instanceof Monster && !plugin.mf.inzoneR(i.getLocation()).isMobs()) {
+		    		if (i instanceof Monster && !((Zone) plugin.mf.insidezone(i.getLocation(), true)).isMobs()) {
 		    			i.setHealth(0);
 		    		}
 		    	}
@@ -208,7 +208,6 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-    	System.out.println("DROP");
     	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId());
     }
     
@@ -320,7 +319,7 @@ public class MIAPlayerListener extends PlayerListener {
     					itemamm = event.getPlayer().getItemInHand().getAmount();
     				}
     				// Check item is in shop
-    				int inzone = plugin.mf.inzone(event.getPlayer());
+    				int inzone = plugin.mf.insidezone(event.getPlayer());
     				HashMap<Integer, Integer[]> sitems = plugin.mf.shopitems(inzone);
     				if (sitems.containsKey(itemid) && (opsell || sitems.get(itemid)[2] >= itemamm || inzone == 0)) {
 	    				if (opsell) {
@@ -385,12 +384,20 @@ public class MIAPlayerListener extends PlayerListener {
     
     private String capitalCase(String s){
     	return s.toUpperCase().charAt(0) + s.toLowerCase().substring(1);
-    }
+    }	
     
     @Override
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-    	plugin.mf.spawn(event.getPlayer());
-    	plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " died! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
+    	if (event.getRespawnLocation().getWorld().getName().equalsIgnoreCase("Nether")) {
+    		event.setRespawnLocation(new Location(event.getRespawnLocation().getWorld(), -0.5d, 74d, -9.5d, 180, 0));
+    	} else {
+    		event.setRespawnLocation(new Location(event.getRespawnLocation().getWorld(), 467d, 114d, -325d, 180, 0));
+    	}
+    	
+    	//respawn.add(event.getPlayer());
+    	//event.setRespawnLocation(l);
+    	//plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, respawnplayers, 100);
+    	//plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " died! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
     }
     
     @Override
@@ -477,7 +484,7 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	}
     	
-    	if (plugin.mf.inzoneR(event.getPlayer()).heal()) {
+    	if (((Zone) plugin.mf.insidezone(event.getPlayer(), true)).heal()) {
     		int newh = event.getPlayer().getHealth() + 1;
     		if (newh > 20) {
     			newh = 20;
@@ -485,8 +492,8 @@ public class MIAPlayerListener extends PlayerListener {
     		event.getPlayer().setHealth(newh);
     	}
     	
-    	Town town1 = plugin.mf.intownR(event.getFrom());
-    	Town town2 = plugin.mf.intownR(event.getTo());
+    	Town town1 = (Town) plugin.mf.insidetown(event.getFrom(), true);
+    	Town town2 = (Town) plugin.mf.insidetown(event.getTo(), true);
     	if (town1 != town2) {
     		if (town1 == null) {
     			plugin.mf.sendmsg(event.getPlayer(), "§6Welcome to " + town2.getName());
