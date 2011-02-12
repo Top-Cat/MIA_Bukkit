@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -18,6 +19,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MobType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
@@ -25,6 +27,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.block.Block;
@@ -46,12 +49,18 @@ public class MIAPlayerListener extends PlayerListener {
     public class timer implements Runnable {
     	int updatec = 0;
     	
+    	List<Sheep> s = new ArrayList<Sheep>();
+    	
 		@Override
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
 		    	for (LivingEntity i : j.getLivingEntities()) {
 		    		if (i instanceof Monster && !((Zone) plugin.mf.insidezone(i.getLocation(), true)).isMobs()) {
 		    			i.setHealth(0);
+		    		} else if (i instanceof Sheep && !s.contains(i)) {
+		    			int dc = (int) Math.ceil(Math.random() * DyeColor.values().length);
+		    			((Sheep) i).setColor(DyeColor.values()[dc]);
+		    			s.add((Sheep) i);
 		    		}
 		    	}
 			}
@@ -211,6 +220,12 @@ public class MIAPlayerListener extends PlayerListener {
     	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId());
     }
     
+    @Override
+    public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+    	//Item i = event.getItem();
+    	//plugin.mf.updatestats(event.getPlayer(), 4, event.getItem().);
+    }
+    
     public void onPlayerAnimation(PlayerAnimationEvent event) {
     	if (event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 10);
@@ -319,7 +334,7 @@ public class MIAPlayerListener extends PlayerListener {
     					itemamm = event.getPlayer().getItemInHand().getAmount();
     				}
     				// Check item is in shop
-    				int inzone = plugin.mf.insidezone(event.getPlayer());
+    				int inzone = ((Number) plugin.mf.insidezone(event.getPlayer(), false, false)).intValue();
     				HashMap<Integer, Integer[]> sitems = plugin.mf.shopitems(inzone);
     				if (sitems.containsKey(itemid) && (opsell || sitems.get(itemid)[2] >= itemamm || inzone == 0)) {
 	    				if (opsell) {

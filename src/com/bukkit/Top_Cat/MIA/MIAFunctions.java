@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,8 +37,8 @@ public class MIAFunctions {
     sqllogin sqllogin = new sqllogin();
     
     public void post_tweet(String s) {
-    	Date time = new Date();
-    	s += " (" + String.valueOf(Math.round(time.getTime() / 1000)).substring(5) + ")";
+    	long time = plugin.getServer().getWorlds().get(0).getFullTime();
+    	s += " (" + String.valueOf(time).substring(3) + ")";
     	
         twitter = new TwitterFactory().getInstance();
         AccessToken accessToken = sqllogin.accessToken;
@@ -397,13 +396,17 @@ public class MIAFunctions {
     }
     
     public Object insidezone(Object o, boolean ret) {
+    	return insidezone(o, ret, true);
+    }
+    
+    public Object insidezone(Object o, boolean ret, boolean town) {
     	Zone t = null;
     	if (o instanceof Block) {
-    		t = inzoneR(((Block) o).getLocation());
+    		t = inzoneR(((Block) o).getLocation(), town);
     	} else if (o instanceof Location) {
-    		t = inzoneR((Location) o);
+    		t = inzoneR((Location) o, town);
     	} else if (o instanceof Player) {
-    		t = inzoneR(((Player) o).getLocation());
+    		t = inzoneR(((Player) o).getLocation(), town);
     	}
     	
     	if (ret) {
@@ -414,12 +417,12 @@ public class MIAFunctions {
 		return null;
     }
     
-    private Zone inzoneR(Location ps) {
+    private Zone inzoneR(Location ps, boolean town) {
     	if (zones.size() == 0)
     		rebuild_cache();
     	
     	for (Zone i : zones) {
-    		if (i.inZone(ps)) {
+    		if (i.inZone(ps) && (!(i instanceof Town) || town)) {
     			return i;
     		}
     	}
