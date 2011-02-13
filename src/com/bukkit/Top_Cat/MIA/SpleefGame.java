@@ -58,7 +58,7 @@ public class SpleefGame {
 	boolean activegame = false;
 	final MIA plugin;
 	HashMap<Player, SpleefPlayer> players = new HashMap<Player, SpleefPlayer>();
-	ArrayList<ArrayList<Integer>> pattern = new ArrayList<ArrayList<Integer>>();
+	ArrayList<ArrayList<ArrayList<Integer>>> pattern = new ArrayList<ArrayList<ArrayList<Integer>>>();
 	
 	public void move(Player p, Location nl) {
 		if (activegame && players.get(p).isAlive()) {
@@ -119,7 +119,8 @@ public class SpleefGame {
 		ythreshold = bs[0].getY();
 		for (int i = 0; i <= w; i++) {
 			for (int j = 0; j <= h; j++) {
-				bs[0].getWorld().getBlockAt(x + i, bs[0].getY(), z + j).setTypeId(pattern.get(i).get(j));
+				bs[0].getWorld().getBlockAt(x + i, bs[0].getY(), z + j).setTypeId(pattern.get(0).get(i).get(j));
+				bs[0].getWorld().getBlockAt(x + i, bs[0].getY(), z + j).setData((byte) (int) pattern.get(1).get(i).get(j));
 			}
 		}
 	}
