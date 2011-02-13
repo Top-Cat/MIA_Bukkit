@@ -41,6 +41,14 @@ public class MIABlockListener extends BlockListener {
 			plugin.mf.updatestats(event.getPlayer(), 1, event.getBlock().getTypeId());
 			plugin.mf.updatestats(event.getPlayer(), 2, 8, 1);
 		}
+		
+		for (Zone i : plugin.mf.zones) {
+			if (i.inZone(event.getBlock().getLocation()) && i.isSpleefArena() && plugin.playerListener.spleefgames.containsKey(i)) {
+				if (plugin.playerListener.spleefgames.get(i).activegame) {
+					event.setCancelled(true);
+				}
+			}
+    	}
 	}
     
     ArrayList<Block> b = new ArrayList<Block>();
@@ -50,7 +58,18 @@ public class MIABlockListener extends BlockListener {
     	Zone z = ((Zone) plugin.mf.insidezone(event.getBlock(), true));
 		if (z.isProtected(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
-		}
+		}	
+		
+    	for (Zone i : plugin.mf.zones) {
+			if (i.inZone(event.getBlock().getLocation()) && i.isSpleefArena() && plugin.playerListener.spleefgames.containsKey(i)) {
+				if (plugin.playerListener.spleefgames.get(i).activegame && plugin.playerListener.spleefgames.get(i).playerPlaying(event.getPlayer())) {
+					event.getBlock().setType(Material.AIR);
+				} else {
+					event.setCancelled(true);
+				}
+			}
+    	}
+		
     	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {	
     		if (b.contains(event.getBlock())) {
 	    		event.setCancelled(true);

@@ -58,7 +58,7 @@ public class MIAPlayerListener extends PlayerListener {
 		    		if (i instanceof Monster && !((Zone) plugin.mf.insidezone(i.getLocation(), true)).isMobs()) {
 		    			i.setHealth(0);
 		    		} else if (i instanceof Sheep && !s.contains(i)) {
-		    			int dc = (int) Math.ceil(Math.random() * DyeColor.values().length);
+		    			int dc = (int) Math.floor(Math.random() * DyeColor.values().length);
 		    			((Sheep) i).setColor(DyeColor.values()[dc]);
 		    			s.add((Sheep) i);
 		    		}
@@ -239,6 +239,7 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     HashMap<String, String> tprequests = new HashMap<String, String>();
+    HashMap<Zone, SpleefGame> spleefgames = new HashMap<Zone, SpleefGame>();
     
     @Override
     public void onPlayerCommand(PlayerChatEvent event) {
@@ -390,11 +391,51 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     		((org.bukkit.block.MobSpawner) blk.getState()).setMobType(mt);
     		event.getPlayer().sendMessage("Mob spawner set as " + mt.getName().toLowerCase() + ".");
+    	} else if (coms[0].equalsIgnoreCase("/spleef")) {
+    		if (coms[1].equalsIgnoreCase("join")) {
+    			Zone i = inArena(coms[2]);
+    			for (SpleefGame sg : spleefgames.values()) {
+    				if (sg.playerPlaying(event.getPlayer()) && sg.z != i) {
+    					sg.removePlayer(event.getPlayer());
+    				}
+    			}
+				if (!spleefgames.containsKey(i)) {
+					System.out.println("O rly?");
+					//spleefgames.put(i, new SpleefGame(plugin, i));
+				}
+				if (!spleefgames.get(i).addPlayer(event.getPlayer())) {
+					plugin.mf.sendmsg(event.getPlayer(), "Can't join game!");
+				}
+    		} else if (coms[1].equalsIgnoreCase("leave")) {
+    			for (Zone i : plugin.mf.zones) {
+    				if (i.getName().equalsIgnoreCase(coms[2]) && i.isSpleefArena()) {
+    					if (spleefgames.containsKey(i)) {
+    						spleefgames.get(i).removePlayer(event.getPlayer());
+    					}
+    					break;
+    				}
+    			}
+    		}
+    	} else if (coms[0].equalsIgnoreCase("/ready")) {
+    		for (SpleefGame i : spleefgames.values()) {
+    			if (i.playerPlaying(event.getPlayer())) {
+    				i.setReadyPlayer(event.getPlayer(), true);
+    			}
+    		}
     	} else {
     		canc = false;
     	}
     	if (canc)
     		event.setCancelled(true);
+    }
+    
+    public Zone inArena(String name) {
+    	for (Zone i : plugin.mf.zones) {
+			if (i.getName().equalsIgnoreCase(name) && i.isSpleefArena()) {
+				return i;
+			}
+    	}
+    	return null;
     }
     
     private String capitalCase(String s){
@@ -454,10 +495,21 @@ public class MIAPlayerListener extends PlayerListener {
     	for (Block b : blox) {
     		plugin.blockListener.opengate.remove(b);
     	}
+    	
+    	for (Zone i : plugin.mf.zones) {
+			if (i.isSpleefArena() && spleefgames.containsKey(i) && spleefgames.get(i).playerPlaying(event.getPlayer())) {
+				spleefgames.get(i).removePlayer(event.getPlayer());
+			}
+		}
     }
     
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
+    	for (SpleefGame i : spleefgames.values()) {
+    		 if (i.playerPlaying(event.getPlayer())) {
+    			 i.move(event.getPlayer(), event.getTo());
+    		 }
+    	}
     	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}

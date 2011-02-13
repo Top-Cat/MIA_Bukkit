@@ -29,7 +29,47 @@ public class MIAFunctions {
         plugin = instance;
         
         sblock = plugin.getServer().getWorlds().get(0).getBlockAt(409, 4, -354);
-        gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, 0);
+        gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, false, 0);
+    }
+    
+    public ArrayList<ArrayList<Integer>> getpattern(int zid) {
+    	ArrayList<ArrayList<Integer>> out = new ArrayList<ArrayList<Integer>>();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT pattern FROM spleef WHERE zone = '" + zid + "'";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			r.next();
+			String p = r.getString("pattern");
+			String[] rs = p.split(";");
+			for (String row : rs) {
+				String[] blks = row.split(",");
+				ArrayList<Integer> arow = new ArrayList<Integer>();
+				for (String blk : blks) {
+					arow.add(Integer.parseInt(blk));
+				}
+				out.add(arow);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return out;
+    }
+    
+    public int spleefmax(int zid) {
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT max FROM spleef WHERE zone = '" + zid + "'";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			r.next();
+			return r.getInt("max");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
     }
     
     RequestToken requestToken;
@@ -57,6 +97,7 @@ public class MIAFunctions {
     }
     
     public void rebuild_cache() {
+    	plugin.playerListener.spleefgames.clear();
     	cache_zones();
     	cache_towns();
     }
@@ -378,7 +419,7 @@ public class MIAFunctions {
 				Integer[] cs2 = intarray(bls[1].split(","));
 				Block b1 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs[0], cs[1], cs[2]);
 				Block b2 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs2[0], cs2[1], cs2[2]);
-				zones.add(new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getInt("owner")));
+				zones.add(new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getBoolean("spleef"), r.getInt("owner")));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

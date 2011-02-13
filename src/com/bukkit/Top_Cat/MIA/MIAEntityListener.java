@@ -2,8 +2,6 @@ package com.bukkit.Top_Cat.MIA;
 
 import java.util.HashMap;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -47,24 +45,9 @@ public class MIAEntityListener extends EntityListener {
 	    		zonea = ((Zone) plugin.mf.insidezone(defender.getLocation(), true)).isMobs();
 	    	}
     		
-	    	if ((plugin.mf.insidetown(defender.getLocation()) > 0 && attacker instanceof Entity) || zonea) {
+	    	if ((plugin.mf.insidetown(defender.getLocation()) > 0 && attacker instanceof Entity) || !zonea) {
 	        	return true;
 	    	} else if (attacker instanceof Player) {
-	    		if ((((Player) defender).getDisplayName().equalsIgnoreCase("Top_Cat") || ((Player) defender).getDisplayName().equalsIgnoreCase("Welsh_Sniper")) && ((Player) attacker).getDisplayName().equalsIgnoreCase("Gigthank")) {
-	    			attacker.teleportTo(new Location(plugin.getServer().getWorlds().get(0), 645, 3, 200));
-	    			int xs = 643;
-	    			int zs = 198;
-	    			for (int i = 1; i < 6; i++) {
-	    				for (int j = 0; j < 5; j++) {
-	    					for (int k = 0; k < 5; k++) {
-	    						if (j == 0 || j == 4 || k == 0 || k == 4) {
-	    							plugin.getServer().getWorlds().get(0).getBlockAt(j + xs, i, k + zs).setType(Material.OBSIDIAN);
-	    						}
-	    					}
-	    				}
-	    			}
-	    			return true;
-	    		}
 		    	if (((Player) defender).getHealth() - damage <= 0) {
 		    		lastattacker.put((Player) defender, (Player) attacker);
 		    	}
