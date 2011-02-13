@@ -1,5 +1,8 @@
 package com.bukkit.Top_Cat.MIA;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,6 +15,7 @@ class Zone {
 	private String name;
 	private final MIA plugin;
 	private townshape ts = townshape.CUBE;
+	private List<Zone> children = new ArrayList<Zone>();
 	
 	public enum townshape {
 		SQUARE, CIRCLE, CUBE, SPHERE
@@ -54,6 +58,14 @@ class Zone {
 		if (spleef) {
 			plugin.playerListener.spleefgames.put(this, new SpleefGame(plugin, this));
 		}
+	}
+	
+	public void addChild(Zone z) {
+		children.add(z);
+	}
+	
+	public List<Zone> getChildren() {
+		return children;
 	}
 	
 	public Block[] cornerblocks() {

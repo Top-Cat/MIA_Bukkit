@@ -419,7 +419,14 @@ public class MIAFunctions {
 				Integer[] cs2 = intarray(bls[1].split(","));
 				Block b1 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs[0], cs[1], cs[2]);
 				Block b2 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs2[0], cs2[1], cs2[2]);
-				zones.add(new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getBoolean("spleef"), r.getInt("owner")));
+				Zone nz = new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getBoolean("spleef"), r.getInt("owner"));
+				zones.add(nz);
+				int par = r.getInt("parent");
+				if (par > 0) {
+					zones.get(par - 1).addChild(nz);
+				} else {
+					gzone.addChild(nz);
+				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -462,12 +469,16 @@ public class MIAFunctions {
     	if (zones.size() == 0)
     		rebuild_cache();
     	
-    	for (Zone i : zones) {
+    	return inzoneR(ps, town, zones, gzone);
+    }
+    
+    private Zone inzoneR(Location ps, boolean town, List<Zone> lz, Zone z) {
+    	for (Zone i : lz) {
     		if (i.inZone(ps) && (!(i instanceof Town) || town)) {
-    			return i;
+    			return inzoneR(ps, town, i.getChildren(), i);
     		}
     	}
-    	return gzone;
+		return z;
     }
     
     public boolean ownzone(Player p) {
