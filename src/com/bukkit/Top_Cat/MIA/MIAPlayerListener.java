@@ -431,6 +431,7 @@ public class MIAPlayerListener extends PlayerListener {
     
     public Zone inArena(String name) {
     	for (Zone i : plugin.mf.zones) {
+    		System.out.println(i.getName() + i.isSpleefArena());
 			if (i.getName().equalsIgnoreCase(name) && i.isSpleefArena()) {
 				return i;
 			}

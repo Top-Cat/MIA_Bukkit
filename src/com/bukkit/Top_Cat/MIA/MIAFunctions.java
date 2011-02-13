@@ -32,8 +32,10 @@ public class MIAFunctions {
         gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, false, 0);
     }
     
-    public ArrayList<ArrayList<Integer>> getpattern(int zid) {
-    	ArrayList<ArrayList<Integer>> out = new ArrayList<ArrayList<Integer>>();
+    public ArrayList<ArrayList<ArrayList<Integer>>> getpattern(int zid) {
+    	ArrayList<ArrayList<ArrayList<Integer>>> out = new ArrayList<ArrayList<ArrayList<Integer>>>();
+    	ArrayList<ArrayList<Integer>> blktypes = new ArrayList<ArrayList<Integer>>();
+    	ArrayList<ArrayList<Integer>> blkvals = new ArrayList<ArrayList<Integer>>();
     	PreparedStatement pr;
 		try {
 			String q = "SELECT pattern FROM spleef WHERE zone = '" + zid + "'";
@@ -44,12 +46,18 @@ public class MIAFunctions {
 			String[] rs = p.split(";");
 			for (String row : rs) {
 				String[] blks = row.split(",");
-				ArrayList<Integer> arow = new ArrayList<Integer>();
+				ArrayList<Integer> arowt = new ArrayList<Integer>();
+				ArrayList<Integer> arowv = new ArrayList<Integer>();
 				for (String blk : blks) {
-					arow.add(Integer.parseInt(blk));
+					String[] bd = blk.split("-");
+					arowt.add(Integer.parseInt(bd[0]));
+					arowv.add(Integer.parseInt(bd[1]));
 				}
-				out.add(arow);
+				blktypes.add(arowt);
+				blkvals.add(arowv);
 			}
+			out.add(blktypes);
+			out.add(blkvals);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
