@@ -1,4 +1,4 @@
-package com.bukkit.Top_Cat.MIA;
+package com.Top_Cat.MIA;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

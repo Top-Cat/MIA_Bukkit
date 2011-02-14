@@ -1,4 +1,4 @@
-package com.bukkit.Top_Cat.MIA;
+package com.Top_Cat.MIA;
 
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
