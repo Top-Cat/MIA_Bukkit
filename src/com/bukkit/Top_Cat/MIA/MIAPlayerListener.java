@@ -142,7 +142,7 @@ public class MIAPlayerListener extends PlayerListener {
 			ResultSet r = pr.executeQuery();
 			OnlinePlayer op = null;
 			while (r.next()) {
-				op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"), r.getInt("Id"));
+				op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
 				userinfo.put(r.getString("name"), op);
 			}
 		} catch (SQLException e) {
@@ -165,7 +165,7 @@ public class MIAPlayerListener extends PlayerListener {
 			OnlinePlayer op = null;	
 			if (r.next()) {
 		    	nam = r.getString("prefix") + "§f " + r.getString("name");
-		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"));
+		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
 			} else {
 				// User doesn't exist! Make a new record
 				String q2 = "INSERT INTO users (name) VALUES('" + event.getPlayer().getDisplayName() + "')";
@@ -175,7 +175,7 @@ public class MIAPlayerListener extends PlayerListener {
 				r = pr2.getGeneratedKeys();
 				
 		    	nam = "§0[G]§f " + event.getPlayer().getDisplayName();
-		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0, r.getInt(1));
+		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0, r.getInt(1), 0, 0);
 		    	plugin.mf.spawn(event.getPlayer());
 			}
 			userinfo.put(r.getString("name"), op);
@@ -409,12 +409,30 @@ public class MIAPlayerListener extends PlayerListener {
     		} else if (coms[1].equalsIgnoreCase("leave")) {
     			for (Zone i : plugin.mf.zones) {
     				if (i.getName().equalsIgnoreCase(coms[2]) && i.isSpleefArena()) {
-    					if (spleefgames.containsKey(i)) {
+    					if (spleefgames.get(i).playerPlaying(event.getPlayer())) {
     						spleefgames.get(i).removePlayer(event.getPlayer());
     					}
     					break;
     				}
     			}
+    		} else if (coms[1].equalsIgnoreCase("stats")) {
+    			Player[] psa = new Player[1];
+    			if (coms.length > 2) {
+    				psa[0] = plugin.getServer().getPlayer(coms[2]);
+    			} else {
+					psa[0] = event.getPlayer();
+    			}
+    			boolean found = false;
+				for (Zone i : plugin.mf.zones) {
+					if (i.isSpleefArena() && spleefgames.get(i).playerPlaying(event.getPlayer())) {
+						spleefgames.get(i).showstats(psa, event.getPlayer());
+						found = true;
+					}
+				}
+				if (!found) {
+					int[] ss = plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).spleefstats();
+					plugin.mf.sendmsg(psa, ss[1] + "/" + ss[0] + " All Time");
+				}
     		}
     	} else if (coms[0].equalsIgnoreCase("/ready")) {
     		for (SpleefGame i : spleefgames.values()) {

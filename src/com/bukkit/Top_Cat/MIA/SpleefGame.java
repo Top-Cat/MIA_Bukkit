@@ -15,14 +15,30 @@ public class SpleefGame {
 		Location priorloc;
 		Player player;
 		boolean ready = false;
+		int sg, sw;
 		
 		public SpleefPlayer(Player p, SpleefGame g) {
 			player = p;
 			priorloc = p.getLocation();
 			this.g = g;
+			sg = 0;
+			sw = 0;
 			
 			p.teleportTo(g.z.getcenter());
 		}
+		
+		public void spleefplayed(boolean win) {
+			  sg++;
+			  if (win)
+				  sw++;
+		  }
+		  
+		  public int[] spleefstats() {
+			  int[] out = new int[2];
+			  out[0] = sg;
+			  out[1] = sw;
+			  return out;
+		  }
 		
 		public void reset() {
 			player.teleportTo(g.z.getcenter());
@@ -82,23 +98,34 @@ public class SpleefGame {
 	
 	public void gameCheck() {
 		if (alive() < 2) {
-			Player w = null;
+			SpleefPlayer w = null;
 			for (SpleefPlayer i : players.values()) {
 				if (i.isAlive()) {
-					w = i.player;
+					w = i;
 				}
 			}
 			
 			// Game over
 			for (SpleefPlayer i : players.values()) {
 				i.reset();
+				plugin.mf.spleefplayed(i.player, (i == w)); // Globally saved
+				i.spleefplayed(i == w); // Locally saved
+				plugin.playerListener.userinfo.get(i.player.getDisplayName()).spleefplayed(i == w); // Cached
 			}
 			if (w != null) {
-				plugin.mf.sendmsg(getPlayers(), w.getDisplayName() + " won the game!");
+				plugin.mf.sendmsg(getPlayers(), w.player.getDisplayName() + " won the game!");
+				showstats(getPlayers(), w.player);
 			}
 			activegame = false;
 			resetfloor();
 		}
+	}
+	
+	public void showstats(Player[] ps, Player p) {
+		int[] st = players.get(p).spleefstats();
+		plugin.mf.sendmsg(ps, st[1] + "/" + st[0] + " This Game");
+		int[] ss = plugin.playerListener.userinfo.get(p.getDisplayName()).spleefstats();
+		plugin.mf.sendmsg(ps, ss[1] + "/" + ss[0] + " All Time");
 	}
 	
 	public Player[] getPlayers() {

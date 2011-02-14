@@ -3,19 +3,33 @@ package com.bukkit.Top_Cat.MIA;
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
   //private int cape;
-  private int town;
+  private int town, id, sg, sw;
   private String name;
   private String prefix;
-  private int id;
   
   // (snip ctor, setters, etc.)
 
-  public OnlinePlayer(int bal, int cape, String name, String prefix, int town, int id) {
+  public OnlinePlayer(int bal, int cape, String name, String prefix, int town, int id, int sg, int sw) {
 	  ammount = bal;
 	  this.name = name;
 	  this.prefix = prefix;
 	  this.id = id;
 	  this.town = town;
+	  this.sg = sg;
+	  this.sw = sw;
+  }
+  
+  public void spleefplayed(boolean win) {
+	  sg++;
+	  if (win)
+		  sw++;
+  }
+  
+  public int[] spleefstats() {
+	  int[] out = new int[2];
+	  out[0] = sg;
+	  out[1] = sw;
+	  return out;
   }
   
   public int getBalance() {

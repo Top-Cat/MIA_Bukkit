@@ -80,6 +80,22 @@ public class MIAFunctions {
 		return 0;
     }
     
+    public void spleefplayed(Player p, boolean win) {
+    	PreparedStatement pr;
+		try {
+			String wintxt = "";
+			if (win) {
+				wintxt = ", swins = swins + 1";
+			}
+			String q = "UPDATE users SET spleef = spleef + 1" + wintxt + " WHERE name = '" + p.getDisplayName() + "'";
+			pr = plugin.conn.prepareStatement(q);
+			pr.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     RequestToken requestToken;
     Twitter twitter;
     sqllogin sqllogin = new sqllogin();
