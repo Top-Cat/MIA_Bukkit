@@ -94,7 +94,7 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
     	for (Block i : event.blockList()) {
-        	if (plugin.mf.insidetown(i) > 0 || ((Zone) plugin.mf.insidezone(i, true)).isMobs()) {
+        	if (plugin.mf.insidetown(i) > 0 || !((Zone) plugin.mf.insidezone(i, true)).isMobs()) {
         		event.setCancelled(true);
         	}
     	}
