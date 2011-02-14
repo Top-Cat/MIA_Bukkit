@@ -105,7 +105,5 @@ public class MIAEntityListener extends EntityListener {
     	//event.getRadius()
     	
     }
-
-    //Insert Player related code here
 }
 

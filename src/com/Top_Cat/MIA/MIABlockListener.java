@@ -34,22 +34,27 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
-    	Zone z = ((Zone) plugin.mf.insidezone(event.getBlock(), true));
-		if (z.isProtected(event.getPlayer()) && !event.getPlayer().isOp()) {
-			event.setCancelled(true);
+    	event.setCancelled(useitem_block(event.getBlock(), event.getPlayer()));
+	}
+    
+    public boolean useitem_block(Block b, Player p) {
+    	Zone z = ((Zone) plugin.mf.insidezone(b, true));
+		if (z.isProtected(p) && !p.isOp()) {
+			return true;
 		} else {
-			plugin.mf.updatestats(event.getPlayer(), 1, event.getBlock().getTypeId());
-			plugin.mf.updatestats(event.getPlayer(), 2, 8, 1);
+			plugin.mf.updatestats(p, 1, b.getTypeId());
+			plugin.mf.updatestats(p, 2, 8, 1);
 		}
 		
 		for (Zone i : plugin.mf.zones) {
-			if (i.inZone(event.getBlock().getLocation()) && i.isSpleefArena() && plugin.playerListener.spleefgames.containsKey(i)) {
+			if (i.inZone(b.getLocation()) && i.isSpleefArena() && plugin.playerListener.spleefgames.containsKey(i)) {
 				if (plugin.playerListener.spleefgames.get(i).activegame) {
-					event.setCancelled(true);
+					return true;
 				}
 			}
     	}
-	}
+		return false;
+    }
     
     ArrayList<Block> b = new ArrayList<Block>();
     

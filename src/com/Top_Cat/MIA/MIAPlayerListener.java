@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerItemEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -113,6 +114,13 @@ public class MIAPlayerListener extends PlayerListener {
     public MIAPlayerListener(MIA instance) {
         plugin = instance;
         timer = new timer();
+    }
+    
+    @Override
+    public void onPlayerItem(PlayerItemEvent event) {
+    	if (event.getItem().getType() == Material.LAVA_BUCKET || event.getItem().getType() == Material.WATER_BUCKET || event.getItem().getType() == Material.WOODEN_DOOR || event.getItem().getType() == Material.IRON_DOOR) {
+    		event.setCancelled(plugin.blockListener.useitem_block(event.getBlockClicked(), event.getPlayer()));
+    	}
     }
     
     public boolean cbal(String target, int ammount) {

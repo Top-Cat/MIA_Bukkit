@@ -124,6 +124,7 @@ public class MIAFunctions {
     	plugin.playerListener.spleefgames.clear();
     	cache_zones();
     	cache_towns();
+    	//cache_npcs();
     }
     
     public List<Town> towns = new ArrayList<Town>();
@@ -157,6 +158,19 @@ public class MIAFunctions {
 			e.printStackTrace();
 		}
     }
+    
+    HashMap<Integer, NPC> npcs = new HashMap<Integer, NPC>();
+    
+    /*public void cache_npcs() {
+    	npcs.clear();
+    	PreparedStatement pr;
+		try {
+			// Get npcs :)
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }*/
     
     public Town townR(Player p) {
     	if (towns.size() == 0)
