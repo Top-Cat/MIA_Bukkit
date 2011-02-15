@@ -124,7 +124,6 @@ public class MIAFunctions {
     	plugin.playerListener.spleefgames.clear();
     	cache_zones();
     	cache_towns();
-    	//cache_npcs();
     }
     
     public List<Town> towns = new ArrayList<Town>();
@@ -161,16 +160,41 @@ public class MIAFunctions {
     
     HashMap<Integer, NPC> npcs = new HashMap<Integer, NPC>();
     
-    /*public void cache_npcs() {
+    public void cache_npcs() {
     	npcs.clear();
     	PreparedStatement pr;
 		try {
-			// Get npcs :)
+			String q = "SELECT * FROM npcs";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			
+			while (r.next()) {
+				Location l = new Location(plugin.getServer().getWorlds().get(r.getInt("world")), r.getDouble("posX"), r.getDouble("posY"), r.getDouble("posZ"), r.getInt("rotation"), r.getInt("pitch"));
+				npcs.put(r.getInt("Id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy")));
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }*/
+    }
+    
+    public List<String> getdialogs(NPC n) {
+    	List<String> d = new ArrayList<String>();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM npcs_dialog WHERE npc_id = " + n.getId() + " OR npc_id = " + n.getProxyId();
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			
+			while (r.next()) {
+				d.add(r.getString("dialog_text"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return d;
+    }
     
     public Town townR(Player p) {
     	if (towns.size() == 0)

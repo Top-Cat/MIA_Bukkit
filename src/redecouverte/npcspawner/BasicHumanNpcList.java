@@ -6,7 +6,9 @@ import org.bukkit.entity.Entity;
 
 public class BasicHumanNpcList extends HashMap<String, BasicHumanNpc> {
 
-    public boolean containsBukkitEntity(Entity entity)
+	private static final long serialVersionUID = 1L;
+
+	public boolean containsBukkitEntity(Entity entity)
     {
         for(BasicHumanNpc bnpc : this.values())
         {

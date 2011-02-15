@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -27,6 +28,13 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    	if (event.getEntity() instanceof HumanEntity && event.getDamager() instanceof Player) {
+    		for (NPC i : plugin.mf.npcs.values()) {
+    			if (i.isEntity(event.getEntity())) {
+    				i.interact((Player) event.getDamager());
+    			}
+    		}
+    	}
     	event.setCancelled(onDamage(event.getDamager(), event.getEntity(), event.getDamage()));
     }
     

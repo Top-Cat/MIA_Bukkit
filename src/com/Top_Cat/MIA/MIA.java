@@ -104,6 +104,7 @@ public class MIA extends JavaPlugin {
         	Date time = new Date();
     		playerListener.logintimes.put(i, time.getTime() / 1000);
         }
+        mf.cache_npcs();
     }
     
     public void onDisable() {
@@ -116,6 +117,10 @@ public class MIA extends JavaPlugin {
     		Date time = new Date();
     		mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));        	
         }
+    	
+    	for (NPC i : mf.npcs.values()) {
+    		i.destroy();
+    	}
     	
     	mf.updatestats();
         System.out.println("Goodbye world!");
