@@ -32,10 +32,12 @@ public class MIAEntityListener extends EntityListener {
     		for (NPC i : plugin.mf.npcs.values()) {
     			if (i.isEntity(event.getEntity())) {
     				i.interact((Player) event.getDamager());
+    				event.setCancelled(true);
     			}
     		}
     	}
-    	event.setCancelled(onDamage(event.getDamager(), event.getEntity(), event.getDamage()));
+    	if (!event.isCancelled())
+    		event.setCancelled(onDamage(event.getDamager(), event.getEntity(), event.getDamage()));
     }
     
     public boolean onDamage(Entity attacker, Entity defender) {

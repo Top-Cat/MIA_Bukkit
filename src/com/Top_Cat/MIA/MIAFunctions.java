@@ -15,6 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
+import com.Top_Cat.MIA.Quest.Type;
+
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -132,7 +134,7 @@ public class MIAFunctions {
     	towns.clear();
     	PreparedStatement pr;
 		try {
-			String q = "SELECT a.*, b.radius FROM towns as a, town_type as b WHERE a.ttype = b.Id";
+			String q = "SELECT a.*, b.radius FROM towns as a, town_types as b WHERE a.ttype = b.Id";
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery();
 			while (r.next()) {
@@ -158,7 +160,8 @@ public class MIAFunctions {
 		}
     }
     
-    HashMap<Integer, NPC> npcs = new HashMap<Integer, NPC>();
+    HashMap<String, NPC> npcs = new HashMap<String, NPC>();
+    HashMap<String, Quest> quest = new HashMap<String, Quest>();
     
     public void cache_npcs() {
     	npcs.clear();
@@ -170,7 +173,44 @@ public class MIAFunctions {
 			
 			while (r.next()) {
 				Location l = new Location(plugin.getServer().getWorlds().get(r.getInt("world")), r.getDouble("posX"), r.getDouble("posY"), r.getDouble("posZ"), r.getInt("rotation"), r.getInt("pitch"));
-				npcs.put(r.getInt("Id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy")));
+				npcs.put(r.getString("npc_id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy"), r.getBoolean("prefix")));
+			}
+			
+			q = "SELECT * FROM quests";
+			pr = plugin.conn.prepareStatement(q);
+			r = pr.executeQuery();
+			
+			while (r.next()) {
+				String type = r.getString("quest_type");
+				Type t = null;
+				if (type.equalsIgnoreCase("harvest")) {
+					t = Type.Harvest;
+				} else if (type.equalsIgnoreCase("gather")) {
+					t = Type.Gather;
+				} else if (type.equalsIgnoreCase("build")) {
+					t = Type.Build;
+				} else if (type.equalsIgnoreCase("assasin")) {
+					t = Type.Assasin;
+				} else if (type.equalsIgnoreCase("find")) {
+					t = Type.Find;
+				}
+				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("quest_desc"), r.getString("completion_text"), r.getString("data"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
+			}
+			
+			q = "SELECT * FROM quests_completed";
+			pr = plugin.conn.prepareStatement(q);
+			r = pr.executeQuery();
+			
+			while (r.next()) {
+				quest.get(r.getString("quest_id")).setComplete(r.getString("player_name"));
+			}
+			
+			q = "SELECT * FROM quests_active";
+			pr = plugin.conn.prepareStatement(q);
+			r = pr.executeQuery();
+			
+			while (r.next()) {
+				quest.get(r.getString("quest_id")).setProgress(r.getString("player_name"), r.getInt("progress"));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

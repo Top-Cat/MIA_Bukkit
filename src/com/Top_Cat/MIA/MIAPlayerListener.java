@@ -221,6 +221,11 @@ public class MIAPlayerListener extends PlayerListener {
 		}
 		
 		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), msg);
+		
+		for (NPC i : plugin.mf.npcs.values()) {
+			i.update();
+		}
+		
 		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
     }
     
@@ -407,12 +412,12 @@ public class MIAPlayerListener extends PlayerListener {
     					sg.removePlayer(event.getPlayer());
     				}
     			}
-				if (!spleefgames.containsKey(i)) {
-					System.out.println("O rly?");
-					//spleefgames.put(i, new SpleefGame(plugin, i));
-				}
-				if (!spleefgames.get(i).addPlayer(event.getPlayer())) {
-					plugin.mf.sendmsg(event.getPlayer(), "Can't join game!");
+				if (spleefgames.containsKey(i)) {
+					if (!spleefgames.get(i).addPlayer(event.getPlayer())) {
+						plugin.mf.sendmsg(event.getPlayer(), "Can't join game!");
+					}
+				} else {
+					plugin.mf.sendmsg(event.getPlayer(), "Couldn't find game '" + coms[2] + "'");
 				}
     		} else if (coms[1].equalsIgnoreCase("leave")) {
     			for (Zone i : plugin.mf.zones) {
