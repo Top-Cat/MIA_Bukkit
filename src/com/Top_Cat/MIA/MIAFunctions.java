@@ -194,7 +194,7 @@ public class MIAFunctions {
 				} else if (type.equalsIgnoreCase("find")) {
 					t = Type.Find;
 				}
-				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("quest_desc"), r.getString("completion_text"), r.getString("data"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
+				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("quest_desc"), r.getString("data"), r.getString("completion_text"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
 			}
 			
 			q = "SELECT * FROM quests_completed";

@@ -453,6 +453,36 @@ public class MIAPlayerListener extends PlayerListener {
     				i.setReadyPlayer(event.getPlayer(), true);
     			}
     		}
+    	} else if (coms[0].equalsIgnoreCase("/q") || coms[0].equalsIgnoreCase("/quest")) {
+    		if (coms[1].equalsIgnoreCase("list")) {
+    			int j = 0;
+    			for (Quest i : plugin.mf.quest.values()) {
+    				if (i.isActive(event.getPlayer())) {
+    					plugin.mf.sendmsg(event.getPlayer(), (++j) + ": " + i.getName());
+    				}
+    			}
+    			if (j == 0) {
+    				plugin.mf.sendmsg(event.getPlayer(), "No active quests!");
+    			}
+    		} else if (coms[1].equalsIgnoreCase("progress") || coms[1].equalsIgnoreCase("p") || coms[1].equalsIgnoreCase("pro")) {
+    			int j = 0;
+    			for (Quest i : plugin.mf.quest.values()) {
+    				if (i.isActive(event.getPlayer())) {
+    					if (++j == Integer.parseInt(coms[2])) {
+    						i.dispProgress(event.getPlayer());
+    					}
+    				}
+    			}
+    		} else if (coms[1].equalsIgnoreCase("description") || coms[1].equalsIgnoreCase("d")) {
+    			int j = 0;
+    			for (Quest i : plugin.mf.quest.values()) {
+    				if (i.isActive(event.getPlayer())) {
+    					if (++j == Integer.parseInt(coms[2])) {
+    						i.dispData(event.getPlayer(), "description", i.getDescription());
+    					}
+    				}
+    			}
+    		}
     	} else {
     		canc = false;
     	}

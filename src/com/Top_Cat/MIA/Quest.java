@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 public class Quest {
 	
+	String c = "§e";
 	private String id, name, desc, compl, datatxt, prov, rewa;
 	private Type t;
 	private String pre;
@@ -61,6 +62,44 @@ public class Quest {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getDescription() {
+		return desc;
+	}
+	
+	public boolean isActive(Player p) {
+		return progress.containsKey(p.getDisplayName().toLowerCase());
+	}
+	
+	public int getProgress(Player p) {
+		if (isActive(p))
+			return progress.get(p.getDisplayName().toLowerCase());
+		return 0;
+	}
+	
+	public int totalProgress() {
+		switch (t) {
+			case Assasin:
+				return Integer.parseInt(datatxt.split(",")[0]);
+			case Harvest:
+			case Gather:
+			case Build:
+				return Integer.parseInt(datatxt.split(",")[2]);
+			case Find:
+				return 1;
+		}
+		return 0;
+	}
+	
+	public void dispProgress(Player p) {
+		if (progress.containsKey(p.getDisplayName().toLowerCase())) {
+			plugin.mf.sendmsg(p, c+ name + " Progress: " + getProgress(p) + "/" + totalProgress());	
+		}
+	}
+	
+	public void dispData(Player p, String s, String t) {
+		plugin.mf.sendmsg(p, c+ name + " " + s + ": " + t);	
 	}
 	
 }
