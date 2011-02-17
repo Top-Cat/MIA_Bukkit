@@ -276,6 +276,7 @@ public class Quest {
 			plugin.mf.quest_complete(this, p);
 			progress.remove(p.getDisplayName().toLowerCase());
 			completed.add(p.getDisplayName().toLowerCase());
+			plugin.mf.post_tweet(p.getDisplayName() + " completed the quest '" + name + "'! Their stats: http://thomasc.co.uk/minecraft/" + p.getDisplayName()+ "/");
 		}
 	}
 	
