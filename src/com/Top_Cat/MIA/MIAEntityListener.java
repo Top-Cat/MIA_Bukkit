@@ -16,6 +16,8 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.ExplosionPrimedEvent;
 
+import com.Top_Cat.MIA.Quest.Type;
+
 /**
  * Handle events for all Player related events
  * @author Thomas Cheyney
@@ -68,7 +70,7 @@ public class MIAEntityListener extends EntityListener {
     	} else if (attacker instanceof Player && defender instanceof Creature && lastkilled != defender) {
     		if (((Creature) defender).getHealth() - damage <= 0 && ((Creature) defender).getHealth() > 0) {
     			String def = defender.getClass().getSimpleName();
-    			for (Quest i : plugin.mf.quest.values()) {
+    			for (Quest i : plugin.mf.quest_sort.get(Type.Assasin).values()) {
         			i.kill(((Player) attacker), def);
         		}
 	    		//System.out.println(((Player) attacker).getDisplayName() + " killed a " + def);

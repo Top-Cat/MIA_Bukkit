@@ -35,6 +35,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
 
+import com.Top_Cat.MIA.Quest.Type;
 import com.maxmind.geoip.IPLocation;
 import com.maxmind.geoip.LookupService;
 import com.maxmind.geoip.regionName;
@@ -594,7 +595,7 @@ public class MIAPlayerListener extends PlayerListener {
     			 i.move(event.getPlayer(), event.getTo());
     		 }
     	}
-    	for (Quest i : plugin.mf.quest.values()) {
+    	for (Quest i : plugin.mf.quest_sort.get(Type.Find).values()) {
     		if (i.isActive(event.getPlayer()) && i.getProgress(event.getPlayer()) == 0) {
     			i.move(event.getPlayer(), event.getTo());
     		}

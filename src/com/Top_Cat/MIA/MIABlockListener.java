@@ -21,6 +21,8 @@ import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 
+import com.Top_Cat.MIA.Quest.Type;
+
 /**
  * MIA block listener
  * @author Thomas Cheyney
@@ -36,7 +38,7 @@ public class MIABlockListener extends BlockListener {
     public void onBlockPlace(BlockPlaceEvent event) {
     	event.setCancelled(useitem_block(event.getBlock(), event.getPlayer()));
     	if (!event.isCancelled()) {
-    		for (Quest i : plugin.mf.quest.values()) {
+    		for (Quest i : plugin.mf.quest_sort.get(Type.Build).values()) {
     			i.build(event.getPlayer(), event.getBlock().getTypeId());
     		}
     	}
@@ -85,8 +87,8 @@ public class MIABlockListener extends BlockListener {
 	    		event.setCancelled(true);
 	    		event.getBlock().setType(Material.AIR);
     		}
-    		for (Quest i : plugin.mf.quest.values()) {
-    			i.harvest(event.getPlayer(), event.getBlock().getTypeId());
+    		for (Quest i : plugin.mf.quest_sort.get(Type.Harvest).values()) {
+   				i.harvest(event.getPlayer(), event.getBlock().getTypeId());
     		}
     		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
     		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);

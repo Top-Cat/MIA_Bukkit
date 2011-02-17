@@ -75,12 +75,8 @@ public class Quest {
 		progress.put(s, i);
 	}
 	
-	public boolean completed(Player p) {
-		return completed.contains(p.getDisplayName().toLowerCase());
-	}
-	
 	public boolean avail(Player p) {
-		return ((pre == null || plugin.mf.quest.get(pre).completed(p)) && !completed.contains(p.getDisplayName().toLowerCase()));
+		return (!isActive(p) && (pre == null || plugin.mf.quest.get(pre).isComplete(p)) && !isComplete(p));
 	}
 	
 	public String getId() {
@@ -149,7 +145,7 @@ public class Quest {
 	}
 	
 	public void kill(Player p, String killed) {
-		if (t == Type.Assasin && killed.replace("Craft", "").equalsIgnoreCase(datatxt.split(",")[1])) {
+		if (t == Type.Assasin && isActive(p) && killed.replace("Craft", "").equalsIgnoreCase(datatxt.split(",")[1])) {
 			incrementProgress(p, 1);
 		}
 	}

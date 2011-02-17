@@ -162,9 +162,13 @@ public class MIAFunctions {
     
     HashMap<String, NPC> npcs = new HashMap<String, NPC>();
     HashMap<String, Quest> quest = new HashMap<String, Quest>();
+    HashMap<Quest.Type, HashMap<String, Quest>> quest_sort = new HashMap<Quest.Type, HashMap<String, Quest>>();
     
     public void cache_npcs() {
     	npcs.clear();
+    	for (Type i : Type.values()) {
+    		quest_sort.put(i, new HashMap<String, Quest>());
+    	}
     	PreparedStatement pr;
 		try {
 			String q = "SELECT * FROM npcs";
@@ -194,7 +198,9 @@ public class MIAFunctions {
 				} else if (type.equalsIgnoreCase("find")) {
 					t = Type.Find;
 				}
-				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("completion_text"), r.getString("data"), r.getString("quest_desc"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
+				Quest qu = new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("completion_text"), r.getString("data"), r.getString("quest_desc"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards"));
+				quest.put(r.getString("id"), qu);
+				quest_sort.get(t).put(r.getString("id"), qu);
 			}
 			
 			q = "SELECT * FROM quests_completed";
@@ -237,7 +243,7 @@ public class MIAFunctions {
     public void quest_accept(Quest q, Player p) {
     	PreparedStatement pr;
 		try {
-			String s = "INSERT INTO quests_active (player_name, quest_id) VALUES ('" + p.getDisplayName() + "', '" + q.getId() + "')";
+			String s = "INSERT INTO quests_active (player_name, quest_id) VALUES ('" + p.getDisplayName().toLowerCase() + "', '" + q.getId() + "')";
 			pr = plugin.conn.prepareStatement(s);
 			pr.executeUpdate();
 		} catch (SQLException e) {
