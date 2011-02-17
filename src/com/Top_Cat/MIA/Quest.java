@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -136,7 +137,7 @@ public class Quest {
 	}
 	
 	public void harvest(Player p, int itemid) {
-		if (t == Type.Gather && isActive(p) && !isComplete(p) && Integer.parseInt(datatxt.split(",")[1]) == itemid) {
+		if (t == Type.Harvest && isActive(p) && !isComplete(p) && Integer.parseInt(datatxt.split(",")[1]) == itemid) {
 			incrementProgress(p, 1);
 		}
 	}
@@ -144,6 +145,26 @@ public class Quest {
 	public void build(Player p, int itemid) {
 		if (t == Type.Build && isActive(p) && !isComplete(p) && Integer.parseInt(datatxt.split(",")[1]) == itemid) {
 			incrementProgress(p, 1);
+		}
+	}
+	
+	public void kill(Player p, String killed) {
+		if (t == Type.Assasin && killed.replace("Craft", "").equalsIgnoreCase(datatxt.split(",")[1])) {
+			incrementProgress(p, 1);
+		}
+	}
+	
+	public void move(Player p, Location l) {
+		if (t == Type.Find) {
+			String[] bd = datatxt.split(",");
+			Integer[] bdi = new Integer[bd.length];
+			int j = 0;
+			for (String i : bd)
+				bdi[j++] = Integer.parseInt(i);
+			
+			if (plugin.getServer().getWorlds().indexOf(l.getWorld()) == bdi[0] && l.getBlockX() <= Math.max(bdi[1], bdi[4]) && l.getBlockX() >= Math.min(bdi[1], bdi[4]) && l.getBlockY() <= Math.max(bdi[2], bdi[5]) && l.getBlockY() >= Math.min(bdi[2], bdi[5]) && l.getBlockZ() <= Math.max(bdi[3], bdi[6]) && l.getBlockZ() >= Math.min(bdi[3], bdi[6])) {
+				incrementProgress(p, 1);
+			}
 		}
 	}
 	

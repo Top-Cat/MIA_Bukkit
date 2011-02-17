@@ -89,7 +89,7 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.EXPLOSION_PRIMED, entityListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.CREATURE_SPAWN, playerListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal, this);
         
         if (getServer().getWorlds().size() == 1) {
         	getServer().createWorld("Nether", Environment.NETHER);

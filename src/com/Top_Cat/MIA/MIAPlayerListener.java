@@ -470,7 +470,7 @@ public class MIAPlayerListener extends PlayerListener {
     			if (j == 0) {
     				plugin.mf.sendmsg(event.getPlayer(), "No active quests!");
     			}
-    		} else if (coms[1].equalsIgnoreCase("progress") || coms[1].equalsIgnoreCase("p") || coms[1].equalsIgnoreCase("pro")) {
+    		} else if ((coms[1].equalsIgnoreCase("progress") || coms[1].equalsIgnoreCase("p") || coms[1].equalsIgnoreCase("pro")) && coms.length > 2) {
     			int j = 0;
     			for (Quest i : plugin.mf.quest.values()) {
     				if (i.isActive(event.getPlayer())) {
@@ -479,7 +479,7 @@ public class MIAPlayerListener extends PlayerListener {
     					}
     				}
     			}
-    		} else if (coms[1].equalsIgnoreCase("description") || coms[1].equalsIgnoreCase("d")) {
+    		} else if ((coms[1].equalsIgnoreCase("description") || coms[1].equalsIgnoreCase("d")) && coms.length > 2) {
     			int j = 0;
     			for (Quest i : plugin.mf.quest.values()) {
     				if (i.isActive(event.getPlayer())) {
@@ -488,7 +488,7 @@ public class MIAPlayerListener extends PlayerListener {
     					}
     				}
     			}
-    		} else if (coms[1].equalsIgnoreCase("view") || coms[1].equalsIgnoreCase("v")) {
+    		} else if ((coms[1].equalsIgnoreCase("view") || coms[1].equalsIgnoreCase("v")) && coms.length > 2) {
     			List<Quest> lq = userinfo.get(event.getPlayer().getDisplayName()).tmpQuestList();
     			if (lq.size() >= Integer.parseInt(coms[2])) {
 	    			Quest i = lq.get(Integer.parseInt(coms[2]) - 1);
@@ -593,6 +593,11 @@ public class MIAPlayerListener extends PlayerListener {
     		 if (i.playerPlaying(event.getPlayer())) {
     			 i.move(event.getPlayer(), event.getTo());
     		 }
+    	}
+    	for (Quest i : plugin.mf.quest.values()) {
+    		if (i.isActive(event.getPlayer()) && i.getProgress(event.getPlayer()) == 0) {
+    			i.move(event.getPlayer(), event.getTo());
+    		}
     	}
     	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);

@@ -68,7 +68,10 @@ public class MIAEntityListener extends EntityListener {
     	} else if (attacker instanceof Player && defender instanceof Creature && lastkilled != defender) {
     		if (((Creature) defender).getHealth() - damage <= 0 && ((Creature) defender).getHealth() > 0) {
     			String def = defender.getClass().getSimpleName();
-	    		System.out.println(((Player) attacker).getDisplayName() + " killed a " + def);
+    			for (Quest i : plugin.mf.quest.values()) {
+        			i.kill(((Player) attacker), def);
+        		}
+	    		//System.out.println(((Player) attacker).getDisplayName() + " killed a " + def);
 	    		lastkilled = defender;
 	    	}
     	}
