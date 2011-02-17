@@ -249,7 +249,6 @@ public class MIAFunctions {
     public void save_progress(Player p, Quest q) {
     	PreparedStatement pr;
 		try {
-			System.out.println(q.getProgress(p));
 			String s = "UPDATE quests_active SET progress = '" + q.getProgress(p) + "' WHERE player_name = '" + p.getDisplayName().toLowerCase() + "' and quest_id = '" + q.getId() + "'";
 			pr = plugin.conn.prepareStatement(s);
 			pr.executeUpdate();
