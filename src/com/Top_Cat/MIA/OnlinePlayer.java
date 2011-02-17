@@ -1,11 +1,16 @@
 package com.Top_Cat.MIA;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
   //private int cape;
   private int town, id, sg, sw;
   private String name;
   private String prefix;
+  List<Quest> npc_tmp = new ArrayList<Quest>();
+  Quest aquest;
   
   // (snip ctor, setters, etc.)
 
@@ -17,6 +22,23 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 	  this.town = town;
 	  this.sg = sg;
 	  this.sw = sw;
+  }
+  
+  public List<Quest> tmpQuestList() {
+	  return npc_tmp;
+  }
+  
+  public void setQuestList(List<Quest> ql) {
+	  npc_tmp = ql;
+	  aquest = null;
+  }
+  
+  public void setAQuest(Quest i) {
+	  aquest = i;
+  }
+  
+  public Quest aQuest() {
+	  return aquest;
   }
   
   public void spleefplayed(boolean win) {

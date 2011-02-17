@@ -35,6 +35,11 @@ public class MIABlockListener extends BlockListener {
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
     	event.setCancelled(useitem_block(event.getBlock(), event.getPlayer()));
+    	if (!event.isCancelled()) {
+    		for (Quest i : plugin.mf.quest.values()) {
+    			i.build(event.getPlayer(), event.getBlock().getTypeId());
+    		}
+    	}
 	}
     
     public boolean useitem_block(Block b, Player p) {
@@ -79,6 +84,9 @@ public class MIABlockListener extends BlockListener {
     		if (b.contains(event.getBlock())) {
 	    		event.setCancelled(true);
 	    		event.getBlock().setType(Material.AIR);
+    		}
+    		for (Quest i : plugin.mf.quest.values()) {
+    			i.harvest(event.getPlayer(), event.getBlock().getTypeId());
     		}
     		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
     		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);

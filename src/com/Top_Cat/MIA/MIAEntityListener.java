@@ -7,6 +7,7 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageByProjectileEvent;
@@ -45,6 +46,7 @@ public class MIAEntityListener extends EntityListener {
     }
     
     HashMap<Player, Player> lastattacker = new HashMap<Player, Player>();
+    Entity lastkilled = null;
     
     public boolean onDamage(Entity attacker, Entity defender, int damage) {
     	if (defender instanceof Player) {
@@ -63,6 +65,12 @@ public class MIAEntityListener extends EntityListener {
 		    	}
 	    	}
 	    	plugin.mf.updatestats((Player) defender, 2, 12, damage);
+    	} else if (attacker instanceof Player && defender instanceof Creature && lastkilled != defender) {
+    		if (((Creature) defender).getHealth() - damage <= 0 && ((Creature) defender).getHealth() > 0) {
+    			String def = defender.getClass().getSimpleName();
+	    		System.out.println(((Player) attacker).getDisplayName() + " killed a " + def);
+	    		lastkilled = defender;
+	    	}
     	}
     	return false;
     }
@@ -114,6 +122,13 @@ public class MIAEntityListener extends EntityListener {
     public void onExplosionPrimed(ExplosionPrimedEvent event) {
     	//event.getRadius()
     	
+    }
+    
+    @Override
+    public void onCreatureSpawn(CreatureSpawnEvent event) {
+    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
+    		event.setCancelled(true);
+    	}
     }
 }
 

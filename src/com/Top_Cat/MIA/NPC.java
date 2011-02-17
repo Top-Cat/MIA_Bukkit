@@ -62,6 +62,13 @@ public class NPC {
 	
 	public void interact(Player p) {
 		boolean quests = false;
+		for (Quest i : end_quests) {
+			if (i.isComplete(p)) {
+				i.complete(p);
+				return;
+			}
+		}
+		
 		List<Quest> a_quests = new ArrayList<Quest>();
 		for (Quest i : start_quests) {
 			if (i.avail(p)) {
@@ -77,6 +84,7 @@ public class NPC {
 				plugin.mf.sendmsg(p, c+"   " + (++j) + ": " + i.getName());
 			}
 			plugin.mf.sendmsg(p, c+"To view a quest type: /quest view #");
+			plugin.playerListener.userinfo.get(p.getDisplayName()).setQuestList(a_quests);
 		} else {
 			if (dialogs.size() > 0)
 				plugin.mf.sendmsg(p, premessage(dialogs.get((int) Math.floor(Math.random() * dialogs.size()))));

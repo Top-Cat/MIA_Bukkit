@@ -194,7 +194,7 @@ public class MIAFunctions {
 				} else if (type.equalsIgnoreCase("find")) {
 					t = Type.Find;
 				}
-				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("quest_desc"), r.getString("data"), r.getString("completion_text"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
+				quest.put(r.getString("id"), new Quest(plugin, r.getString("id"), r.getString("quest_name"), r.getString("completion_text"), r.getString("data"), r.getString("quest_desc"), npcs.get(r.getString("start_npc")), npcs.get(r.getString("end_npc")), t, r.getString("prereq"), r.getInt("cost"), r.getInt("prize"), r.getBoolean("chestb"), r.getString("items_provided"), r.getString("rewards")));
 			}
 			
 			q = "SELECT * FROM quests_completed";
@@ -214,6 +214,47 @@ public class MIAFunctions {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void quest_complete(Quest q, Player p) {
+    	PreparedStatement pr;
+		try {
+			String s = "DELETE FROM quests_active WHERE player_name = '" + p.getDisplayName() + "' and quest_id = '" + q.getId() + "'";
+			pr = plugin.conn.prepareStatement(s);
+			pr.executeUpdate();
+			
+			s = "INSERT INTO quests_completed (player_name, quest_id) VALUES('" + p.getDisplayName().toLowerCase() + "', '" + q.getId() + "')";
+			pr = plugin.conn.prepareStatement(s);
+			pr.executeUpdate();
+		} catch (SQLException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+    }
+    
+    public void quest_accept(Quest q, Player p) {
+    	PreparedStatement pr;
+		try {
+			String s = "INSERT INTO quests_active (player_name, quest_id) VALUES ('" + p.getDisplayName() + "', '" + q.getId() + "')";
+			pr = plugin.conn.prepareStatement(s);
+			pr.executeUpdate();
+		} catch (SQLException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+    }
+    
+    public void save_progress(Player p, Quest q) {
+    	PreparedStatement pr;
+		try {
+			System.out.println(q.getProgress(p));
+			String s = "UPDATE quests_active SET progress = '" + q.getProgress(p) + "' WHERE player_name = '" + p.getDisplayName().toLowerCase() + "' and quest_id = '" + q.getId() + "'";
+			pr = plugin.conn.prepareStatement(s);
+			pr.executeUpdate();
+		} catch (SQLException e) {
+			// TODO: handle exception
 			e.printStackTrace();
 		}
     }

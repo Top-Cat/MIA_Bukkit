@@ -15,8 +15,8 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.MobType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
@@ -58,6 +58,7 @@ public class MIAPlayerListener extends PlayerListener {
 		    	for (LivingEntity i : j.getLivingEntities()) {
 		    		if (i instanceof Monster && !((Zone) plugin.mf.insidezone(i.getLocation(), true)).isMobs()) {
 		    			i.setHealth(0);
+		    			//((EntityCreature) i).world.e((EntityCreature) i);
 		    		} else if (i instanceof Sheep && !s.contains(i)) {
 		    			int dc = (int) Math.floor(Math.random() * DyeColor.values().length);
 		    			((Sheep) i).setColor(DyeColor.values()[dc]);
@@ -121,6 +122,10 @@ public class MIAPlayerListener extends PlayerListener {
     	if (event.getItem().getType() == Material.LAVA_BUCKET || event.getItem().getType() == Material.WATER_BUCKET || event.getItem().getType() == Material.WOODEN_DOOR || event.getItem().getType() == Material.IRON_DOOR) {
     		event.setCancelled(plugin.blockListener.useitem_block(event.getBlockClicked(), event.getPlayer()));
     	}
+    }
+    
+    public boolean cbal(Player p, int ammount) {
+    	return cbal(p.getDisplayName(), ammount);
     }
     
     public boolean cbal(String target, int ammount) {
@@ -379,7 +384,8 @@ public class MIAPlayerListener extends PlayerListener {
     	} else if (com.equalsIgnoreCase("/spawn")) {
     		plugin.mf.spawn(event.getPlayer());
     	} else if (coms[0].equalsIgnoreCase("/mspawn")){
-    		MobType mt = MobType.fromName(coms[1].equalsIgnoreCase("PigZombie") ? "PigZombie" : capitalCase(coms[1]));
+    		
+    		CreatureType mt = CreatureType.fromName(coms[1].equalsIgnoreCase("PigZombie") ? "PigZombie" : capitalCase(coms[1]));
     		int[] ignore = {8, 9};
     		org.bukkit.block.Block blk = (new TargetBlock(event.getPlayer(), 300, 0.2, ignore)).getTargetBlock();
     		if(mt == null){
@@ -402,7 +408,7 @@ public class MIAPlayerListener extends PlayerListener {
     			event.getPlayer().sendMessage("You must be looking at a Mob Spawner.");
     			return;
     		}
-    		((org.bukkit.block.MobSpawner) blk.getState()).setMobType(mt);
+    		((org.bukkit.block.CreatureSpawner) blk.getState()).setCreatureType(mt);
     		event.getPlayer().sendMessage("Mob spawner set as " + mt.getName().toLowerCase() + ".");
     	} else if (coms[0].equalsIgnoreCase("/spleef")) {
     		if (coms[1].equalsIgnoreCase("join")) {
@@ -482,6 +488,18 @@ public class MIAPlayerListener extends PlayerListener {
     					}
     				}
     			}
+    		} else if (coms[1].equalsIgnoreCase("view") || coms[1].equalsIgnoreCase("v")) {
+    			List<Quest> lq = userinfo.get(event.getPlayer().getDisplayName()).tmpQuestList();
+    			if (lq.size() >= Integer.parseInt(coms[2])) {
+	    			Quest i = lq.get(Integer.parseInt(coms[2]) - 1);
+	    			i.show(event.getPlayer());
+	    			userinfo.get(event.getPlayer().getDisplayName()).setAQuest(i);
+    			}
+    		} else if (coms[1].equalsIgnoreCase("accept") || coms[1].equalsIgnoreCase("a")) {
+    			Quest lq = userinfo.get(event.getPlayer().getDisplayName()).aQuest();
+    			if (lq != null) {
+	    			lq.accept(event.getPlayer());
+    			}
     		}
     	} else {
     		canc = false;
@@ -539,7 +557,6 @@ public class MIAPlayerListener extends PlayerListener {
 		plugin.mf.updatestats(event.getPlayer(), 2, 2, (int) (time.getTime() / 1000), true);
 		plugin.mf.updatestats(event.getPlayer(), 2, 4, (int) ((time.getTime() / 1000) - logintimes.get(event.getPlayer())));
 		
-		
     	Block[] blox = new Block[plugin.blockListener.opengate.size()];
     	int j = 0;
     	for (Integer[] i : plugin.blockListener.opengate.values()) {
@@ -562,6 +579,12 @@ public class MIAPlayerListener extends PlayerListener {
 				spleefgames.get(i).removePlayer(event.getPlayer());
 			}
 		}
+    	
+    	for (Quest i : plugin.mf.quest.values()) {
+    		if (i.isActive(event.getPlayer())) {
+    			plugin.mf.save_progress(event.getPlayer(), i);
+    		}
+    	}
     }
     
     @Override

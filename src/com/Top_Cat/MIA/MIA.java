@@ -89,7 +89,7 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.EXPLOSION_PRIMED, entityListener, Priority.Normal, this);
-        //pm.registerEvent(Event.Type.CREATURE_SPAWN, playerListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.CREATURE_SPAWN, playerListener, Priority.Normal, this);
         
         if (getServer().getWorlds().size() == 1) {
         	getServer().createWorld("Nether", Environment.NETHER);
@@ -115,7 +115,13 @@ public class MIA extends JavaPlugin {
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
     	for (Player i : getServer().getOnlinePlayers()) {
     		Date time = new Date();
-    		mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));        	
+    		mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));
+    		
+    		for (Quest j : mf.quest.values()) {
+	    		if (j.isActive(i)) {
+	    			mf.save_progress(i, j);
+	    		}
+	    	}
         }
     	
     	for (NPC i : mf.npcs.values()) {
