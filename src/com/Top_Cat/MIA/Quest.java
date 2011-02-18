@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class Quest {
 	
-	String c = "§e";
 	private String id, name, desc, compl, datatxt, prov, rewa;
 	private Type t;
 	private String pre;
@@ -186,15 +185,15 @@ public class Quest {
 	public void dispProgress(Player p) {
 		if (progress.containsKey(p.getDisplayName().toLowerCase())) {
 			if (isComplete(p)) {
-				plugin.mf.sendmsg(p, c+ name + " Progress: Complete!");
+				plugin.mf.sendmsg(p, plugin.c+ name + " Progress: Complete!");
 			} else {
-				plugin.mf.sendmsg(p, c+ name + " Progress: " + getProgress(p) + "/" + totalProgress());
+				plugin.mf.sendmsg(p, plugin.c+ name + " Progress: " + getProgress(p) + "/" + totalProgress());
 			}
 		}
 	}
 	
 	public void dispData(Player p, String s, String t) {
-		plugin.mf.sendmsg(p, c+ name + " " + s + ": " + t);	
+		plugin.mf.sendmsg(p, plugin.c+ name + " " + s + ": " + t);	
 	}
 	
 	public void accept(Player p) {
@@ -203,9 +202,9 @@ public class Quest {
 				if (!plugin.playerListener.cbal(p, -cost)) { // Give user their moneys
 					return;
 				}
-				plugin.mf.sendmsg(p, c+ prize + " ISK was taken to pay for the quest");
+				plugin.mf.sendmsg(p, plugin.c+ prize + " ISK was taken to pay for the quest");
 			}
-			plugin.mf.sendmsg(p, c+ "Accepted quest " + name);
+			plugin.mf.sendmsg(p, plugin.c+ "Accepted quest " + name);
 			
 			progress.put(p.getDisplayName().toLowerCase(), 0);
 			
@@ -216,7 +215,7 @@ public class Quest {
 				ItemStack k = new ItemStack(Integer.parseInt(itemj[0]), Integer.parseInt(itemj[1]));
 				p.getInventory().addItem(k);
 				
-				plugin.mf.sendmsg(p, c+ "You received " + Integer.parseInt(itemj[1]) + " " + itemi[0]);
+				plugin.mf.sendmsg(p, plugin.c+ "You received " + Integer.parseInt(itemj[1]) + " " + itemi[0]);
 			}
 			
 			plugin.mf.quest_accept(this, p);
@@ -225,31 +224,31 @@ public class Quest {
 	
 	public void show(Player p) {
 		plugin.mf.sendmsg(p, " ");
-		plugin.mf.sendmsg(p, c+ "Quest: " + name);
+		plugin.mf.sendmsg(p, plugin.c+ "Quest: " + name);
 		plugin.mf.sendmsg(p, " ");
 		String [] descLines = desc.split("@");
 		for (String s : descLines) {
 			String temp = s;
 			while (temp.length() > 60) {
 				int lastSpace = temp.substring(0,60).lastIndexOf(' ');
-				plugin.mf.sendmsg(p, c+ temp.substring(0,lastSpace));
+				plugin.mf.sendmsg(p, plugin.c+ temp.substring(0,lastSpace));
 				temp = temp.substring(lastSpace+1);
 			}
-			plugin.mf.sendmsg(p, c+ temp);
+			plugin.mf.sendmsg(p, plugin.c+ temp);
 		}
 		if (prov != null && !prov.equals("")) {
-			plugin.mf.sendmsg(p, c+ "   Provided: " + prov.split(":")[0]);
+			plugin.mf.sendmsg(p, plugin.c+ "   Provided: " + prov.split(":")[0]);
 		}
 		if (rewa != null && !rewa.equals("")) {
-			plugin.mf.sendmsg(p, c+ "   Reward: " + rewa.split(":")[0]);
+			plugin.mf.sendmsg(p, plugin.c+ "   Reward: " + rewa.split(":")[0]);
 		}
 		if (cost > 0) {
-			plugin.mf.sendmsg(p, c+ "   Cost: " + cost);
+			plugin.mf.sendmsg(p, plugin.c+ "   Cost: " + cost);
 		}
 		if (prize > 0) {
-			plugin.mf.sendmsg(p, c+ "   Prize: " + prize);
+			plugin.mf.sendmsg(p, plugin.c+ "   Prize: " + prize);
 		}
-		plugin.mf.sendmsg(p, c+ "Type '/quest accept' to accept this quest.");
+		plugin.mf.sendmsg(p, plugin.c+ "Type '/quest accept' to accept this quest.");
 	}
 	
 	public void complete(Player p) {
@@ -257,9 +256,9 @@ public class Quest {
 			// You completed! YAY!
 			if (prize != 0) {
 				plugin.playerListener.cbal(p, prize); // Give user their moneys
-				plugin.mf.sendmsg(p, c+ "You received " + prize + " ISK");
+				plugin.mf.sendmsg(p, plugin.c+ "You received " + prize + " ISK");
 			}
-			plugin.mf.sendmsg(p, c+compl);
+			plugin.mf.sendmsg(p, plugin.c+compl);
 			
 			// If gather or harvest take items and move to chest
 			if (t == Type.Gather || t == Type.Harvest) {
@@ -287,7 +286,7 @@ public class Quest {
 				ItemStack k = new ItemStack(Integer.parseInt(itemj[0]), Integer.parseInt(itemj[1]));
 				p.getInventory().addItem(k);
 				
-				plugin.mf.sendmsg(p, c+ "You received " + Integer.parseInt(itemj[1]) + " " + itemi[0]);
+				plugin.mf.sendmsg(p, plugin.c+ "You received " + Integer.parseInt(itemj[1]) + " " + itemi[0]);
 			}
 			
 			plugin.mf.quest_complete(this, p);

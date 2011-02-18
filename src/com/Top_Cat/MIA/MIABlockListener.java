@@ -101,7 +101,7 @@ public class MIABlockListener extends BlockListener {
     			event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) &&
     			((Zone) plugin.mf.insidezone(event.getBlock(), true)).isChestProtected((Player) event.getEntity())) {
     		
-    		plugin.mf.sendmsg((Player) event.getEntity(), "§4This object is locked!");
+    		plugin.mf.sendmsg((Player) event.getEntity(), plugin.d+"4This object is locked!");
     		event.setCancelled(true);
     	}
     }

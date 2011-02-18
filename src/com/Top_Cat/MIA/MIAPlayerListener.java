@@ -178,7 +178,7 @@ public class MIAPlayerListener extends PlayerListener {
 			ResultSet r = pr.executeQuery();
 			OnlinePlayer op = null;	
 			if (r.next()) {
-		    	nam = r.getString("prefix") + "§f " + r.getString("name");
+		    	nam = r.getString("prefix") + plugin.d+"f " + r.getString("name");
 		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
 			} else {
 				// User doesn't exist! Make a new record
@@ -188,8 +188,8 @@ public class MIAPlayerListener extends PlayerListener {
 				
 				r = pr2.getGeneratedKeys();
 				
-		    	nam = "§0[G]§f " + event.getPlayer().getDisplayName();
-		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), "§0[G]", 0, r.getInt(1), 0, 0);
+		    	nam = plugin.d+"0[G]§f " + event.getPlayer().getDisplayName();
+		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), plugin.d+"0[G]", 0, r.getInt(1), 0, 0);
 		    	plugin.mf.spawn(event.getPlayer());
 			}
 			userinfo.put(r.getString("name"), op);
@@ -215,12 +215,12 @@ public class MIAPlayerListener extends PlayerListener {
 
 		    IPLocation l = cl.getLocation(event.getPlayer().getAddress().getHostName());
 		    
-		    msg = nam + "§a has joined the server from §b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("81.109.21.62" ))) + " km)";
+		    msg = nam + plugin.d+"a has joined the server from §b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("81.109.21.62" ))) + " km)";
 
 		    cl.close();
 		}
 		catch (NullPointerException e) {
-			msg = nam + "§a has joined the server from a local connection (0 km)";
+			msg = nam + plugin.d+"a has joined the server from a local connection (0 km)";
 		}	
 		catch (IOException e) {
 		    System.out.println("IO Exception");
@@ -288,7 +288,7 @@ public class MIAPlayerListener extends PlayerListener {
     		plugin.mf.sendmsg(p, event.getPlayer().getLocation().getBlockX() + ", " + event.getPlayer().getLocation().getBlockY() + ", " + event.getPlayer().getLocation().getBlockZ());
     	} else if (com.startsWith("/pay")) {
     		if (com.split(" ").length != 3) {
-    			plugin.mf.sendmsg(event.getPlayer(), "§bCorrect usage is: /pay <person> <ammount>");
+    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /pay <person> <ammount>");
     		} else {
     			int amm = Integer.parseInt(com.split(" ")[2]);
     			if (userinfo.containsKey(com.split(" ")[1])) {
@@ -297,7 +297,7 @@ public class MIAPlayerListener extends PlayerListener {
         			//Give Money
     				cbal(com.split(" ")[1], amm);
     			} else {
-    				plugin.mf.sendmsg(event.getPlayer(), "§bPlayer " + com.split(" ")[1] + " not found!");
+    				plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bPlayer " + com.split(" ")[1] + " not found!");
     			}
     		}
     	} else if (com.startsWith("/money")) {
@@ -310,31 +310,31 @@ public class MIAPlayerListener extends PlayerListener {
 		    		//loadallusers();
 		    		ArrayList<OnlinePlayer> ops = new ArrayList<OnlinePlayer>(userinfo.values());
 		    		Collections.sort(ops);
-		    		plugin.mf.sendmsg(event.getPlayer(), "§bTop Players List");
+		    		plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bTop Players List");
 		    		for (int i = 0; i < amm; i++) {
 		    			String col = "b";
 		    				if (i == 0) {
 		    					col = "6";
 		    				}
-		    			plugin.mf.sendmsg(event.getPlayer(), "§" + col + "#" + (i + 1) + ": " + ops.get(i).getName() + " (" + ops.get(i).getBalance() + ")");
+		    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"" + col + "#" + (i + 1) + ": " + ops.get(i).getName() + " (" + ops.get(i).getBalance() + ")");
 		    		}
 	    		} else if (coms[1].equalsIgnoreCase("rank")) {
 		    		//loadallusers();
 		    		ArrayList<OnlinePlayer> ops = new ArrayList<OnlinePlayer>(userinfo.values());
 		    		Collections.sort(ops);
-		    		plugin.mf.sendmsg(event.getPlayer(), "§bCurrent rank: " + ops.indexOf(userinfo.get(event.getPlayer().getDisplayName())));
+		    		plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCurrent rank: " + ops.indexOf(userinfo.get(event.getPlayer().getDisplayName())));
 		    		//[Money] Current rank: 1
 	    		} else {
 	    			if (userinfo.containsKey(coms[1])) {
-	    				plugin.mf.sendmsg(event.getPlayer(), "§b[Money] " + coms[1] + "'s Balance: §f" + userinfo.get(coms[1]).getBalance() + " §bISK");
+	    				plugin.mf.sendmsg(event.getPlayer(), plugin.d+"b[Money] " + coms[1] + "'s Balance: §f" + userinfo.get(coms[1]).getBalance() + " §bISK");
 	    			}
 	    		}
     		} else {
-    			plugin.mf.sendmsg(event.getPlayer(), "§b[Money] Balance: §f" + userinfo.get(event.getPlayer().getDisplayName()).getBalance() + " §bISK");
+    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"b[Money] Balance: §f" + userinfo.get(event.getPlayer().getDisplayName()).getBalance() + " §bISK");
     		}
     	} else if (com.startsWith("/shop")) {
     		if (coms.length < 2 || coms.length > 4) {
-    			plugin.mf.sendmsg(event.getPlayer(), "§bCorrect usage is: /shop <sell/buy> [id] [ammount]");
+    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /shop <sell/buy> [id] [ammount]");
     		} else {
     			boolean opsell = true;
     			int itemid = 0;
@@ -364,7 +364,7 @@ public class MIAPlayerListener extends PlayerListener {
 	    					if (inzone > 0)
 	    						plugin.mf.changestock(inzone, itemid, itemamm);
 	    					
-	    					plugin.mf.sendmsg(event.getPlayer(), "§bReceived " + (sitems.get(itemid)[1] * itemamm) + " for " + itemamm + " " + new ItemStack(itemid, itemamm).getType().toString());
+	    					plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bReceived " + (sitems.get(itemid)[1] * itemamm) + " for " + itemamm + " " + new ItemStack(itemid, itemamm).getType().toString());
 	    				} else {
 	    					// Take Money
 	    					cbal(event.getPlayer().getDisplayName(), -(sitems.get(itemid)[0] * itemamm));
@@ -373,13 +373,13 @@ public class MIAPlayerListener extends PlayerListener {
 	    					if (inzone > 0)
 	    						plugin.mf.changestock(inzone, itemid, -itemamm);
 	    					
-	    					plugin.mf.sendmsg(event.getPlayer(), "§bBought " + itemamm + " " + new ItemStack(itemid, itemamm).getType().toString() + " for " + (sitems.get(itemid)[0] * itemamm));
+	    					plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bBought " + itemamm + " " + new ItemStack(itemid, itemamm).getType().toString() + " for " + (sitems.get(itemid)[0] * itemamm));
 	    				}
     				} else {
-    					plugin.mf.sendmsg(event.getPlayer(), "§bThis shop does not stock that item, or does not have sufficient stock");
+    					plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bThis shop does not stock that item, or does not have sufficient stock");
     				}
     			} else {
-    				plugin.mf.sendmsg(event.getPlayer(), "§bCorrect usage is: /shop <sell/buy> [id] [ammount]");
+    				plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /shop <sell/buy> [id] [ammount]");
     			}
     		}
     	} else if (com.equalsIgnoreCase("/spawn")) {
@@ -545,7 +545,7 @@ public class MIAPlayerListener extends PlayerListener {
 		if (p == null) {
 			p = plugin.getServer().getOnlinePlayers();
 		} else {
-			tw = "§9(TOWN) ";
+			tw = plugin.d+"9(TOWN) ";
 		}
 		
     	plugin.mf.sendmsg(p, tw + prefix + " " + event.getPlayer().getDisplayName() + ":§f " + event.getMessage());
@@ -653,9 +653,9 @@ public class MIAPlayerListener extends PlayerListener {
     	Town town2 = (Town) plugin.mf.insidetown(event.getTo(), true);
     	if (town1 != town2) {
     		if (town1 == null) {
-    			plugin.mf.sendmsg(event.getPlayer(), "§6Welcome to " + town2.getName());
+    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"6Welcome to " + town2.getName());
     		} else {
-    			plugin.mf.sendmsg(event.getPlayer(), "§6Now leaving " + town1.getName());
+    			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"6Now leaving " + town1.getName());
     		}
     	}
     	

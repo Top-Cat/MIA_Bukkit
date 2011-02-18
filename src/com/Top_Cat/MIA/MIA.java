@@ -29,6 +29,8 @@ public class MIA extends JavaPlugin {
     public final MIABlockListener blockListener = new MIABlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     MIAFunctions mf = new MIAFunctions(this);
+    public final String d = "\u00C2\u00A7";
+	public final String c = d+"e";
     Connection conn;
     
     public MIA(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {

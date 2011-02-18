@@ -13,7 +13,6 @@ import redecouverte.npcspawner.NpcSpawner;
 
 public class NPC {
 	
-	String c = "§e";
 	List<String> dialogs = new ArrayList<String>();
 	int proxy, id;
 	final MIA plugin;
@@ -57,7 +56,7 @@ public class NPC {
 	}
 	
 	public String premessage(String s) {
-		return c+"[NPC] " + name + ": §f" + s;
+		return plugin.c+"[NPC] " + name + ": §f" + s;
 	}
 	
 	public void interact(Player p) {
@@ -78,12 +77,12 @@ public class NPC {
 		}
 		
 		if (quests) {
-			plugin.mf.sendmsg(p, c+"Available quests:");
+			plugin.mf.sendmsg(p, plugin.c+"Available quests:");
 			int j = 0;
 			for (Quest i : a_quests) {
-				plugin.mf.sendmsg(p, c+"   " + (++j) + ": " + i.getName());
+				plugin.mf.sendmsg(p, plugin.c+"   " + (++j) + ": " + i.getName());
 			}
-			plugin.mf.sendmsg(p, c+"To view a quest type: /quest view #");
+			plugin.mf.sendmsg(p, plugin.c+"To view a quest type: /quest view #");
 			plugin.playerListener.userinfo.get(p.getDisplayName()).setQuestList(a_quests);
 		} else {
 			if (dialogs.size() > 0)
