@@ -123,7 +123,7 @@ public class MIABlockListener extends BlockListener {
     	}
     	
     	if (!event.isCancelled() && event.getBlock().getWorld().getName().equals("Creative")) {
-    		if ((pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
+    		if (event.getBlock().getType() == Material.TNT || (pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
     			event.setCancelled(true);
 	    		event.getBlock().setType(Material.AIR);
     		}
