@@ -140,7 +140,7 @@ public class MIAFunctions {
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery();
 			while (r.next()) {
-				worlds.put(r.getString("name"), new MIAWorld(r.getInt("Id"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp")));
+				worlds.put(r.getString("name"), new MIAWorld(r.getInt("Id"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -670,6 +670,7 @@ public class MIAFunctions {
     	
     	gzone.setMobs(worlds.get(ps.getWorld().getName()).isMobs());
     	gzone.setPvP(worlds.get(ps.getWorld().getName()).isPvP());
+    	gzone.setHealing(worlds.get(ps.getWorld().getName()).getHealing());
     	return inzoneR(ps, town, zones, gzone);
     }
     

@@ -2,6 +2,7 @@ package com.Top_Cat.MIA;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,6 +33,29 @@ public class MIABlockListener extends BlockListener {
 
     public MIABlockListener(final MIA plugin) {
         this.plugin = plugin;
+        spades.add(Material.WOOD_SPADE);
+        spades.add(Material.STONE_SPADE);
+        spades.add(Material.IRON_SPADE);
+        spades.add(Material.GOLD_SPADE);
+        spades.add(Material.DIAMOND_SPADE);
+        
+        spade_fast.add(Material.DIRT);
+        spade_fast.add(Material.GRASS);
+        spade_fast.add(Material.SAND);
+        spade_fast.add(Material.GRAVEL);
+        
+        picks.add(Material.WOOD_PICKAXE);
+        picks.add(Material.STONE_PICKAXE);
+        picks.add(Material.IRON_PICKAXE);
+        picks.add(Material.GOLD_PICKAXE);
+        picks.add(Material.DIAMOND_PICKAXE);
+        
+        pick_fast.add(Material.COAL_ORE);
+        pick_fast.add(Material.IRON_ORE);
+        pick_fast.add(Material.STONE);
+        pick_fast.add(Material.COBBLESTONE);
+        pick_fast.add(Material.GOLD_ORE);
+        pick_fast.add(Material.DIAMOND_ORE);
     }
     
     @Override
@@ -64,6 +88,10 @@ public class MIABlockListener extends BlockListener {
     }
     
     ArrayList<Block> b = new ArrayList<Block>();
+    List<Material> spades = new ArrayList<Material>();
+    List<Material> spade_fast = new ArrayList<Material>();
+    List<Material> picks = new ArrayList<Material>();
+    List<Material> pick_fast = new ArrayList<Material>();
     
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
@@ -81,7 +109,7 @@ public class MIABlockListener extends BlockListener {
 				}
 			}
     	}
-		
+    	
     	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {	
     		if (b.contains(event.getBlock())) {
 	    		event.setCancelled(true);
@@ -92,6 +120,13 @@ public class MIABlockListener extends BlockListener {
     		}
     		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
     		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);
+    	}
+    	
+    	if (!event.isCancelled() && event.getBlock().getWorld().getName().equals("Creative")) {
+    		if ((pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
+    			event.setCancelled(true);
+	    		event.getBlock().setType(Material.AIR);
+    		}
     	}
     }
     

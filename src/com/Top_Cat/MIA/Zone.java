@@ -104,6 +104,10 @@ class Zone {
 		this.mobs = mobs;
 	}
 	
+	public void setHealing(int healing) {
+		this.healing = healing;
+	}
+	
 	public boolean isSpleefArena() {
 		if (!spleef || (ts == townshape.CUBE && b1.getY() == b2.getY())) {
 			return spleef;
