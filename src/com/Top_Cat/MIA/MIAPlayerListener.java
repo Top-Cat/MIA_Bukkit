@@ -106,6 +106,7 @@ public class MIAPlayerListener extends PlayerListener {
     		if (updatec > 60) {
     			updatec = 0;
     			plugin.mf.rebuild_cache();
+    			plugin.getServer().getWorld("Creative").setTime(1000);
     		}
 		}
     	
@@ -203,6 +204,8 @@ public class MIAPlayerListener extends PlayerListener {
 		plugin.mf.updatestats(event.getPlayer(), 2, 3, 1);
 		logintimes.put(event.getPlayer(), time.getTime() / 1000);
 		
+		plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).addPlayer(event.getPlayer());
+		
 		String msg = nam + " joined!";
 		
 		try {
@@ -266,27 +269,43 @@ public class MIAPlayerListener extends PlayerListener {
     	boolean canc = true;
     	String com = event.getMessage();
 		String coms[] = com.split(" ");
-    	if (com.startsWith("/g ")) {
+		if (!plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).canCommand(coms[0]) && !event.getPlayer().isOp()) {
+			plugin.mf.sendmsg(event.getPlayer(), "Unknown command!");
+			event.setCancelled(true);
+			return;
+		}
+		if (coms[0].equalsIgnoreCase("/w")) { 
+			plugin.mf.sendmsg(plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).getplayers(), plugin.d+"9(WORLD) " + userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
+		} else if (coms[0].equalsIgnoreCase("/g")) {
     		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
-    	} else if (com.startsWith("/tpc") && coms.length > 1 && plugin.getServer().getPlayer(coms[1]) != null) {
+		} else if (coms[0].equalsIgnoreCase("/item")) {
+			if (coms.length > 1) {
+				int amm = 1;
+				if (coms.length > 2) {
+					amm = Integer.parseInt(coms[2]);
+				}
+				event.getPlayer().getInventory().addItem(new ItemStack(Integer.parseInt(coms[1]), amm));
+				plugin.mf.sendmsg(event.getPlayer(), "There you go!");
+			} else {
+				plugin.mf.sendmsg(event.getPlayer(), "Correct usage: /item <id> <ammount>");
+			}
+    	} else if (coms[0].equalsIgnoreCase("/tpc") && coms.length > 1 && plugin.getServer().getPlayer(coms[1]) != null) {
 			tprequests.put(plugin.getServer().getPlayer(coms[1]).getDisplayName(), event.getPlayer().getDisplayName());
 			plugin.mf.sendmsg(plugin.getServer().getPlayer(coms[1]), "Player " + event.getPlayer().getDisplayName() + " requested to teleport to you!");
-    	} else if (com.equalsIgnoreCase("/deny") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
+    	} else if (coms[0].equalsIgnoreCase("/deny") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		tprequests.remove(event.getPlayer().getDisplayName());
-    	} else if (com.startsWith("/world") && coms.length > 1) {
-    		plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).loadChunk(0, 0);
-    		event.getPlayer().teleportTo(new Location(plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])), 0, plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).getHighestBlockYAt(0, 0), 0));
+    	} else if (coms[0].equalsIgnoreCase("/world") && coms.length > 1) {
+    		plugin.mf.teleport(event.getPlayer(), new Location(plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])), 0, plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).getHighestBlockYAt(0, 0), 0));
     		plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
-    	} else if (com.equalsIgnoreCase("/accept") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
-    		System.out.println("Teleport?");
-    		plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())).teleportTo(event.getPlayer());
+    	} else if (coms[0].equalsIgnoreCase("/accept") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
+    		plugin.mf.teleport(plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())), event.getPlayer().getLocation());
     		plugin.mf.updatestats(plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())), 2, 5, 1);
     		tprequests.remove(event.getPlayer().getDisplayName());
-    	} else if (com.equals("/getpos")) {
+    	} else if (coms[0].equalsIgnoreCase("/getpos")) {
     		Player[] p = new Player[1];
     		p[0] = event.getPlayer();
     		plugin.mf.sendmsg(p, event.getPlayer().getLocation().getBlockX() + ", " + event.getPlayer().getLocation().getBlockY() + ", " + event.getPlayer().getLocation().getBlockZ());
-    	} else if (com.startsWith("/pay")) {
+    	} else if (coms[0].equalsIgnoreCase("/pay")) {
     		if (com.split(" ").length != 3) {
     			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /pay <person> <ammount>");
     		} else {
@@ -300,7 +319,7 @@ public class MIAPlayerListener extends PlayerListener {
     				plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bPlayer " + com.split(" ")[1] + " not found!");
     			}
     		}
-    	} else if (com.startsWith("/money")) {
+    	} else if (coms[0].equalsIgnoreCase("/money")) {
     		if (coms.length > 1) {
 	    		if (coms[1].equalsIgnoreCase("top")) {
 	    			int amm = 5;
@@ -332,7 +351,7 @@ public class MIAPlayerListener extends PlayerListener {
     		} else {
     			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"b[Money] Balance: §f" + userinfo.get(event.getPlayer().getDisplayName()).getBalance() + " §bISK");
     		}
-    	} else if (com.startsWith("/shop")) {
+    	} else if (coms[0].equalsIgnoreCase("/shop")) {
     		if (coms.length < 2 || coms.length > 4) {
     			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /shop <sell/buy> [id] [ammount]");
     		} else {
@@ -382,7 +401,7 @@ public class MIAPlayerListener extends PlayerListener {
     				plugin.mf.sendmsg(event.getPlayer(), plugin.d+"bCorrect usage is: /shop <sell/buy> [id] [ammount]");
     			}
     		}
-    	} else if (com.equalsIgnoreCase("/spawn")) {
+    	} else if (coms[0].equalsIgnoreCase("/spawn")) {
     		plugin.mf.spawn(event.getPlayer());
     	} else if (coms[0].equalsIgnoreCase("/mspawn")){
     		
@@ -526,6 +545,8 @@ public class MIAPlayerListener extends PlayerListener {
     public void onPlayerRespawn(PlayerRespawnEvent event) {
     	if (event.getRespawnLocation().getWorld().getName().equalsIgnoreCase("Nether")) {
     		event.setRespawnLocation(new Location(event.getRespawnLocation().getWorld(), -0.5d, 74d, -9.5d, 180, 0));
+    	} else if (event.getRespawnLocation().getWorld().getName().equalsIgnoreCase("Creative") || event.getRespawnLocation().getWorld().getName().equalsIgnoreCase("Survival")) {
+    		
     	} else {
     		event.setRespawnLocation(new Location(event.getRespawnLocation().getWorld(), 467d, 114d, -325d, 180, 0));
     	}
@@ -540,13 +561,16 @@ public class MIAPlayerListener extends PlayerListener {
     public void onPlayerChat(PlayerChatEvent event) {
     	String tw = "";
     	String prefix = userinfo.get(event.getPlayer().getDisplayName()).getPrefix();
-    	Player[] p = plugin.mf.townR(event.getPlayer()).getplayers();
-		
-		if (p == null) {
-			p = plugin.getServer().getOnlinePlayers();
-		} else {
-			tw = plugin.d+"9(TOWN) ";
-		}
+    	Player[] p = plugin.getServer().getOnlinePlayers();
+    	if (plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).townChat()) {
+	    	p = plugin.mf.checkWorld(plugin.mf.townR(event.getPlayer()).getplayers(), plugin.getServer().getWorlds().get(0), plugin.getServer().getWorlds().get(1));
+			
+			if (p == null) {
+				p = plugin.getServer().getOnlinePlayers();
+			} else {
+				tw = plugin.d+"9(TOWN) ";
+			}
+    	}
 		
     	plugin.mf.sendmsg(p, tw + prefix + " " + event.getPlayer().getDisplayName() + ":§f " + event.getMessage());
     	event.setCancelled(true);
@@ -557,6 +581,7 @@ public class MIAPlayerListener extends PlayerListener {
     	Date time = new Date();
 		plugin.mf.updatestats(event.getPlayer(), 2, 2, (int) (time.getTime() / 1000), true);
 		plugin.mf.updatestats(event.getPlayer(), 2, 4, (int) ((time.getTime() / 1000) - logintimes.get(event.getPlayer())));
+		plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).removePlayer(event.getPlayer());
 		
     	Block[] blox = new Block[plugin.blockListener.opengate.size()];
     	int j = 0;
@@ -618,7 +643,7 @@ public class MIAPlayerListener extends PlayerListener {
     			int aY = (int) (-303 + vY / magV * 1000);
     			
     			Location dest = new Location(event.getPlayer().getWorld(), aX, event.getPlayer().getWorld().getHighestBlockYAt(aX, aY), aY);
-    			event.getPlayer().teleportTo(dest);
+    			plugin.mf.teleport(event.getPlayer(), dest);
     			event.setTo(dest);
     		}
     	}
@@ -729,7 +754,7 @@ public class MIAPlayerListener extends PlayerListener {
 	        		
 	        		
 	    			Location dest = new Location(ws.get(l[3]), l[0] + xo2, l[1] - 1, l[2] + zo2, r, 0);
-	    			event.getPlayer().teleportTo(dest);
+	    			plugin.mf.teleport(event.getPlayer(), dest);
 	    			plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
 	    			event.setTo(dest);
 	    			

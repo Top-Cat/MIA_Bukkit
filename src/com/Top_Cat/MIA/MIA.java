@@ -27,6 +27,7 @@ public class MIA extends JavaPlugin {
     public final MIAPlayerListener playerListener = new MIAPlayerListener(this);
     private final MIAEntityListener entityListener = new MIAEntityListener(this);
     public final MIABlockListener blockListener = new MIABlockListener(this);
+    public final MIAVehicleListener vehicleListener = new MIAVehicleListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     MIAFunctions mf = new MIAFunctions(this);
     public final String d = "\u00C2\u00A7";
@@ -62,6 +63,7 @@ public class MIA extends JavaPlugin {
     public void onEnable() {
         // TODO: Place any custom enable code here including the registration of any events
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 100);
+    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
     	
         // Register our events
         PluginManager pm = getServer().getPluginManager();
@@ -93,18 +95,22 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.EXPLOSION_PRIMED, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal, this);
         
-        if (getServer().getWorlds().size() == 1) {
-        	getServer().createWorld("Nether", Environment.NETHER);
-        }	
+        pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
+        
+       	getServer().createWorld("Nether", Environment.NETHER);
+        getServer().createWorld("Survival", Environment.NORMAL);
+        getServer().createWorld("Creative", Environment.NORMAL);
         
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
         
         playerListener.loadallusers();
+        mf.rebuild_cache();
         for (Player i : getServer().getOnlinePlayers()) {
         	Date time = new Date();
     		playerListener.logintimes.put(i, time.getTime() / 1000);
+    		mf.worlds.get(i.getWorld().getName()).addPlayer(i);
         }
         mf.cache_npcs();
     }

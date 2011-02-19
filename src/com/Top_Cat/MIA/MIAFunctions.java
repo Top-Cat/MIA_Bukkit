@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
@@ -126,6 +127,25 @@ public class MIAFunctions {
     	plugin.playerListener.spleefgames.clear();
     	cache_zones();
     	cache_towns();
+    	cache_worlds();
+    }
+    
+    public HashMap<String, MIAWorld> worlds = new HashMap<String, MIAWorld>();
+    
+    public void cache_worlds() {
+    	worlds.clear();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM worlds";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			while (r.next()) {
+				worlds.put(r.getString("name"), new MIAWorld(r.getInt("Id"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     public List<Town> towns = new ArrayList<Town>();
@@ -280,6 +300,19 @@ public class MIAFunctions {
 			e.printStackTrace();
 		}
 		return d;
+    }
+    
+    public Player[] checkWorld(Player[] p, World w, World s) {
+    	Player[] out = new Player[p.length];
+    	int i = 0;
+    	List<Player> q = worlds.get(w.getName()).getplayersList();
+    	List<Player> t = worlds.get(s.getName()).getplayersList();
+    	for (Player o : p) {
+    		if (q.contains(o) || t.contains(o)) {
+    			out[i++] = o;
+    		}
+    	}
+    	return out;
     }
     
     public Town townR(Player p) {
@@ -549,6 +582,24 @@ public class MIAFunctions {
 		return out;
     }
     
+    public void teleport(Player p, Location l) {
+    	if (p.getWorld() != l.getWorld() && !((p.getWorld().getName().equals("Nether") && l.getWorld().getName().equals("Final")) || (p.getWorld().getName().equals("Final") && l.getWorld().getName().equals("Nether")))) {
+    		//Players inventory must be empty
+    		int t = 0;
+    		for (ItemStack i : p.getInventory().getContents()) {
+    			t += i.getAmount();
+    		}
+    		if (t > 0) {
+    			sendmsg(p, "Your inventory must be empty to travel to this world!");
+    			return;
+    		}
+    	}
+    	plugin.mf.worlds.get(p.getWorld().getName()).removePlayer(p);
+    	l.getWorld().loadChunk(l.getBlockX(), l.getBlockZ());
+    	p.teleportTo(l);
+    	plugin.mf.worlds.get(l.getWorld().getName()).addPlayer(p);
+    }
+    
     List<Zone> zones = new ArrayList<Zone>();
     Block sblock;
     Zone gzone;
@@ -617,6 +668,8 @@ public class MIAFunctions {
     	if (zones.size() == 0)
     		rebuild_cache();
     	
+    	gzone.setMobs(worlds.get(ps.getWorld().getName()).isMobs());
+    	gzone.setPvP(worlds.get(ps.getWorld().getName()).isPvP());
     	return inzoneR(ps, town, zones, gzone);
     }
     
@@ -695,9 +748,8 @@ public class MIAFunctions {
     }
     
     public void spawn(Player p) {
-    	World w = plugin.getServer().getWorlds().get(0);
-    	w.loadChunk(467, -325);
-    	p.teleportTo(new Location(w, 467d, 114d, -325d, 180, 0));
+    	World w = plugin.getServer().getWorld("Final");
+    	teleport(p, new Location(w, 467d, 114d, -325d, 180, 0));
     }
     
     public void ePortal(Block sign, Material m) {

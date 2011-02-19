@@ -132,7 +132,7 @@ public class MIABlockListener extends BlockListener {
 			} else {
 				yd++;
 			}
-			p.teleportTo(new Location(w, xd, yd, zd, p.getLocation().getYaw(), p.getLocation().getPitch()));
+			plugin.mf.teleport(p, new Location(w, xd, yd, zd, p.getLocation().getYaw(), p.getLocation().getPitch()));
 		}
     }
     

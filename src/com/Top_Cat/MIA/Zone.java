@@ -96,6 +96,14 @@ class Zone {
 		return mobs;
 	}
 	
+	public void setPvP(boolean pvp) {
+		this.PvP = pvp;
+	}
+	
+	public void setMobs(boolean mobs) {
+		this.mobs = mobs;
+	}
+	
 	public boolean isSpleefArena() {
 		if (!spleef || (ts == townshape.CUBE && b1.getY() == b2.getY())) {
 			return spleef;

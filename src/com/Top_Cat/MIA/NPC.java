@@ -14,7 +14,7 @@ import redecouverte.npcspawner.NpcSpawner;
 public class NPC {
 	
 	List<String> dialogs = new ArrayList<String>();
-	int proxy, id;
+	int proxy, id, inhand;
 	final MIA plugin;
 	BasicHumanNpc bhn;
 	Location l;
@@ -30,6 +30,7 @@ public class NPC {
 		if (inhand > 0)
 			bhn.getBukkitEntity().setItemInHand(new ItemStack(inhand, 1));
 		
+		this.inhand = inhand;
 		this.proxy = proxy;
 		this.id = id;
 		this.l = l;
@@ -53,6 +54,8 @@ public class NPC {
 	public void update() {
 		NpcSpawner.RemoveBasicHumanNpc(bhn); // Until I find a better way of broadcasting the position of the npc
 		bhn = NpcSpawner.SpawnBasicHumanNpc(String.valueOf(id), prefix + name, l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
+		if (inhand > 0)
+			bhn.getBukkitEntity().setItemInHand(new ItemStack(inhand, 1));
 	}
 	
 	public String premessage(String s) {
