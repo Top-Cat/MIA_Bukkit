@@ -62,7 +62,7 @@ public class MIA extends JavaPlugin {
 
     public void onEnable() {
         // TODO: Place any custom enable code here including the registration of any events
-    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 100);
+    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 50);
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
     	
         // Register our events
@@ -87,13 +87,12 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
         
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_ENTITY, entityListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_BLOCK, entityListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGEDBY_PROJECTILE, entityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.EXPLOSION_PRIMED, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
         

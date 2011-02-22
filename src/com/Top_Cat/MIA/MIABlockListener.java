@@ -43,6 +43,7 @@ public class MIABlockListener extends BlockListener {
         spade_fast.add(Material.GRASS);
         spade_fast.add(Material.SAND);
         spade_fast.add(Material.GRAVEL);
+        spade_fast.add(Material.CLAY);
         
         picks.add(Material.WOOD_PICKAXE);
         picks.add(Material.STONE_PICKAXE);
@@ -56,6 +57,17 @@ public class MIABlockListener extends BlockListener {
         pick_fast.add(Material.COBBLESTONE);
         pick_fast.add(Material.GOLD_ORE);
         pick_fast.add(Material.DIAMOND_ORE);
+        pick_fast.add(Material.OBSIDIAN);
+        
+        axe.add(Material.WOOD_AXE);
+        axe.add(Material.STONE_AXE);
+        axe.add(Material.IRON_AXE);
+        axe.add(Material.GOLD_AXE);
+        axe.add(Material.DIAMOND_AXE);
+        
+        axe_fast.add(Material.WOOD);
+        axe_fast.add(Material.LOG);
+        axe_fast.add(Material.LEAVES);
     }
     
     @Override
@@ -92,6 +104,8 @@ public class MIABlockListener extends BlockListener {
     List<Material> spade_fast = new ArrayList<Material>();
     List<Material> picks = new ArrayList<Material>();
     List<Material> pick_fast = new ArrayList<Material>();
+    List<Material> axe = new ArrayList<Material>();
+    List<Material> axe_fast = new ArrayList<Material>();
     
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
@@ -123,7 +137,7 @@ public class MIABlockListener extends BlockListener {
     	}
     	
     	if (!event.isCancelled() && event.getBlock().getWorld().getName().equals("Creative")) {
-    		if (event.getBlock().getType() == Material.TNT || (pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
+    		if (event.getBlock().getType() == Material.TNT || (axe_fast.contains(event.getBlock().getType()) && axe.contains(event.getPlayer().getItemInHand().getType())) || (pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
     			event.setCancelled(true);
 	    		event.getBlock().setType(Material.AIR);
     		}
@@ -258,16 +272,12 @@ public class MIABlockListener extends BlockListener {
     			int zd = 0;
     			if (s == BlockFace.SOUTH) {
     				xd = -1;
-    				//System.out.println("South");
     			} else if (s == BlockFace.NORTH) {
     				xd = 1;
-    				System.out.println("North");
     			} else if (s == BlockFace.WEST) {
     				zd = 1;
-    				System.out.println("West");
     			} else if (s == BlockFace.EAST) {
     				zd = -1;
-    				System.out.println("East");
     			} else {
     				System.out.println("Lolwut?");
     				System.out.println(s.toString());
@@ -294,7 +304,8 @@ public class MIABlockListener extends BlockListener {
         						boolean cle = false;
         						for (int j = 1; j < i; j++) {
         							for (int k = -1; k < 2; k++) {
-        								Material b7 = sign1.getRelative((j * xd) + (k * zd), -1, (j * zd) + (k * xd)).getType();
+        								Block b7b = sign1.getRelative((j * xd) + (k * zd), -1, (j * zd) + (k * xd));
+        								Material b7 = b7b.getType();
         								if (b1 == b7) {
         									cle = true;
         								}

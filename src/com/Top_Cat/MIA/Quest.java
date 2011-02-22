@@ -128,7 +128,7 @@ public class Quest {
 	}
 	
 	public boolean isComplete(Player p) {
-		return isActive(p) && getProgress(p) >= totalProgress();
+		return  (isActive(p) && getProgress(p) >= totalProgress()) || (!isActive(p) && completed.contains(p.getDisplayName().toLowerCase()));
 	}
 	
 	public void harvest(Player p, int itemid) {

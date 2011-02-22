@@ -65,7 +65,7 @@ public class NPC {
 	public void interact(Player p) {
 		boolean quests = false;
 		for (Quest i : end_quests) {
-			if (i.isComplete(p)) {
+			if (i.isActive(p) && i.isComplete(p)) {
 				i.complete(p);
 				return;
 			}

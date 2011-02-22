@@ -583,7 +583,7 @@ public class MIAFunctions {
     }
     
     public void teleport(Player p, Location l) {
-    	if (p.getWorld() != l.getWorld() && !((p.getWorld().getName().equals("Nether") && l.getWorld().getName().equals("Final")) || (p.getWorld().getName().equals("Final") && l.getWorld().getName().equals("Nether")))) {
+    	if (!p.isOp() && p.getWorld() != l.getWorld() && !((p.getWorld().getName().equals("Nether") && l.getWorld().getName().equals("Final")) || (p.getWorld().getName().equals("Final") && l.getWorld().getName().equals("Nether")))) {
     		//Players inventory must be empty
     		int t = 0;
     		for (ItemStack i : p.getInventory().getContents()) {

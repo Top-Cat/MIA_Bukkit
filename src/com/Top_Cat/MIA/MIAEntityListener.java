@@ -8,9 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageByProjectileEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
@@ -30,17 +30,25 @@ public class MIAEntityListener extends EntityListener {
     }
     
     @Override
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-    	if (event.getEntity() instanceof HumanEntity && event.getDamager() instanceof Player) {
-    		for (NPC i : plugin.mf.npcs.values()) {
-    			if (i.isEntity(event.getEntity())) {
-    				i.interact((Player) event.getDamager());
-    				event.setCancelled(true);
-    			}
-    		}
+    public void onEntityDamage(EntityDamageEvent event) {
+    	Entity damager = null;
+    	if (event instanceof EntityDamageByEntityEvent) {
+    		EntityDamageByEntityEvent sub = (EntityDamageByEntityEvent)event;
+	    	if (event.getEntity() instanceof HumanEntity && sub.getDamager() instanceof Player) {
+	    		for (NPC i : plugin.mf.npcs.values()) {
+	    			if (i.isEntity(event.getEntity())) {
+	    				i.interact((Player) sub.getDamager());
+	    				event.setCancelled(true);
+	    			}
+	    		}
+	    	}
+	    	damager = sub.getDamager();
+    	}
+    	if (event.getEntity().getWorld().getName().equals("Creative")) {
+    		event.setCancelled(true);
     	}
     	if (!event.isCancelled())
-    		event.setCancelled(onDamage(event.getDamager(), event.getEntity(), event.getDamage()));
+    		event.setCancelled(onDamage(damager, event.getEntity(), event.getDamage()));
     }
     
     public boolean onDamage(Entity attacker, Entity defender) {
@@ -81,16 +89,6 @@ public class MIAEntityListener extends EntityListener {
     }
     
     @Override
-    public void onEntityDamageByProjectile(EntityDamageByProjectileEvent event) {
-    	event.setCancelled(onDamage(null, event.getEntity(), event.getDamage()));
-    }
-    
-    @Override
-    public void onEntityDamageByBlock(EntityDamageByBlockEvent event) {
-    	event.setCancelled(onDamage(null, event.getEntity(), event.getDamage()));
-    }
-    
-    @Override
     public void onEntityDeath(EntityDeathEvent event) {
     	Entity defender = event.getEntity();
     	if (defender instanceof Player) {
@@ -127,6 +125,14 @@ public class MIAEntityListener extends EntityListener {
     public void onExplosionPrimed(ExplosionPrimedEvent event) {
     	//event.getRadius()
     	
+    }
+    
+    @Override
+    public void onEntityCombust(EntityCombustEvent event) {
+    	if (event.getEntity() instanceof Player && ((Player) event.getEntity()).getWorld().getName().equals("Creative")) {
+    		event.setCancelled(true);
+    		((Player) event.getEntity()).setHealth(20);
+    	}
     }
     
     @Override

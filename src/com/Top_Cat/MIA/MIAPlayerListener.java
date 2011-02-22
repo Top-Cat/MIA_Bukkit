@@ -17,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.player.PlayerAnimationEvent;
@@ -57,10 +56,7 @@ public class MIAPlayerListener extends PlayerListener {
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
 		    	for (LivingEntity i : j.getLivingEntities()) {
-		    		if (i instanceof Monster && !((Zone) plugin.mf.insidezone(i.getLocation(), true)).isMobs()) {
-		    			i.setHealth(0);
-		    			//((EntityCreature) i).world.e((EntityCreature) i);
-		    		} else if (i instanceof Sheep && !s.contains(i)) {
+		    		if (i instanceof Sheep && !s.contains(i)) {
 		    			int dc = (int) Math.floor(Math.random() * DyeColor.values().length);
 		    			((Sheep) i).setColor(DyeColor.values()[dc]);
 		    			s.add((Sheep) i);
@@ -97,13 +93,13 @@ public class MIAPlayerListener extends PlayerListener {
     		sign.setLine(3, sdf.format(time) + " PST");
     		sign.update();
 	    	
-    		if (updatec++ % 6 == 0) {
+    		if (updatec++ % 12 == 0) {
     			for (Player k : plugin.getServer().getOnlinePlayers()) {
     				plugin.mf.updatestats(k, 2, 13, k.getHealth(), true);
     			}
     			plugin.mf.updatestats();
     		}
-    		if (updatec > 60) {
+    		if (updatec > 120) {
     			updatec = 0;
     			plugin.mf.rebuild_cache();
     			plugin.getServer().getWorld("Creative").setTime(1000);
@@ -280,14 +276,28 @@ public class MIAPlayerListener extends PlayerListener {
     		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
 		} else if (coms[0].equalsIgnoreCase("/item")) {
 			if (coms.length > 1) {
+				int id = -1;
+				try {
+					id = Integer.parseInt(coms[1]);
+				} catch (NumberFormatException e) {
+					// Oh well ¬¬
+				}
+				if (Material.getMaterial(id) == null) {
+					plugin.mf.sendmsg(event.getPlayer(), "The material id '" + id + "' is not recognised");
+					return;
+				}
 				int amm = 1;
+				int data = 0;
 				if (coms.length > 2) {
 					amm = Integer.parseInt(coms[2]);
 				}
-				event.getPlayer().getInventory().addItem(new ItemStack(Integer.parseInt(coms[1]), amm));
+				if (coms.length > 3 && event.getPlayer().isOp()) {
+					data = Integer.parseInt(coms[3]);
+				}
+				event.getPlayer().getInventory().addItem(new ItemStack(id, amm, (short) 0, (byte) data));
 				plugin.mf.sendmsg(event.getPlayer(), "There you go!");
 			} else {
-				plugin.mf.sendmsg(event.getPlayer(), "Correct usage: /item <id> <ammount>");
+				plugin.mf.sendmsg(event.getPlayer(), "Correct usage: /item <id> <ammount> <data>");
 			}
     	} else if (coms[0].equalsIgnoreCase("/tpc") && coms.length > 1 && plugin.getServer().getPlayer(coms[1]) != null) {
 			tprequests.put(plugin.getServer().getPlayer(coms[1]).getDisplayName(), event.getPlayer().getDisplayName());
