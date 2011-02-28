@@ -77,7 +77,7 @@ public class MIAPlayerListener extends PlayerListener {
     		String hp = "";
     		if (hours < 10)
     			hp = "0";
-    		if (mtime < 10)
+    		if (mtime < 10)	
     			mp = "0";
     		
     		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
@@ -184,6 +184,7 @@ public class MIAPlayerListener extends PlayerListener {
 				pr2.executeUpdate();
 				
 				r = pr2.getGeneratedKeys();
+				r.next();
 				
 		    	nam = plugin.d+"0[G]§f " + event.getPlayer().getDisplayName();
 		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), plugin.d+"0[G]", 0, r.getInt(1), 0, 0);
@@ -214,7 +215,7 @@ public class MIAPlayerListener extends PlayerListener {
 
 		    IPLocation l = cl.getLocation(event.getPlayer().getAddress().getHostName());
 		    
-		    msg = nam + plugin.d+"a has joined the server from §b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("81.109.21.62" ))) + " km)";
+		    msg = nam + plugin.d+"a has joined the server from §b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("70.86.154.98"))) + " km)";
 
 		    cl.close();
 		}
@@ -231,17 +232,24 @@ public class MIAPlayerListener extends PlayerListener {
 			i.update();
 		}
 		
+		plugin.mf.sendmsg(event.getPlayer(), plugin.d + "3Welcome to the MIA minecraft server hosted by www.thorgaming.com");
 		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
+		/*World pw = event.getPlayer().getWorld();
+		Location pl = event.getPlayer().getLocation();
+		World mw = plugin.getServer().getWorlds().get(0);
+		if (pw != mw) {
+			event.getPlayer().teleportTo(new Location(mw, 0, mw.getHighestBlockYAt(0, 0), 0));
+			event.getPlayer().teleportTo(pl);
+		}*/
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId());
+    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId(), event.getItemDrop().getItemStack().getAmount());
     }
     
     @Override
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-    	//Item i = event.getItem();
-    	//plugin.mf.updatestats(event.getPlayer(), 4, event.getItem().);
+    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItem().getItemStack().getTypeId(), event.getItem().getItemStack().getAmount());
     }
     
     public void onPlayerAnimation(PlayerAnimationEvent event) {
@@ -260,7 +268,7 @@ public class MIAPlayerListener extends PlayerListener {
     HashMap<Zone, SpleefGame> spleefgames = new HashMap<Zone, SpleefGame>();
     
     @Override
-    public void onPlayerCommand(PlayerChatEvent event) {
+    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
     	plugin.mf.updatestats(event.getPlayer(), 2, 7, 1);
     	boolean canc = true;
     	String com = event.getMessage();
@@ -314,6 +322,7 @@ public class MIAPlayerListener extends PlayerListener {
     	} else if (coms[0].equalsIgnoreCase("/getpos")) {
     		Player[] p = new Player[1];
     		p[0] = event.getPlayer();
+    		plugin.mf.sendmsg(p, "World: " + event.getPlayer().getWorld().getName());
     		plugin.mf.sendmsg(p, event.getPlayer().getLocation().getBlockX() + ", " + event.getPlayer().getLocation().getBlockY() + ", " + event.getPlayer().getLocation().getBlockZ());
     	} else if (coms[0].equalsIgnoreCase("/pay")) {
     		if (com.split(" ").length != 3) {
@@ -573,7 +582,12 @@ public class MIAPlayerListener extends PlayerListener {
     	String prefix = userinfo.get(event.getPlayer().getDisplayName()).getPrefix();
     	Player[] p = plugin.getServer().getOnlinePlayers();
     	if (plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).townChat()) {
-	    	p = plugin.mf.checkWorld(plugin.mf.townR(event.getPlayer()).getplayers(), plugin.getServer().getWorlds().get(0), plugin.getServer().getWorlds().get(1));
+    		Town t = plugin.mf.townR(event.getPlayer());
+    		if (t != null) {
+    			p = plugin.mf.checkWorld(t.getplayers(), plugin.getServer().getWorlds().get(0), plugin.getServer().getWorlds().get(1));
+    		} else {
+    			p = null;
+    		}
 			
 			if (p == null) {
 				p = plugin.getServer().getOnlinePlayers();

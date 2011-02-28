@@ -140,7 +140,7 @@ public class MIAFunctions {
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery();
 			while (r.next()) {
-				worlds.put(r.getString("name"), new MIAWorld(r.getInt("Id"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
+				worlds.put(r.getString("name"), new MIAWorld(plugin, r.getInt("Id"), r.getString("name"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -560,6 +560,10 @@ public class MIAFunctions {
     	return plugin.playerListener.userinfo.get(p.getDisplayName()).getTown();
     }
     
+    public void sendmsg(String msg) {
+		sendmsg(plugin.getServer().getOnlinePlayers(), msg);
+	}
+    
     public void sendmsg(Player rec, String msg) {
 		Player[] pa = new Player[1];
 		pa[0] = rec;
@@ -675,11 +679,13 @@ public class MIAFunctions {
     }
     
     private Zone inzoneR(Location ps, boolean town, List<Zone> lz, Zone z) {
-    	for (Zone i : lz) {
-    		if (i.inZone(ps) && (!(i instanceof Town) || town)) {
-    			return inzoneR(ps, town, i.getChildren(), i);
-    		}
-    	}
+    	synchronized (lz) {
+	    	for (Zone i : lz) {
+	    		if (i.inZone(ps) && (!(i instanceof Town) || town)) {
+	    			return inzoneR(ps, town, i.getChildren(), i);
+	    		}
+	    	}
+		}
 		return z;
     }
     

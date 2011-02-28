@@ -9,7 +9,9 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageByProjectileEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -47,7 +49,7 @@ public class MIAEntityListener extends EntityListener {
     	if (event.getEntity().getWorld().getName().equals("Creative")) {
     		event.setCancelled(true);
     	}
-    	if (!event.isCancelled())
+    	if (!event.isCancelled() && (event instanceof EntityDamageByEntityEvent || event instanceof EntityDamageByProjectileEvent || event instanceof EntityDamageByBlockEvent))
     		event.setCancelled(onDamage(damager, event.getEntity(), event.getDamage()));
     }
     

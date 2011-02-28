@@ -1,17 +1,14 @@
 package com.Top_Cat.MIA;
 
-import java.io.File;
 import java.sql.DriverManager;
 import java.util.Date;
 import java.util.HashMap;
 
 import org.bukkit.entity.Player;
-import org.bukkit.Server;
 import org.bukkit.World.Environment;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -29,14 +26,13 @@ public class MIA extends JavaPlugin {
     public final MIABlockListener blockListener = new MIABlockListener(this);
     public final MIAVehicleListener vehicleListener = new MIAVehicleListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
-    MIAFunctions mf = new MIAFunctions(this);
+    MIAFunctions mf;
     public final String d = "\u00C2\u00A7";
 	public final String c = d+"e";
-    Connection conn;
-    
-    public MIA(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-        
+    Connection conn;   
+
+    public void onEnable() {
+        // TODO: Place any custom enable code here including the registration of any events
         try {
         	Class.forName("com.mysql.jdbc.Driver").newInstance();
         	// Step 2: Establish the connection to the database. 
@@ -54,14 +50,9 @@ public class MIA extends JavaPlugin {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		mf = new MIAFunctions(this);
 		mf.post_tweet("The Minecraft server has started!");
-    }
-
-   
-
-    public void onEnable() {
-        // TODO: Place any custom enable code here including the registration of any events
+    	
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 50);
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
     	
@@ -71,7 +62,7 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ITEM, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_PICKUP_ITEM, playerListener, Priority.Normal, this);
@@ -85,7 +76,8 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.BLOCK_FLOW, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_INTERACT, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal, this);
+        //pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
@@ -95,7 +87,7 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
-        
+
        	getServer().createWorld("Nether", Environment.NETHER);
         getServer().createWorld("Survival", Environment.NORMAL);
         getServer().createWorld("Creative", Environment.NORMAL);
