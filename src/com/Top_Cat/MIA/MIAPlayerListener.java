@@ -186,7 +186,7 @@ public class MIAPlayerListener extends PlayerListener {
 				r = pr2.getGeneratedKeys();
 				r.next();
 				
-		    	nam = plugin.d+"0[G]§f " + event.getPlayer().getDisplayName();
+		    	nam = plugin.d+"0[G]"+plugin.d+"f " + event.getPlayer().getDisplayName();
 		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), plugin.d+"0[G]", 0, r.getInt(1), 0, 0);
 		    	plugin.mf.spawn(event.getPlayer());
 			}
@@ -215,7 +215,7 @@ public class MIAPlayerListener extends PlayerListener {
 
 		    IPLocation l = cl.getLocation(event.getPlayer().getAddress().getHostName());
 		    
-		    msg = nam + plugin.d+"a has joined the server from §b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("70.86.154.98"))) + " km)";
+		    msg = nam + plugin.d+"a has joined the server from "+plugin.d+"b" + regionName.regionNameByCode(l.countryCode,l.region) + ", " + l.countryName + " (" + ((int) l.distance(cl.getLocation("70.86.154.98"))) + " km)";
 
 		    cl.close();
 		}
