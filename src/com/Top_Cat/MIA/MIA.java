@@ -114,7 +114,9 @@ public class MIA extends JavaPlugin {
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
     	for (Player i : getServer().getOnlinePlayers()) {
     		Date time = new Date();
-    		mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));
+    		if (playerListener.logintimes.containsKey(i)) {
+    			mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));
+    		}
     		
     		for (Quest j : mf.quest.values()) {
 	    		if (j.isActive(i)) {

@@ -9,12 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 
 import com.Top_Cat.MIA.Quest.Type;
 
@@ -128,6 +126,7 @@ public class MIAFunctions {
     	cache_zones();
     	cache_towns();
     	cache_worlds();
+    	cache_stargates();
     }
     
     public HashMap<String, MIAWorld> worlds = new HashMap<String, MIAWorld>();
@@ -141,6 +140,32 @@ public class MIAFunctions {
 			ResultSet r = pr.executeQuery();
 			while (r.next()) {
 				worlds.put(r.getString("name"), new MIAWorld(plugin, r.getInt("Id"), r.getString("name"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public HashMap<Block, Stargate> stargates = new HashMap<Block, Stargate>();
+    public HashMap<String, List<Stargate>> networks = new HashMap<String, List<Stargate>>();
+    
+    public void cache_stargates() {
+    	stargates.clear();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM stargates";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			while (r.next()) {
+				String[] cs = r.getString("cblock").split(",");
+				Block cblock = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(Integer.parseInt(cs[0]), Integer.parseInt(cs[1]), Integer.parseInt(cs[2]));
+				if (!networks.containsKey(r.getString("network"))) {
+					networks.put(r.getString("network"), new ArrayList<Stargate>());
+				}
+				Stargate ns = new Stargate(plugin, r.getInt("Id"), r.getString("name"), r.getString("network"), cblock, r.getInt("rot"));
+				stargates.put(cblock, ns);
+				networks.get(r.getString("network")).add(ns);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -431,32 +456,6 @@ public class MIAFunctions {
     	}
     }
     
-    ArrayList<Block> gateblocks = new ArrayList<Block>();
-    
-    public void getGates() {
-    	if (gateblocks.size() == 0) {
-	    	PreparedStatement pr;
-	    	ArrayList<Block> out = new ArrayList<Block>();
-			try {
-				String q = "SELECT cblock, world FROM stargates";
-				pr = plugin.conn.prepareStatement(q);
-				ResultSet r = pr.executeQuery();
-				while (r.next()) {
-					String[] so = r.getString("cblock").split(",");
-					Integer[] l = new Integer[3];
-					for (int i = 0; i < 3; i++) {
-						l[i] = Integer.parseInt(so[i]);
-					}
-					out.add(plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(l[0], l[1], l[2]));
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			gateblocks = out;
-    	}
-    }
-    
     public String gateName(Block sign) {
     	PreparedStatement pr;
 		try {
@@ -490,74 +489,8 @@ public class MIAFunctions {
     	return 0;
     }
     
-    public Integer[] gateSign(Object gateid) {
-    	Integer[] out = new Integer[4];
-    	HashMap<String, String> inf = gateData(gateid);
-		String[] so = inf.get("cblock").split(",");
-		for (int i = 0; i < 3; i++) {
-			out[i] = Integer.parseInt(so[i]);
-		}
-		out[3] = Integer.parseInt(inf.get("world"));
-    	return out;
-    }
-    
-    public HashMap<String, String> gateData(Block fromsign) {
-    	getGates();
-    	if (fromsign.getType() == Material.STONE_BUTTON) {
-    		for (Block i : gateblocks) {
-    			if (i.getWorld() == fromsign.getWorld() && (i.getX() == fromsign.getX() && Math.abs(i.getZ() - fromsign.getZ()) == 3) || (i.getZ() == fromsign.getZ() && Math.abs(i.getX() - fromsign.getX()) == 3)) {
-    				fromsign = i;
-    				break;
-    			}
-    		}
-    	}
-    	return gateData(gateId(gateName(fromsign)));
-    }
-    
-    public HashMap<String, String> gateData(String fromsign) {
-    	return gateData(gateId(fromsign));
-    }
-    
-    public HashMap<String, String> gateData(Object gateid) {
-    	if (gateid instanceof String) {
-    		return gateData((String) gateid);
-    	} else if (gateid instanceof Block) {
-    		return gateData((Block) gateid);
-    	} else if (gateid instanceof Integer) {
-    		return gateData((Integer) gateid);
-    	}
-    	return null;
-    }
-    HashMap<Integer, HashMap<String, String>> gateinfo_cache = new HashMap<Integer, HashMap<String, String>>();
-    public HashMap<String, String> gateData(Integer id) {
-    	if (gateinfo_cache.containsKey(id)) {
-    		return gateinfo_cache.get(id);
-    	} else {
-	    	HashMap<String, String> out = new HashMap<String, String>();
-	    	PreparedStatement pr;
-			try {
-				String q = "SELECT * FROM stargates WHERE Id= '" + id + "'";
-				pr = plugin.conn.prepareStatement(q);
-				ResultSet r = pr.executeQuery();
-				if (r.first()) {
-					out.put("Id", r.getString("Id"));
-					out.put("name", r.getString("name"));
-					out.put("world", r.getString("world"));
-					out.put("cblock", r.getString("cblock"));
-					out.put("rot", r.getString("rot"));
-					out.put("network", r.getString("network"));
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			gateinfo_cache.put(id, out);
-	    	return out;
-    	}
-    }
-    
     public int playertownId(Player p) {
-    	return plugin.playerListener.userinfo.get(p.getDisplayName()).getTown();
+    	return plugin.playerListener.userinfo.get(p.getDisplayName()).getTownId();
     }
     
     public void sendmsg(String msg) {
@@ -591,6 +524,9 @@ public class MIAFunctions {
     		//Players inventory must be empty
     		int t = 0;
     		for (ItemStack i : p.getInventory().getContents()) {
+    			t += i.getAmount();
+    		}
+    		for (ItemStack i : p.getInventory().getArmorContents()) {
     			t += i.getAmount();
     		}
     		if (t > 0) {
@@ -738,50 +674,9 @@ public class MIAFunctions {
     	return false;
     }
     
-    public void openportal(Block sign) {
-    	sign.getWorld().loadChunk(sign.getWorld().getChunkAt(sign));
-    	ePortal(sign, Material.FIRE);
-    }
-    
-    public void closeportal(Block sign, World w) {
-    	ePortal(sign, Material.AIR);
-    	
-		Sign si = (Sign) sign.getState();
-		si.setLine(0, "--" + plugin.mf.gateName(sign) + "--");
-		si.setLine(1, "Right click to");
-        si.setLine(2, "use the gate");
-        si.setLine(3, " (" + plugin.mf.gateData(sign).get("network") + ") ");
-        si.update();
-    }
-    
     public void spawn(Player p) {
     	World w = plugin.getServer().getWorld("Final");
     	teleport(p, new Location(w, 467d, 114d, -325d, 180, 0));
-    }
-    
-    public void ePortal(Block sign, Material m) {
-    	Integer[] l = new Integer[3];
-		l[0] = sign.getX();
-		l[1] = sign.getY();
-		l[2] = sign.getZ();
-		
-		
-		Integer rot = Integer.parseInt(gateData(sign).get("rot"));
-
-		int xo2 = 1;
-		int zo2 = -1;
-		if (rot == 0) {
-			xo2 = -1;
-			zo2 = -1;
-		} else if (rot == 2) {
-			xo2 = 1;
-			zo2 = 1;
-		} else if (rot == 3) {
-			xo2 = -1;
-			zo2 = 1;
-		}
-
-		sign.getWorld().getBlockAt(l[0] + xo2, l[1] - 1, l[2] + zo2).setType(m);
     }
     
     HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();

@@ -11,10 +11,11 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   private String prefix;
   List<Quest> npc_tmp = new ArrayList<Quest>();
   Quest aquest;
+  Town t;
   
   // (snip ctor, setters, etc.)
 
-  public OnlinePlayer(int bal, int cape, String name, String prefix, int town, int id, int sg, int sw) {
+  public OnlinePlayer(MIA plugin, int bal, int cape, String name, String prefix, int town, int id, int sg, int sw) {
 	  ammount = bal;
 	  this.name = name;
 	  this.prefix = prefix;
@@ -22,6 +23,12 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 	  this.town = town;
 	  this.sg = sg;
 	  this.sw = sw;
+	  for (Town i : plugin.mf.towns) {
+			if (i.getId() == town) {
+				t = i;
+				break;
+			}
+	  }
   }
   
   public List<Quest> tmpQuestList() {
@@ -69,8 +76,12 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 	  return prefix;
   }
   
-  public int getTown() {
+  public int getTownId() {
 	  return town;
+  }
+  
+  public Town getTown() {
+	  return t;
   }
   
   public boolean cbal(int amm) {

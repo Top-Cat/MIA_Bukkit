@@ -3,6 +3,8 @@ package com.Top_Cat.MIA;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,7 +32,7 @@ import com.Top_Cat.MIA.Quest.Type;
  */
 public class MIABlockListener extends BlockListener {
     private final MIA plugin;
-
+    
     public MIABlockListener(final MIA plugin) {
         this.plugin = plugin;
         spades.add(Material.WOOD_SPADE);
@@ -159,23 +161,11 @@ public class MIABlockListener extends BlockListener {
     	}
     }
     HashMap<Block, HashMap<Player, Integer>> signdes = new HashMap<Block, HashMap<Player, Integer>>();
-    HashMap<Block, Integer[]> opengate = new HashMap<Block, Integer[]>();
     
     public void checklift(World w, Player p, int x, int y, int z, Location pl) {
     	if (w.getBlockAt(x, y, z).getType() == Material.WALL_SIGN) {
     		double xd = x;
 			double zd = z;
-    		/*BlockFace s = new org.bukkit.material.Sign(Material.SIGN, w.getBlockAt(x, y, z).getData()).getFacing();
-			if (s == BlockFace.SOUTH) {
-				System.out.println("South");
-			} else if (s == BlockFace.NORTH || s == BlockFace.NORTH_WEST) {
-				xd += .5; zd += .5;
-			} else if (s == BlockFace.WEST) {
-				System.out.println("West");
-			} else {
-				System.out.println("Lolwut?");
-				System.out.println(s.toString());
-			}*/
 			xd = pl.getX();
 			zd = pl.getZ();
 			x = pl.getBlockX();
@@ -212,7 +202,7 @@ public class MIABlockListener extends BlockListener {
 	    			nx = 1;
 	    			break;
 	    	}
-			if (event.getBlock().getType() == Material.WALL_SIGN) {
+			if (event.getBlock().getType() == Material.WALL_SIGN && plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getMayor() == event.getPlayer() && plugin.mf.notothertown(event.getPlayer())) {
 				// Might our user be building a gate?
 				boolean isgate = true;
 				Block[] bl = new Block[14];
@@ -261,6 +251,11 @@ public class MIABlockListener extends BlockListener {
 	    		event.setLine(3, "Pop. " + t.getplayers().length);
     		}
     	}
+    	for (int i = 0; i < 4; i++) {
+			Pattern p = Pattern.compile("&([0-9a-f])");
+			Matcher m = p.matcher(event.getLine(i));
+			event.setLine(i, m.replaceAll(plugin.d + "$1"));	
+		}
     }
     
     public boolean dogatecol(HashMap<Block, Boolean> fb, int x, int y, int z, World w) {
@@ -495,120 +490,17 @@ public class MIABlockListener extends BlockListener {
     		} else {
     			event.getPlayer().sendMessage("This mod is not available in survival!");
     		}
-	    	if (!opengate.containsKey(event.getBlock())) {
-	    		int p = 0;
-	    		ArrayList<String> s = plugin.mf.getDest(event.getBlock());
-	    		if (signdes.containsKey(event.getBlock())) {
-	    			HashMap<Player, Integer> ug = signdes.get(event.getBlock());
-	    			if (ug.containsKey(event.getPlayer())) {
-	    				p = ug.get(event.getPlayer()) + 1;
-	    			}
-		    		if (s.size() <= p) {
-		    			p = 0;
-		    		}
-		    		ug.put(event.getPlayer(), p);
-	    		} else {
-	    			HashMap<Player, Integer> ug = new HashMap<Player, Integer>();
-	    			ug.put(event.getPlayer(), p);
-	    			signdes.put(event.getBlock(), ug);
-	    		}
-	    		if (s.size() > 0) {
-		    		// Display next destination on sign  s.get(p);
-		    		int t = p - 1;
-		    		int m = p + 1; 
-		    		if (t < 0) { t = 0; m++; }
-		    		if (m >= s.size()) { m = s.size() - 1; if (s.size() > 2) { t--; } }
-		    		Sign si = ((Sign) event.getBlock().getState());
-		    		si.setLine(0, "- " + plugin.mf.gateName(event.getBlock()) + " -");
-		    		//int j = 0;
-		    		
-		    		int l = 0;
-		    		for (l = t; l <= m; l++) {
-		    			String li = s.get(l);
-		    			if (l == p) li = " > " + li + " < ";
-		    			// j = l - t;
-			    		si.setLine((l - t) + 1, li);
-		    		}
-		    		for (int l2 = (l - t) + 1; l2 < 4; l2++) {
-		    			si.setLine(l2, "");
-		    		}
-		    		si.update();
-	    		}
-	     	}
+    		for (Stargate i : plugin.mf.stargates.values()) {
+    			if (i.getBlock().equals(event.getBlock())) {
+    				i.incrementDest(event.getPlayer());
+    			}
+    		}
     	}
     	
     	if (event.getBlock().getType() == Material.STONE_BUTTON) {
-    		HashMap<String, String> gd = plugin.mf.gateData(event.getBlock());
-    		int p = -1;
-    		int xo = 0;
-    		int zo = 0;
-    		if (gd.containsKey("rot")) {
-    			Integer rot = Integer.parseInt(gd.get("rot"));
-    		    		
-	    		switch (rot) {
-	    		case 0:
-	            	zo = 1;
-	            	break;
-	            case 1:
-	            	xo = -1;
-	            	break;
-	            case 2:
-	            	zo = -1;
-	            	break;
-	            case 3:
-	            	xo = 1;
-	            	break;
-	    		}
-    		}
-    		Block si = w.getBlockAt(event.getBlock().getX() + (xo * 3), event.getBlock().getY(), event.getBlock().getZ() + (zo * 3));
-    		if (signdes.containsKey(si)) {
-    			HashMap<Player, Integer> ug = signdes.get(si);
-    			if (ug.containsKey(event.getPlayer())) {
-    				p = ug.get(event.getPlayer());
-    			}
-    		}
-    		ArrayList<String> s = plugin.mf.getDest(si);
-    		if (p > -1 && !opengate.containsKey(si)) {
-    			HashMap<Player, Integer> ug = signdes.get(si);
-    			ug.remove(event.getPlayer());
-    			/*Sign sis = ((Sign) si.getState()); DOESN'T UPDATE???
-	    		sis.setLine(0, "--" + plugin.mf.gateName(si) + "--");
-	    		sis.setLine(1, "");
-	    		sis.setLine(2, "*" + s.get(p) + "*");
-	    		sis.setLine(3, "*" + event.getPlayer().getName() + "*");
-	    		sis.update();*/
-    			
-	    		Integer[] l = plugin.mf.gateSign(s.get(p));
-	    		//plugin.get
-	    		plugin.mf.openportal(plugin.getServer().getWorlds().get(l[3]).getBlockAt(l[0], l[1], l[2]));
-	    		plugin.mf.openportal(si);
-
-	    		java.util.Date time = new java.util.Date();
-				Integer tnow = (int) Math.round(((double) time.getTime() / 1000));
-	    		
-    			Integer[] gstat = new Integer[4];
-    			gstat[0] = plugin.mf.gateId(s.get(p));
-    			gstat[1] = event.getPlayer().getEntityId();
-    			gstat[2] = Integer.parseInt( plugin.mf.gateData(si).get("Id") );
-    			gstat[3] = tnow;
-    			Integer[] gstat2 = new Integer[4];
-    			gstat2[0] = Integer.parseInt( plugin.mf.gateData(si).get("Id") );
-    			gstat2[1] = 0;
-    			gstat2[2] = plugin.mf.gateId(s.get(p));
-    			gstat2[3] = tnow;
-    			opengate.put(w.getBlockAt(l[0], l[1], l[2]), gstat2);
-    			opengate.put(si, gstat);
-    		} else {
-    			if (opengate.containsKey(si)) {
-    				Integer[] gstat3 = opengate.get(si);
-    				opengate.remove(si);
-    				Integer[] l = plugin.mf.gateSign(gstat3[2]);
-    				opengate.remove(w.getBlockAt(l[0], l[1], l[2]));
-        			plugin.mf.closeportal(plugin.getServer().getWorlds().get(l[3]).getBlockAt(l[0], l[1], l[2]), event.getPlayer().getWorld());
-        			plugin.mf.closeportal(si, event.getPlayer().getWorld());
-    			}
-    			if (s.size() > 0) {
-    				w.getBlockAt(event.getBlock().getX() + xo - zo, event.getBlock().getY() - 1, event.getBlock().getZ() + zo + xo).setType(Material.AIR);
+    		for (Stargate i : plugin.mf.stargates.values()) {
+    			if (i.getButtonBlock() == event.getBlock()) {
+    				i.changeGateState(true, event.getPlayer());
     			}
     		}
     	}

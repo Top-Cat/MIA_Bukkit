@@ -30,9 +30,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import com.Top_Cat.MIA.Quest.Type;
 import com.maxmind.geoip.IPLocation;
@@ -65,9 +65,9 @@ public class MIAPlayerListener extends PlayerListener {
 			}
 	    	
 	    	Date time = new Date();
-	    	List<World> ws = plugin.getServer().getWorlds();
+	    	World w = plugin.getServer().getWorld("Final");
     		//System.out.println(ws.get(0).getTime());
-    		long mtime = ws.get(0).getTime() + 6000;
+    		long mtime = w.getTime() + 6000;
     		if (mtime > 24000) {
     			mtime -= 24000;
     		}
@@ -80,11 +80,11 @@ public class MIAPlayerListener extends PlayerListener {
     		if (mtime < 10)	
     			mp = "0";
     		
-    		Sign mtsign = ((Sign) ws.get(0).getBlockAt(409, 4, -354).getState());
+    		Sign mtsign = ((Sign) w.getBlockAt(409, 4, -354).getState());
     		mtsign.setLine(2, hp + hours + ":" + mp + mtime);
     		mtsign.update();
     		
-    		Sign sign = ((Sign) ws.get(0).getBlockAt(409, 4, -353).getState());
+    		Sign sign = ((Sign) w.getBlockAt(409, 4, -353).getState());
     		SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss");
     		sign.setLine(1, sdf.format(time) + " GMT"); //sign_rss[(int) Math.round(Math.random() * 4)]
     		time.setTime(time.getTime() - 18000000);
@@ -153,7 +153,7 @@ public class MIAPlayerListener extends PlayerListener {
 			ResultSet r = pr.executeQuery();
 			OnlinePlayer op = null;
 			while (r.next()) {
-				op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
+				op = new OnlinePlayer(plugin, r.getInt("balance"), r.getInt("cloak"), r.getString("name"), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
 				userinfo.put(r.getString("name"), op);
 			}
 		} catch (SQLException e) {
@@ -176,7 +176,7 @@ public class MIAPlayerListener extends PlayerListener {
 			OnlinePlayer op = null;	
 			if (r.next()) {
 		    	nam = r.getString("prefix") + plugin.d+"f " + r.getString("name");
-		    	op = new OnlinePlayer(r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
+		    	op = new OnlinePlayer(plugin, r.getInt("balance"), r.getInt("cloak"), event.getPlayer().getDisplayName(), r.getString("prefix"), r.getInt("town"), r.getInt("Id"), r.getInt("spleef"), r.getInt("swins"));
 			} else {
 				// User doesn't exist! Make a new record
 				String q2 = "INSERT INTO users (name) VALUES('" + event.getPlayer().getDisplayName() + "')";
@@ -187,7 +187,7 @@ public class MIAPlayerListener extends PlayerListener {
 				r.next();
 				
 		    	nam = plugin.d+"0[G]"+plugin.d+"f " + event.getPlayer().getDisplayName();
-		    	op = new OnlinePlayer(0, 1, event.getPlayer().getDisplayName(), plugin.d+"0[G]", 0, r.getInt(1), 0, 0);
+		    	op = new OnlinePlayer(plugin, 0, 1, event.getPlayer().getDisplayName(), plugin.d+"0[G]", 0, r.getInt(1), 0, 0);
 		    	plugin.mf.spawn(event.getPlayer());
 			}
 			userinfo.put(r.getString("name"), op);
@@ -233,7 +233,7 @@ public class MIAPlayerListener extends PlayerListener {
 		}
 		
 		plugin.mf.sendmsg(event.getPlayer(), plugin.d + "3Welcome to the MIA minecraft server hosted by www.thorgaming.com");
-		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://thomasc.co.uk/minecraft/" + event.getPlayer().getDisplayName() + "/");
+		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://www.thorgaming.com/minecraft/" + event.getPlayer().getDisplayName() + "/");
 		/*World pw = event.getPlayer().getWorld();
 		Location pl = event.getPlayer().getLocation();
 		World mw = plugin.getServer().getWorlds().get(0);
@@ -249,7 +249,7 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItem().getItemStack().getTypeId(), event.getItem().getItemStack().getAmount());
+    	plugin.mf.updatestats(event.getPlayer(), 4, event.getItem().getItemStack().getTypeId(), event.getItem().getItemStack().getAmount());
     }
     
     public void onPlayerAnimation(PlayerAnimationEvent event) {
@@ -282,6 +282,14 @@ public class MIAPlayerListener extends PlayerListener {
 			plugin.mf.sendmsg(plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).getplayers(), plugin.d+"9(WORLD) " + userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
 		} else if (coms[0].equalsIgnoreCase("/g")) {
     		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), userinfo.get(event.getPlayer().getDisplayName()).getPrefix() + " " + event.getPlayer().getDisplayName() + ":§f " + com.substring(3));
+		} else if (coms[0].equalsIgnoreCase("/clearinv") && event.getPlayer().isOp()) {
+			Player p = plugin.getServer().getPlayer(coms[1]);
+			PlayerInventory i = p.getInventory();
+			i.clear();
+			i.setBoots(new ItemStack(0));
+			i.setChestplate(new ItemStack(0));
+			i.setHelmet(new ItemStack(0));
+			i.setLeggings(new ItemStack(0));
 		} else if (coms[0].equalsIgnoreCase("/item")) {
 			if (coms.length > 1) {
 				int id = -1;
@@ -607,23 +615,9 @@ public class MIAPlayerListener extends PlayerListener {
 		plugin.mf.updatestats(event.getPlayer(), 2, 4, (int) ((time.getTime() / 1000) - logintimes.get(event.getPlayer())));
 		plugin.mf.worlds.get(event.getPlayer().getWorld().getName()).removePlayer(event.getPlayer());
 		
-    	Block[] blox = new Block[plugin.blockListener.opengate.size()];
-    	int j = 0;
-    	for (Integer[] i : plugin.blockListener.opengate.values()) {
-    		if (event.getPlayer().getEntityId() == i[1]) {
-    			World w = event.getPlayer().getWorld();
-    			Integer[] l = plugin.mf.gateSign(i[0]);
-    			Integer[] l2 = plugin.mf.gateSign(i[2]);
-    			plugin.mf.closeportal(w.getBlockAt(l[0], l[1], l[2]), w);
-    			plugin.mf.closeportal(w.getBlockAt(l2[0], l2[1], l2[2]), w);
-    			blox[j++] = w.getBlockAt(l[0], l[1], l[2]);
-    			blox[j++] = w.getBlockAt(l2[0], l2[1], l2[2]);
-    		}
+    	for (Stargate i : plugin.mf.stargates.values()) {
+    		i.changeGateState(false, event.getPlayer());
     	}
-    	for (Block b : blox) {
-    		plugin.blockListener.opengate.remove(b);
-    	}
-    	
     	for (Zone i : plugin.mf.zones) {
 			if (i.isSpleefArena() && spleefgames.containsKey(i) && spleefgames.get(i).playerPlaying(event.getPlayer())) {
 				spleefgames.get(i).removePlayer(event.getPlayer());
@@ -652,9 +646,6 @@ public class MIAPlayerListener extends PlayerListener {
     	if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}
-	   	Date time = new Date();
-    	World w = event.getPlayer().getWorld();
-    	List<World> ws = plugin.getServer().getWorlds();
     	
     	if (Math.sqrt(Math.pow(event.getTo().getBlockX() - 466, 2) + Math.pow(event.getTo().getBlockZ() + 303, 2)) > 1000) {
     		if (Math.sqrt(Math.pow(event.getFrom().getBlockX() - 466, 2) + Math.pow(event.getFrom().getBlockZ() + 303, 2)) < 1000) {
@@ -673,7 +664,7 @@ public class MIAPlayerListener extends PlayerListener {
     	}
     	
     	// Put lapis in! and do bedrock
-    	Location pl = event.getPlayer().getLocation();
+    	/*Location pl = event.getPlayer().getLocation();
     	for (int i = -8; i < 8; i++) {
     		for (int k = -8; k < 8; k++) {
 	    		for (int j = 0; j < 5; j++) {
@@ -688,7 +679,7 @@ public class MIAPlayerListener extends PlayerListener {
 	    			System.out.println("Deposit lapis :)");
 	    		}
     		}
-    	}
+    	}*/
     	
     	if (((Zone) plugin.mf.insidezone(event.getPlayer(), true)).heal()) {
     		int newh = event.getPlayer().getHealth() + 1;
@@ -708,88 +699,8 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	}
     	
-    	/*if (event.getTo().getBlockY() < 1) {  Depreciated. Need loadChunk!
-    		Location dest = event.getTo();
-    		dest.setY(2);
-			event.getPlayer().teleportTo(dest);
-			event.setTo(dest);
-    	}*/
-    	for (Block i : plugin.blockListener.opengate.keySet()) {
-    		if (event.getPlayer().getEntityId() == plugin.blockListener.opengate.get(i)[1]) {
-	    		Integer rot = Integer.parseInt(plugin.mf.gateData(i).get("rot"));
-	    		
-	    		int xo = 0;
-	    		int zo = 0;
-	    		int ax = 1;
-	    		int ay = 1;
-	    		switch (rot) {
-	    		case 0: //North (-X)
-	            	xo = -1;
-	            	zo = -1;
-	            	ay = 2;
-	            	break;
-	            case 2: //South (+X)
-	            	xo = 1;
-	            	zo = 1;
-	            	ay = 2;
-	            	break;
-	            case 1: //East (-Z)
-	            	xo = 1;
-	            	zo = -1;
-	            	ax = 2;
-	            	break;
-	            case 3: //West (+Z)
-	            	xo = -1;
-	            	zo = 1;
-	            	ax = 2;
-	            	break;
-	    		}	
-	    		
-	    		
-	    		Integer[] b = plugin.blockListener.opengate.get(i);
-				Integer tnow = (int) Math.round(((double) time.getTime() / 1000));
-				Integer[] l = plugin.mf.gateSign(b[0]);
-				if (b[3] + 90 < tnow) {
-	    			plugin.blockListener.opengate.remove(i);
-	    			plugin.blockListener.opengate.remove(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]));
-	    			plugin.mf.closeportal(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]), w);
-	    			plugin.mf.closeportal(i, w);
-	    		}
-	    		 
-	    		if (event.getPlayer().getEntityId() == b[1] && ((event.getTo().getBlockX() == (i.getX() + (xo * ax)) && event.getTo().getBlockZ() == (i.getZ() + (zo * ay))) || (event.getTo().getBlockX() == (i.getX() + xo) && event.getTo().getBlockZ() == (i.getZ() + zo))) && event.getTo().getBlockY() == (i.getY() - 1)) {
-	    			Integer rot2 = Integer.parseInt(plugin.mf.gateData(b[0]).get("rot"));
-	        		
-	    			int xo2 = 2;
-	        		int zo2 = 0;
-	        		int r = 0;
-	        		if (rot2 == 0) { //North (-X)
-	        			r = 270;
-	        			zo2 = -1;
-	        			xo2 = 0;
-	        		} else if (rot2 == 2) { //South (+X)
-	        			r = 90;
-	        			zo2 = 2;
-	        			xo2 = 1;
-	        		} else if (rot2 == 3) { //West (+Z)
-	        			r = 180;
-	        			xo2 = -1;
-	        			zo2 = 1;
-	        		}
-	        		
-	        		
-	    			Location dest = new Location(ws.get(l[3]), l[0] + xo2, l[1] - 1, l[2] + zo2, r, 0);
-	    			plugin.mf.teleport(event.getPlayer(), dest);
-	    			plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
-	    			event.setTo(dest);
-	    			
-	    			plugin.blockListener.opengate.remove(i);
-	    			plugin.blockListener.opengate.remove(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]));
-	    			plugin.mf.closeportal(ws.get(l[3]).getBlockAt(l[0], l[1], l[2]), w);
-	    			plugin.mf.closeportal(i, w);
-	    			
-	    			break;
-	    		}
-	    	}
+    	for (Stargate i : plugin.mf.stargates.values()) {
+    			event.setTo(i.pMove(event.getPlayer(), event.getTo()));
     	}
     }
 }

@@ -24,6 +24,7 @@ public class Town extends Zone {
 	final MIA plugin;
 	private List<String> users;
 	private towntypes tt;
+	private int mayor;
 	
 	public Town(MIA instance, int id, Block c1, String name, int mayor, towntypes tt, List<String> usrs) {
 		super(instance, id, c1, instance.getServer().getWorlds().get(0).getBlockAt(c1.getX() + tt.radius(), c1.getY(), c1.getZ()), name, 0, false, false, false, false, false, mayor, Zone.townshape.CIRCLE);
@@ -34,6 +35,15 @@ public class Town extends Zone {
 	
 	public towntypes getTownType() {
 		return tt;
+	}
+	
+	public OnlinePlayer getMayor() {
+		for (OnlinePlayer i : plugin.playerListener.userinfo.values()) {
+			if (i.getId() == mayor) {
+				return i;
+			}
+		}
+		return null;
 	}
 	
 	@Override
