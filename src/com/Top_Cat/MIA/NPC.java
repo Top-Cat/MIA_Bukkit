@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +18,7 @@ public class NPC {
 	List<String> dialogs = new ArrayList<String>();
 	int proxy, id, inhand;
 	final MIA plugin;
+	Block chest = null;
 	BasicHumanNpc bhn;
 	Location l;
 	String name;
@@ -23,7 +26,7 @@ public class NPC {
 	List<Quest> start_quests = new ArrayList<Quest>();
 	List<Quest> end_quests = new ArrayList<Quest>();
 	
-	public NPC(MIA instance, int id, String name, Location l, int inhand, int proxy, boolean pre) {
+	public NPC(MIA instance, int id, String name, Location l, int inhand, int proxy, boolean pre, String chest) {
 		if (pre)
 			prefix = "NPC-";
 		bhn = NpcSpawner.SpawnBasicHumanNpc(String.valueOf(id), prefix + name, l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
@@ -37,6 +40,10 @@ public class NPC {
 		this.name = name;
 		plugin = instance;
 		dialogs = instance.mf.getdialogs(this);
+		String [] cp = chest.split(",");
+		if (cp.length == 4) {
+			this.chest = instance.getServer().getWorlds().get(Integer.parseInt(cp[0])).getBlockAt(Integer.parseInt(cp[1]), Integer.parseInt(cp[2]), Integer.parseInt(cp[3]));
+		}
 	}
 	
 	public void addQuestStart(Quest q) {
@@ -66,7 +73,7 @@ public class NPC {
 		boolean quests = false;
 		for (Quest i : end_quests) {
 			if (i.isActive(p) && i.isComplete(p)) {
-				i.complete(p);
+				i.complete(this, p);
 				return;
 			}
 		}
@@ -107,6 +114,10 @@ public class NPC {
 	
 	public NPC getProxy() {
 		return plugin.mf.npcs.get(proxy);
+	}
+	
+	public Chest getChest() {
+		return (Chest) chest;
 	}
 	
 }

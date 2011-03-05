@@ -251,7 +251,7 @@ public class Quest {
 		plugin.mf.sendmsg(p, plugin.c+ "Type '/quest accept' to accept this quest.");
 	}
 	
-	public void complete(Player p) {
+	public void complete(NPC n, Player p) {
 		if (isComplete(p)) {
 			// You completed! YAY!
 			if (prize != 0) {
@@ -270,9 +270,12 @@ public class Quest {
 						if (of >= 0) {
 							amm -= i.getAmount();
 							p.getInventory().removeItem(i);
+							n.getChest().getInventory().addItem(i);
 						} else {
+							int amm2 = i.getAmount() - Math.abs(of);
 							amm = 0;
 							i.setAmount(Math.abs(of));
+							n.getChest().getInventory().addItem(new ItemStack(i.getType(), amm2));
 						}
 						
 					}

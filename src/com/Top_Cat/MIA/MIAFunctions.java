@@ -127,6 +127,7 @@ public class MIAFunctions {
     	cache_towns();
     	cache_worlds();
     	cache_stargates();
+    	cache_cloaks();
     }
     
     public HashMap<String, MIAWorld> worlds = new HashMap<String, MIAWorld>();
@@ -141,6 +142,40 @@ public class MIAFunctions {
 			while (r.next()) {
 				worlds.put(r.getString("name"), new MIAWorld(plugin, r.getInt("Id"), r.getString("name"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
 			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public HashMap<Integer, String[]> cloaks = new HashMap<Integer, String[]>();
+    
+    public void cache_cloaks() {
+    	cloaks.clear();
+    	PreparedStatement pr;
+		try {
+			String q = "SELECT * FROM cloaks";
+			pr = plugin.conn.prepareStatement(q);
+			ResultSet r = pr.executeQuery();
+			while (r.next()) {
+				String [] o = new String[3];
+				o[0] = r.getString("cnam");
+				o[1] = r.getString("group");
+				o[2] = r.getString("nicename");
+				cloaks.put(r.getInt("Id"), o);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void setcloak(int id, String usr) {
+    	PreparedStatement pr;
+		try {
+			String q = "UPDATE users SET cloak = '" + id + "' WHERE name = '" + usr + "'";
+			pr = plugin.conn.prepareStatement(q);
+			pr.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -270,7 +305,7 @@ public class MIAFunctions {
 			
 			while (r.next()) {
 				Location l = new Location(plugin.getServer().getWorlds().get(r.getInt("world")), r.getDouble("posX"), r.getDouble("posY"), r.getDouble("posZ"), r.getInt("rotation"), r.getInt("pitch"));
-				npcs.put(r.getString("npc_id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy"), r.getBoolean("prefix")));
+				npcs.put(r.getString("npc_id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy"), r.getBoolean("prefix"), r.getString("chest")));
 			}
 			
 			q = "SELECT * FROM quests";

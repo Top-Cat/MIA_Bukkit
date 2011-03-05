@@ -7,8 +7,7 @@ import org.bukkit.entity.Player;
 
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
-  //private int cape;
-  private int town, id, sg, sw;
+  private int town, id, sg, sw, cape;
   private String name;
   private String prefix;
   List<Quest> npc_tmp = new ArrayList<Quest>();
@@ -22,6 +21,7 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 	  this.name = name;
 	  this.prefix = prefix;
 	  this.id = id;
+	  this.cape = cape;
 	  this.town = town;
 	  this.sg = sg;
 	  this.sw = sw;
@@ -31,6 +31,10 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
 				break;
 			}
 	  }
+  }
+  
+  public int getCape() {
+	  return cape;
   }
   
   public List<Quest> tmpQuestList() {

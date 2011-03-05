@@ -130,9 +130,6 @@ public class MIAPlayerListener extends PlayerListener {
     		OnlinePlayer inf = userinfo.get(target);
     		int res = inf.getBalance() + ammount;
     		if (inf.cbal(ammount)) {
-    			// = String.valueOf(res);
-    			//userinfo.put(target, inf);
-    			
     			String q = "UPDATE users SET balance = '" + res + "' WHERE name = '" + target + "'";
     			try {
         			PreparedStatement pr = plugin.conn.prepareStatement(q);
@@ -234,13 +231,6 @@ public class MIAPlayerListener extends PlayerListener {
 		
 		plugin.mf.sendmsg(event.getPlayer(), plugin.d + "3Welcome to the MIA minecraft server hosted by www.thorgaming.com");
 		plugin.mf.post_tweet(event.getPlayer().getDisplayName() + " joined the server! Their stats: http://www.thorgaming.com/minecraft/" + event.getPlayer().getDisplayName() + "/");
-		/*World pw = event.getPlayer().getWorld();
-		Location pl = event.getPlayer().getLocation();
-		World mw = plugin.getServer().getWorlds().get(0);
-		if (pw != mw) {
-			event.getPlayer().teleportTo(new Location(mw, 0, mw.getHighestBlockYAt(0, 0), 0));
-			event.getPlayer().teleportTo(pl);
-		}*/
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
@@ -263,6 +253,13 @@ public class MIAPlayerListener extends PlayerListener {
     		plugin.mf.updatestats(event.getPlayer(), 2, 11);
     	}
     }
+    
+	public boolean applicableToPlayer(Player player, String owner) {
+		if(owner.equalsIgnoreCase("everyone")) return true;
+		if(owner.startsWith("p:")) return owner.replaceAll("p:","").equalsIgnoreCase(player.getName());
+		if(owner.equalsIgnoreCase(player.getName())) return true;
+		return false;
+	}
     
     HashMap<String, String> tprequests = new HashMap<String, String>();
     HashMap<Zone, SpleefGame> spleefgames = new HashMap<Zone, SpleefGame>();
@@ -290,6 +287,31 @@ public class MIAPlayerListener extends PlayerListener {
 			i.setChestplate(new ItemStack(0));
 			i.setHelmet(new ItemStack(0));
 			i.setLeggings(new ItemStack(0));
+		} else if (coms[0].equalsIgnoreCase("/cloak")) {
+			if (coms.length >= 2 && coms[1].equalsIgnoreCase("list")) {
+				HashMap<Integer, String[]> t = plugin.mf.cloaks;
+				plugin.mf.sendmsg(event.getPlayer(), "Current Cloak: " + t.get(userinfo.get(event.getPlayer().getDisplayName()).getCape())[2]);
+				for (Integer y : t.keySet()) {
+					String[] r = t.get(y);
+					if (applicableToPlayer(event.getPlayer(), r[1])) {
+						String sp = "  ";
+						if (y > 9) {
+							sp = "";
+						}
+						plugin.mf.sendmsg(event.getPlayer(), "#" + y + sp + "     " + r[2]);
+					}
+				}
+			} else if (coms.length >= 3 && coms[1].equalsIgnoreCase("set")) {
+				HashMap<Integer, String[]> t = plugin.mf.cloaks;
+				if (t.containsKey(Integer.parseInt(coms[2]))) {
+					if ( applicableToPlayer(event.getPlayer(), t.get(Integer.parseInt(coms[2]))[1]) ) {
+						plugin.mf.setcloak(Integer.parseInt(coms[2]), event.getPlayer().getDisplayName());
+						event.getPlayer().sendMessage("Cloak set to " + t.get(Integer.parseInt(coms[2]))[2] + "!");
+					} else {
+						event.getPlayer().sendMessage("That cloak is exclusive, sorry.");
+					}
+				}
+			}
 		} else if (coms[0].equalsIgnoreCase("/item")) {
 			if (coms.length > 1) {
 				int id = -1;
@@ -631,6 +653,8 @@ public class MIAPlayerListener extends PlayerListener {
     	}
     }
     
+    HashMap<Player, Town> prevtown = new HashMap<Player, Town>();
+    
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
     	for (SpleefGame i : spleefgames.values()) {
@@ -689,8 +713,9 @@ public class MIAPlayerListener extends PlayerListener {
     		event.getPlayer().setHealth(newh);
     	}
     	
-    	Town town1 = (Town) plugin.mf.insidetown(event.getFrom(), true);
+    	Town town1 = prevtown.get(event.getPlayer());
     	Town town2 = (Town) plugin.mf.insidetown(event.getTo(), true);
+    	prevtown.put(event.getPlayer(), town2);
     	if (town1 != town2) {
     		if (town1 == null) {
     			plugin.mf.sendmsg(event.getPlayer(), plugin.d+"6Welcome to " + town2.getName());
