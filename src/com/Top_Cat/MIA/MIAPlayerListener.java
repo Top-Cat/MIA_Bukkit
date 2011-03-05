@@ -48,7 +48,7 @@ public class MIAPlayerListener extends PlayerListener {
     final timer timer;
     
     public class timer implements Runnable {
-    	int updatec = 0;
+    	int updatec = 115;
     	
     	List<Sheep> s = new ArrayList<Sheep>();
     	

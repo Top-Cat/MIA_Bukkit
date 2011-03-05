@@ -148,10 +148,13 @@ public class MIAFunctions {
     }
     
     public HashMap<Block, Stargate> stargates = new HashMap<Block, Stargate>();
+    public HashMap<Block, Stargate> stargateBlocks = new HashMap<Block, Stargate>();
     public HashMap<String, List<Stargate>> networks = new HashMap<String, List<Stargate>>();
     
     public void cache_stargates() {
     	stargates.clear();
+    	stargateBlocks.clear();
+    	networks.clear();
     	PreparedStatement pr;
 		try {
 			String q = "SELECT * FROM stargates";
@@ -166,6 +169,51 @@ public class MIAFunctions {
 				Stargate ns = new Stargate(plugin, r.getInt("Id"), r.getString("name"), r.getString("network"), cblock, r.getInt("rot"));
 				stargates.put(cblock, ns);
 				networks.get(r.getString("network")).add(ns);
+				stargateBlocks.put(ns.getBlock(), ns);
+				stargateBlocks.put(ns.getButtonBlock(), ns);
+				stargateBlocks.putAll(ns.getBlocksHash());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void newgate(Block b, String name, String network, int rot) {
+    	PreparedStatement pr;
+		try {
+	    	String q = "INSERT INTO stargates (name, world, cblock, rot, network) VALUES ('" + name + "', '" + worlds.get(b.getWorld().getName()).getId() + "', '" + b.getX() + "," + b.getY() + "," + b.getZ() + "', '" + rot + "', '" + network + "')";
+			pr = plugin.conn.prepareStatement(q);
+			pr.executeUpdate();
+			
+			ResultSet r = pr.getGeneratedKeys();
+			r.next();
+			
+			Stargate ns = new Stargate(plugin, r.getInt(1), name, network, b, rot);
+			stargates.put(b, ns);
+			if (!networks.containsKey(network)) {
+				networks.put(network, new ArrayList<Stargate>());
+			}
+			networks.get(network).add(ns);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public void removeGate(Stargate s) {
+    	PreparedStatement pr;
+		try {
+	    	String q = "DELETE FROM stargates WHERE Id = '" + s.id + "'";
+			pr = plugin.conn.prepareStatement(q);
+			pr.executeUpdate();
+			
+			stargates.remove(s.getBlock());
+			s.getNetwork().remove(s);
+			stargateBlocks.remove(s.getBlock());
+			stargateBlocks.remove(s.getButtonBlock());
+			for (Block i : s.getBlocks()) {
+				stargateBlocks.remove(i);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

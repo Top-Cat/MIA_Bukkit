@@ -11,7 +11,7 @@ public class MIAWorld {
 	private List<String> commands = new ArrayList<String>();
 	private List<Player> users = new ArrayList<Player>();
 	private boolean townchat, mobs, pvp;
-	private int healing;
+	private int healing, id;
 	private String name;
 	private final MIA plugin;
 	
@@ -23,10 +23,15 @@ public class MIAWorld {
 		this.healing = healing;
 		this.name = name;
 		plugin = instance;
+		this.id = id;
 	}
 	
 	public boolean canCommand(String com0) {
 		return commands.contains(com0);
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public boolean townChat() {

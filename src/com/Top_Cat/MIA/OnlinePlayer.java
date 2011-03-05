@@ -3,6 +3,8 @@ package com.Top_Cat.MIA;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.entity.Player;
+
 class OnlinePlayer implements Comparable<OnlinePlayer> {
   private int ammount;
   //private int cape;
@@ -82,6 +84,10 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   
   public Town getTown() {
 	  return t;
+  }
+  
+  public boolean isPlayer(Player p) {
+	  return p.getDisplayName().equalsIgnoreCase(name);
   }
   
   public boolean cbal(int amm) {

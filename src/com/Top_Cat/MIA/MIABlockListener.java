@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -21,7 +22,6 @@ import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import com.Top_Cat.MIA.Quest.Type;
@@ -110,6 +110,31 @@ public class MIABlockListener extends BlockListener {
     List<Material> axe_fast = new ArrayList<Material>();
     
     @Override
+    public void onBlockBreak(BlockBreakEvent event) {
+		if (b.contains(event.getBlock())) {
+			b.remove(event.getBlock());
+    		event.setCancelled(true);
+    		event.getBlock().setType(Material.AIR);
+		}
+		
+		for (Quest i : plugin.mf.quest_sort.get(Type.Harvest).values()) {
+				i.harvest(event.getPlayer(), event.getBlock().getTypeId());
+		}
+		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
+		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);
+    	
+    	if (plugin.mf.stargateBlocks.containsKey(event.getBlock())) {
+    		Stargate s = plugin.mf.stargateBlocks.get(event.getBlock());
+    		Town t = s.getTown();
+    		if (!event.getPlayer().isOp() && !(t != null && t.getMayor().isPlayer(event.getPlayer()))) {
+    			event.setCancelled(true);
+    		} else {
+    			s.destroy(event.getPlayer());
+    		}
+    	}
+    }
+    
+    @Override
     public void onBlockDamage(BlockDamageEvent event) {
     	Zone z = ((Zone) plugin.mf.insidezone(event.getBlock(), true));
 		if (z.isProtected(event.getPlayer()) && !event.getPlayer().isOp()) {
@@ -126,22 +151,20 @@ public class MIABlockListener extends BlockListener {
 			}
     	}
     	
-    	if (event.getDamageLevel() == BlockDamageLevel.BROKEN && !event.isCancelled()) {	
-    		if (b.contains(event.getBlock())) {
-	    		event.setCancelled(true);
-	    		event.getBlock().setType(Material.AIR);
-    		}
-    		for (Quest i : plugin.mf.quest_sort.get(Type.Harvest).values()) {
-   				i.harvest(event.getPlayer(), event.getBlock().getTypeId());
-    		}
-    		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
-    		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);
-    	}
-    	
     	if (!event.isCancelled() && event.getBlock().getWorld().getName().equals("Creative")) {
     		if (event.getBlock().getType() == Material.TNT || (axe_fast.contains(event.getBlock().getType()) && axe.contains(event.getPlayer().getItemInHand().getType())) || (pick_fast.contains(event.getBlock().getType()) && picks.contains(event.getPlayer().getItemInHand().getType())) || (spade_fast.contains(event.getBlock().getType()) && spades.contains(event.getPlayer().getItemInHand().getType()))) {
     			event.setCancelled(true);
     			
+	    		if (plugin.mf.stargateBlocks.containsKey(event.getBlock())) {
+	    			Stargate s = plugin.mf.stargateBlocks.get(event.getBlock());
+	        		Town t = s.getTown();
+	    			if (!event.getPlayer().isOp() && !(t != null && t.getMayor().isPlayer(event.getPlayer()))) {
+	    				return;
+	    			} else {
+	    				s.destroy(event.getPlayer());
+	    			}
+	    		}
+	    		
 	    		plugin.mf.updatestats(event.getPlayer(), 0, event.getBlock().getTypeId());
 	    		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);
     			
@@ -188,21 +211,37 @@ public class MIABlockListener extends BlockListener {
     	if (event.getBlock().getType() == Material.WALL_SIGN) {
 	    	int nx = 0;
 	    	int nz = 0;
+	    	int rot = 0;
 	    	switch (new org.bukkit.material.Sign(Material.WALL_SIGN, event.getBlock().getData()).getAttachedFace()) {
 	    		case WEST:
+	    			rot = 3;
 	    			nz = 1;
 	    			break;
 	    		case EAST:
+	    			rot = 1;
 	    			nz = -1;
 	    			break;
 	    		case NORTH:
+	    			rot = 0;
 	    			nx = -1;
 	    			break;
 	    		case SOUTH:
+	    			rot = 2;
 	    			nx = 1;
 	    			break;
 	    	}
-			if (event.getBlock().getType() == Material.WALL_SIGN && plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getMayor() == event.getPlayer() && plugin.mf.notothertown(event.getPlayer())) {
+	    	boolean canmake = true;
+	    	boolean town = false;
+	    	String network = "";
+	    	if (event.getPlayer().isOp() && event.getLine(2).length() > 0) {
+	    		network = event.getLine(2).toLowerCase();
+	    	} else if (plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getMayor() == event.getPlayer() && plugin.mf.notothertown(event.getPlayer()) && event.getBlock().getWorld().getName().equals("Final")) {
+	    		network = plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getName().toLowerCase();
+	    		town = true;
+	    	} else {
+	    		canmake = false;
+	    	}
+			if (event.getBlock().getType() == Material.WALL_SIGN && canmake) {
 				// Might our user be building a gate?
 				boolean isgate = true;
 				Block[] bl = new Block[14];
@@ -231,7 +270,14 @@ public class MIABlockListener extends BlockListener {
 				}
 				
 				if (isgate) {
-					plugin.mf.sendmsg(event.getPlayer(), "OMG you made a gate o.0");
+					if (town) {
+						town = !plugin.playerListener.cbal(event.getPlayer(), -1000);
+						plugin.mf.sendmsg(event.getPlayer(), plugin.d+"2Debited 1000 ISK. This will be refunded when you destroy the gate.");
+					}
+					if (!town) {
+						plugin.mf.newgate(event.getBlock(), event.getLine(0), network, rot);
+						plugin.mf.sendmsg(event.getPlayer(), plugin.d+"2Gate created and active!");
+					}
 				}
 			}
     	}
