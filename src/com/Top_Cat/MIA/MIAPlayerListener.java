@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -160,9 +161,14 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     HashMap<Player, Long> logintimes = new HashMap<Player, Long>();
+    int st = 0;
     
     @Override
     public void onPlayerJoin(PlayerEvent event) {
+    	if (st == 0) {
+    		plugin.mf.rebuild_cache();
+    		st = 1;
+    	}
     	String nam = event.getPlayer().getDisplayName();
     	
     	PreparedStatement pr;
@@ -264,6 +270,19 @@ public class MIAPlayerListener extends PlayerListener {
     HashMap<String, String> tprequests = new HashMap<String, String>();
     HashMap<Zone, SpleefGame> spleefgames = new HashMap<Zone, SpleefGame>();
     
+    private void dring(Block b) {
+    	if (b.getType() == Material.OBSIDIAN) {
+    		b.setType(Material.AIR);
+    		for (int i = -1; i <= 1; i++) {
+    			for (int j = -1; j <= 1; j++) {
+    				if (i != 0 || j != 0) {
+    					dring(b.getRelative(i, 0, j));
+    				}
+    			}
+    		}
+    	}
+    }
+    
     @Override
     public void onPlayerCommandPreprocess(PlayerChatEvent event) {
     	plugin.mf.updatestats(event.getPlayer(), 2, 7, 1);
@@ -283,10 +302,18 @@ public class MIAPlayerListener extends PlayerListener {
 			Player p = plugin.getServer().getPlayer(coms[1]);
 			PlayerInventory i = p.getInventory();
 			i.clear();
-			i.setBoots(new ItemStack(0));
-			i.setChestplate(new ItemStack(0));
-			i.setHelmet(new ItemStack(0));
-			i.setLeggings(new ItemStack(0));
+			i.setBoots(new ItemStack(1, 0));
+			i.setChestplate(new ItemStack(1, 0));
+			i.setHelmet(new ItemStack(1, 0));
+			i.setLeggings(new ItemStack(1, 0));
+		} else if (coms[0].equalsIgnoreCase("/destroyring")) {
+			dring(event.getPlayer().getLocation().getBlock().getRelative(0, -1, 0));
+		} else if (coms[0].equalsIgnoreCase("/jumpto")) {
+			List<Block> los = event.getPlayer().getLineOfSight(null, 100);
+			Location l =  los.get(los.size() - 1).getLocation();
+			l.setYaw(event.getPlayer().getLocation().getYaw());
+			l.setY(l.getWorld().getHighestBlockYAt(l));
+			event.getPlayer().teleportTo(l);
 		} else if (coms[0].equalsIgnoreCase("/cloak")) {
 			if (coms.length >= 2 && coms[1].equalsIgnoreCase("list")) {
 				HashMap<Integer, String[]> t = plugin.mf.cloaks;
@@ -342,9 +369,9 @@ public class MIAPlayerListener extends PlayerListener {
 			plugin.mf.sendmsg(plugin.getServer().getPlayer(coms[1]), "Player " + event.getPlayer().getDisplayName() + " requested to teleport to you!");
     	} else if (coms[0].equalsIgnoreCase("/deny") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		tprequests.remove(event.getPlayer().getDisplayName());
-    	} else if (coms[0].equalsIgnoreCase("/world") && coms.length > 1) {
+    	/*} else if (coms[0].equalsIgnoreCase("/world") && coms.length > 1) {
     		plugin.mf.teleport(event.getPlayer(), new Location(plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])), 0, plugin.getServer().getWorlds().get(Integer.parseInt(coms[1])).getHighestBlockYAt(0, 0), 0));
-    		plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);
+    		plugin.mf.updatestats(event.getPlayer(), 2, 5, 1);*/
     	} else if (coms[0].equalsIgnoreCase("/accept") && tprequests.containsKey(event.getPlayer().getDisplayName())) {
     		plugin.mf.teleport(plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())), event.getPlayer().getLocation());
     		plugin.mf.updatestats(plugin.getServer().getPlayer(tprequests.get(event.getPlayer().getDisplayName())), 2, 5, 1);
@@ -710,6 +737,9 @@ public class MIAPlayerListener extends PlayerListener {
     		if (newh > 20) {
     			newh = 20;
     		}
+    		if (newh < 0) {
+    			newh = 0;
+    		}
     		event.getPlayer().setHealth(newh);
     	}
     	
@@ -725,7 +755,15 @@ public class MIAPlayerListener extends PlayerListener {
     	}
     	
     	for (Stargate i : plugin.mf.stargates.values()) {
-    			event.setTo(i.pMove(event.getPlayer(), event.getTo()));
+    			Location tl = i.pMove(event.getPlayer(), event.getTo());
+    			if (tl != event.getTo()) {
+    				//Teleport!
+    				Location tc = plugin.mf.teleport(event.getPlayer(), tl, false);
+    				if (tc == tl) {
+    					event.setTo(tl);
+    					event.getPlayer().teleportTo(tl);
+    				}
+    			}
     	}
     }
 }

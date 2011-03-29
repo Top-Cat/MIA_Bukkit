@@ -1,6 +1,7 @@
 package com.Top_Cat.MIA;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,11 +15,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.block.Block;
@@ -46,6 +47,7 @@ public class MIABlockListener extends BlockListener {
         spade_fast.add(Material.SAND);
         spade_fast.add(Material.GRAVEL);
         spade_fast.add(Material.CLAY);
+        spade_fast.add(Material.WOOL);
         
         picks.add(Material.WOOD_PICKAXE);
         picks.add(Material.STONE_PICKAXE);
@@ -57,9 +59,11 @@ public class MIABlockListener extends BlockListener {
         pick_fast.add(Material.IRON_ORE);
         pick_fast.add(Material.STONE);
         pick_fast.add(Material.COBBLESTONE);
+        pick_fast.add(Material.MOSSY_COBBLESTONE);
         pick_fast.add(Material.GOLD_ORE);
         pick_fast.add(Material.DIAMOND_ORE);
         pick_fast.add(Material.OBSIDIAN);
+        pick_fast.add(Material.MOB_SPAWNER);
         
         axe.add(Material.WOOD_AXE);
         axe.add(Material.STONE_AXE);
@@ -173,16 +177,6 @@ public class MIABlockListener extends BlockListener {
     	}
     }
     
-    @Override
-    public void onBlockInteract(BlockInteractEvent event) {
-    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE ||
-    			event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) &&
-    			((Zone) plugin.mf.insidezone(event.getBlock(), true)).isChestProtected((Player) event.getEntity())) {
-    		
-    		plugin.mf.sendmsg((Player) event.getEntity(), plugin.d+"4This object is locked!");
-    		event.setCancelled(true);
-    	}
-    }
     HashMap<Block, HashMap<Player, Integer>> signdes = new HashMap<Block, HashMap<Player, Integer>>();
     
     public void checklift(World w, Player p, int x, int y, int z, Location pl) {
@@ -266,6 +260,7 @@ public class MIABlockListener extends BlockListener {
 				for (Block i : bl) {
 					if (i.getType() != Material.OBSIDIAN) {
 						isgate = false;
+						plugin.mf.sendmsg(event.getPlayer(), i.getX() + "," + i.getY() + "," + i.getZ());
 					}
 				}
 				
@@ -304,7 +299,7 @@ public class MIABlockListener extends BlockListener {
 		}
     }
     
-    public boolean dogatecol(HashMap<Block, Boolean> fb, int x, int y, int z, World w) {
+    public boolean dogatecol(HashMap<Block, Boolean> fb, int x, int y, int z, World w, int t) {
     	if (!fb.containsKey(w.getBlockAt(x, y, z))){
     		int tmpy = y;
     		if (w.getBlockAt(x, y, z).getType() != Material.FENCE) { return false; }
@@ -323,7 +318,12 @@ public class MIABlockListener extends BlockListener {
 	    	if (!fb.containsKey(w.getBlockAt(x, y, z))){
 	    		fb.put(w.getBlockAt(x, tmpy, z), false);
 		    	fb.put(w.getBlockAt(x, y, z), true);
-		    	Boolean close = w.getBlockAt(x, y - 1, z).getType() != Material.FENCE;
+		    	Boolean close;
+		    	if (t == -2) {
+		    		close = w.getBlockAt(x, y - 1, z).getType() != Material.FENCE;
+		    	} else {
+		    		close = t != -1;
+		    	}
 		    	
 		    	int minY = Math.max(0, y - 12);
 		    	for (int y1 = y - 1; y1 >= minY; y1--) {
@@ -341,201 +341,227 @@ public class MIABlockListener extends BlockListener {
 		            
 		            w.getBlockAt(x, y1, z).setType(close ? Material.FENCE : Material.AIR);
 		            
-		            dogatecol(fb, x + 1, y1, z, w);
-		            dogatecol(fb, x - 1, y1, z, w);
-		            dogatecol(fb, x, y1, z + 1, w);
-		            dogatecol(fb, x, y1, z - 1, w);
+		            dogatecol(fb, x + 1, y1, z, w, t);
+		            dogatecol(fb, x - 1, y1, z, w, t);
+		            dogatecol(fb, x, y1, z + 1, w, t);
+		            dogatecol(fb, x, y1, z - 1, w, t);
 		    	}
-	            dogatecol(fb, x + 1, y, z, w);
-	            dogatecol(fb, x - 1, y, z, w);
-	            dogatecol(fb, x, y, z + 1, w);
-	            dogatecol(fb, x, y, z - 1, w);
+	            dogatecol(fb, x + 1, y, z, w, t);
+	            dogatecol(fb, x - 1, y, z, w, t);
+	            dogatecol(fb, x, y, z + 1, w, t);
+	            dogatecol(fb, x, y, z - 1, w, t);
 		    	return true;
 	    	}
     	}
     	return false;
     }
     
+    public void cbsigns(Block b, Player p, int t) {
+    	World w = b.getWorld();
+    	if (!w.getName().equals("Survival")) {
+    		String signtxt = ((Sign) b.getState()).getLine(1);
+    		int x = b.getX();
+    		int z = b.getZ();
+    		int y = b.getY();
+    		if (signtxt.equalsIgnoreCase("[Gate]")) {
+    			HashMap<Block, Boolean> foundblocks = new HashMap<Block, Boolean>();
+    			
+    			//Find gate
+    			for (int x1 = x - 3; x1 <= x + 3; x1++) {
+                    for (int y1 = y - 3; y1 <= y + 6; y1++) {
+                        for (int z1 = z - 3; z1 <= z + 3; z1++) {
+                            dogatecol(foundblocks, x1, y1, z1, w, t);
+                        }
+                    }
+                }
+    			
+    		} else if (signtxt.equalsIgnoreCase("[Lift Down]") && t == -2) {
+    			for (int i = b.getY() - 1; i > 0; i--) {
+    				checklift(w, p, x, i, z, p.getLocation());
+    			}
+    		} else if (signtxt.equalsIgnoreCase("[Lift Up]") && t == -2) {
+    			for (int i = b.getY() + 1; i < 128; i++) {
+    				checklift(w, p, x, i, z, p.getLocation());
+    			}
+    		} else if (signtxt.equalsIgnoreCase("[Bridge]") || signtxt.equalsIgnoreCase("[Bridge Up]")) {
+    			BlockFace s = new org.bukkit.material.Sign(Material.SIGN, b.getData()).getFacing();
+    			int yd = signtxt.equalsIgnoreCase("[Bridge Up]") ? 1 : -1;
+    			int xd = 0;
+    			int zd = 0;
+    			if (s == BlockFace.SOUTH) {
+    				xd = -1;
+    			} else if (s == BlockFace.NORTH) {
+    				xd = 1;
+    			} else if (s == BlockFace.WEST) {
+    				zd = -1;
+    			} else if (s == BlockFace.EAST) {
+    				zd = 1;
+    			} else {
+    				System.out.println("Lolwut?");
+    				System.out.println(s.toString());
+    			}
+    			for (int i = 1; i < 20; i++) {
+    				int nx = x + (i * xd);
+    				int nz = z + (i * zd);
+    				
+    				if (w.getBlockAt(nx, b.getY(), nz).getType() == Material.SIGN_POST) {
+    					String end_signtxt = ((Sign) w.getBlockAt(nx, b.getY(), nz).getState()).getLine(1);
+    					if (end_signtxt.equalsIgnoreCase("[Bridge End]") || end_signtxt.equalsIgnoreCase("[Bridge]") || end_signtxt.equalsIgnoreCase("[Bridge Up]")) {
+        					Block sign1 = b;
+        					Block sign2 = w.getBlockAt(nx, b.getY(), nz);
+        					// Check blocks below signs are of the same type
+        					Material b1 = sign1.getRelative(0, yd, 0).getType();
+        					Material b2 = sign2.getRelative(0, yd, 0).getType();
+        					Material b3 = sign1.getRelative(zd, yd, xd).getType();
+        					Material b4 = sign1.getRelative(-zd, yd, -xd).getType();
+        					Material b5 = sign2.getRelative(zd, yd, xd).getType();
+        					Material b6 = sign2.getRelative(-zd, yd, -xd).getType();
+        					Material[] kcl = {b1, Material.AIR, Material.STATIONARY_WATER, Material.STATIONARY_LAVA, Material.LAVA, Material.WATER};
+        					List<Material> kc = Arrays.asList(kcl);
+        					//plugin.mf.sendmsg(event.getPlayer(), b1.toString() + b2.toString() + b3.toString() + b4.toString() + b5.toString() + b6.toString());
+        					if (b1 == b2 && b2 == b3 && b3 == b4 && b4 == b5 && b5 == b6) {
+        						boolean air = true;
+        						boolean cle = false;
+        						for (int j = 1; j < i; 	j++) {
+        							for (int k = -1; k < 2; k++) {
+        								Block b7b = sign1.getRelative((j * xd) + (k * zd), yd, (j * zd) + (k * xd));
+        								Material b7 = b7b.getType();
+        								if (b1 == b7) {
+        									cle = true;
+        								}
+        								if (!kc.contains(b7)) {
+        									air = false;
+        								}
+        							}
+        						}
+        						if (t != -2) {
+        							cle = (t != 0);
+        						}
+        						if (air) {
+        							if (cle) {
+        								b1 = Material.AIR;
+        							}
+            						for (int j = 1; j < i; j++) {
+            							for (int k = -1; k < 2; k++) {
+            								sign1.getRelative((j * xd) + (k * zd), yd, (j * zd) + (k * xd)).setType(b1);
+            							}
+            						}
+        						} else if (p != null) {
+        							plugin.mf.sendmsg(p, "Bridge area not empty!");
+        						}
+        					} else if (p != null) {
+        						plugin.mf.sendmsg(p, "Block types don't match!");
+        					}
+    					}
+    					break;
+    				}
+    			}
+    		} else if (signtxt.equalsIgnoreCase("[Door]") || signtxt.equalsIgnoreCase("[Door Down]") || signtxt.equalsIgnoreCase("[Door Up]")) {
+    			BlockFace s = new org.bukkit.material.Sign(Material.SIGN, b.getData()).getFacing();
+    			int xd = 0;
+    			int zd = 0;
+    			if (s == BlockFace.SOUTH || s == BlockFace.NORTH) {
+    				xd = 1;
+    			} else if (s == BlockFace.WEST || s == BlockFace.EAST) {
+    				zd = 1;
+    			} else {
+    				System.out.println("Lolwut?");
+    				System.out.println(s.toString());
+    			}
+    			int dl = -15;
+    			int du = 15;
+    			if (signtxt.equalsIgnoreCase("[Door Down]")) {
+    				du = 0;
+    			}
+    			if (signtxt.equalsIgnoreCase("[Door Up]")) {
+    				dl = 0;
+    			}
+    			for (int i = dl; i < du; i++) {
+    				if (i == 0)
+    					continue;
+    				
+    				int nx = x;
+    				int nz = z;
+    				int ny = y + i;
+    				
+    				if (w.getBlockAt(nx, ny, nz).getType() == Material.SIGN_POST) {
+    					String end_signtxt = ((Sign) w.getBlockAt(nx, ny, nz).getState()).getLine(1);
+    					if (end_signtxt.equalsIgnoreCase("[Door End]") || end_signtxt.equalsIgnoreCase("[Door]")) {
+        					Block sign1 = b;
+        					Block sign2 = w.getBlockAt(nx, ny, nz);
+    						if (i > 0) {
+    							ny = 1;
+    						} else {
+    							ny = -1;
+    						}
+        					// Check blocks below signs are of the same type
+        					Material b1 = sign1.getRelative(0, ny, 0).getType();
+        					Material b2 = sign2.getRelative(0, -ny, 0).getType();
+        					Material b3 = sign1.getRelative(zd, ny, xd).getType();
+        					Material b4 = sign1.getRelative(-zd, ny, -xd).getType();
+        					Material b5 = sign2.getRelative(zd, -ny, xd).getType();
+        					Material b6 = sign2.getRelative(-zd, -ny, -xd).getType();
+        					//plugin.mf.sendmsg(event.getPlayer(), b1.toString() + b2.toString() + b3.toString() + b4.toString() + b5.toString() + b6.toString());
+        					Material[] kcl = {b1, Material.AIR, Material.STATIONARY_WATER, Material.STATIONARY_LAVA, Material.LAVA, Material.WATER};
+        					List<Material> kc = Arrays.asList(kcl);
+        					if (b1 == b2 && b2 == b3 && b3 == b4 && b4 == b5 && b5 == b6) {
+        						boolean air = true;
+        						boolean cle = false;
+        						for (int q = 2; q < Math.abs(i) - 1; q++) {
+        							int j = q;
+        							if (i < 0)
+        								j *= -1;
+        							for (int k = -1; k < 2; k++) {
+        								Material b7 = sign1.getRelative((k * zd), j, (k * xd)).getType();
+        								if (b1 == b7) {
+        									cle = true;
+        								}
+        								if (!kc.contains(b7)) {
+        									air = false;
+        								}
+        							}
+        						}
+        						if (t != -2) {
+        							cle = (t != 0); 
+        						}
+        						if (air) {
+        							if (cle) {
+        								b1 = Material.AIR;
+        							}
+        							for (int q = 2; q < Math.abs(i) - 1; q++) {
+            							int j = q;
+            							if (i < 0)
+            								j *= -1;
+            							for (int k = -1; k < 2; k++) {
+            								sign1.getRelative((k * zd), j, (k * xd)).setType(b1);
+            							}
+            						}
+        						} else if (p != null) {
+        							plugin.mf.sendmsg(p, "Bridge area not empty!");
+        						}
+        					} else if (p != null) {
+        						plugin.mf.sendmsg(p, "Block types don't match!");
+        					}
+    					}
+    					break;
+    				}
+    			}
+    		}
+		}
+    }
+    
+    @Override
+    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
+    	if (event.getBlock().getType() == Material.SIGN_POST || event.getBlock().getType() == Material.WALL_SIGN) {
+    		System.out.println("Sign post!");
+    		cbsigns(event.getBlock(), null, event.getNewCurrent());
+    	}
+    }
+    
     @Override
     public void onBlockRightClick(BlockRightClickEvent event) {
-		World w = event.getPlayer().getWorld();
     	if (event.getBlock().getType() == Material.WALL_SIGN || event.getBlock().getType() == Material.SIGN_POST) {
-    		if (!w.getName().equals("Survival")) {
-	    		String signtxt = ((Sign) event.getBlock().getState()).getLine(1);
-	    		int x = event.getBlock().getX();
-	    		int z = event.getBlock().getZ();
-	    		int y = event.getBlock().getY();
-	    		//System.out.println(x + "," + event.getBlock().getY() + "," + z);
-	    		if (signtxt.equalsIgnoreCase("[Gate]")) {
-	    			HashMap<Block, Boolean> foundblocks = new HashMap<Block, Boolean>();
-	    			
-	    			//Find gate
-	    			for (int x1 = x - 3; x1 <= x + 3; x1++) {
-	                    for (int y1 = y - 3; y1 <= y + 6; y1++) {
-	                        for (int z1 = z - 3; z1 <= z + 3; z1++) {
-	                            dogatecol(foundblocks, x1, y1, z1, w);
-	                        }
-	                    }
-	                }
-	    			
-	    		} else if (signtxt.equalsIgnoreCase("[Lift Down]")) {
-	    			for (int i = event.getBlock().getY() - 1; i > 0; i--) {
-	    				checklift(w, event.getPlayer(), x, i, z, event.getPlayer().getLocation());
-	    			}
-	    		} else if (signtxt.equalsIgnoreCase("[Lift Up]")) {
-	    			for (int i = event.getBlock().getY() + 1; i < 128; i++) {
-	    				checklift(w, event.getPlayer(), x, i, z, event.getPlayer().getLocation());
-	    			}
-	    		} else if (signtxt.equalsIgnoreCase("[Bridge]")) {
-	    			BlockFace s = new org.bukkit.material.Sign(Material.SIGN, event.getBlock().getData()).getFacing();
-	    			int xd = 0;
-	    			int zd = 0;
-	    			if (s == BlockFace.SOUTH) {
-	    				xd = -1;
-	    			} else if (s == BlockFace.NORTH) {
-	    				xd = 1;
-	    			} else if (s == BlockFace.WEST) {
-	    				zd = 1;
-	    			} else if (s == BlockFace.EAST) {
-	    				zd = -1;
-	    			} else {
-	    				System.out.println("Lolwut?");
-	    				System.out.println(s.toString());
-	    			}
-	    			for (int i = 1; i < 15; i++) {
-	    				int nx = x + (i * xd);
-	    				int nz = z + (i * zd);
-	    				
-	    				if (w.getBlockAt(nx, event.getBlock().getY(), nz).getType() == Material.SIGN_POST) {
-	    					String end_signtxt = ((Sign) w.getBlockAt(nx, event.getBlock().getY(), nz).getState()).getLine(1);
-	    					if (end_signtxt.equalsIgnoreCase("[Bridge End]") || end_signtxt.equalsIgnoreCase("[Bridge]")) {
-	        					Block sign1 = event.getBlock();
-	        					Block sign2 = w.getBlockAt(nx, event.getBlock().getY(), nz);
-	        					// Check blocks below signs are of the same type
-	        					Material b1 = sign1.getRelative(0, -1, 0).getType();
-	        					Material b2 = sign2.getRelative(0, -1, 0).getType();
-	        					Material b3 = sign1.getRelative(zd, -1, xd).getType();
-	        					Material b4 = sign1.getRelative(-zd, -1, -xd).getType();
-	        					Material b5 = sign2.getRelative(zd, -1, xd).getType();
-	        					Material b6 = sign2.getRelative(-zd, -1, -xd).getType();
-	        					//plugin.mf.sendmsg(event.getPlayer(), b1.toString() + b2.toString() + b3.toString() + b4.toString() + b5.toString() + b6.toString());
-	        					if (b1 == b2 && b2 == b3 && b3 == b4 && b4 == b5 && b5 == b6) {
-	        						boolean air = true;
-	        						boolean cle = false;
-	        						for (int j = 1; j < i; j++) {
-	        							for (int k = -1; k < 2; k++) {
-	        								Block b7b = sign1.getRelative((j * xd) + (k * zd), -1, (j * zd) + (k * xd));
-	        								Material b7 = b7b.getType();
-	        								if (b1 == b7) {
-	        									cle = true;
-	        								}
-	        								if (b7 != Material.AIR && b7 != b1 && b7 != Material.STATIONARY_WATER && b7 != Material.STATIONARY_LAVA) {
-	        									air = false;
-	        								}
-	        							}
-	        						}
-	        						if (air) {
-	        							if (cle) {
-	        								b1 = Material.AIR;
-	        							}
-	            						for (int j = 1; j < i; j++) {
-	            							for (int k = -1; k < 2; k++) {
-	            								sign1.getRelative((j * xd) + (k * zd), -1, (j * zd) + (k * xd)).setType(b1);
-	            							}
-	            						}
-	        						} else {
-	        							plugin.mf.sendmsg(event.getPlayer(), "Bridge area not empty!");
-	        						}
-	        					} else {
-	        						plugin.mf.sendmsg(event.getPlayer(), "Block types don't match!");
-	        					}
-	    					}
-	    					break;
-	    				}
-	    			}
-	    		} else if (signtxt.equalsIgnoreCase("[Door]")) {
-	    			BlockFace s = new org.bukkit.material.Sign(Material.SIGN, event.getBlock().getData()).getFacing();
-	    			int xd = 0;
-	    			int zd = 0;
-	    			if (s == BlockFace.SOUTH || s == BlockFace.NORTH) {
-	    				xd = 1;
-	    				System.out.println("North/South");
-	    			} else if (s == BlockFace.WEST || s == BlockFace.EAST) {
-	    				zd = 1;
-	    				System.out.println("East/West");
-	    			} else {
-	    				System.out.println("Lolwut?");
-	    				System.out.println(s.toString());
-	    			}
-	    			for (int i = -15; i < 15; i++) {
-	    				if (i == 0)
-	    					continue;
-	    				
-	    				int nx = x;
-	    				int nz = z;
-	    				int ny = y + i;
-	    				
-	    				if (w.getBlockAt(nx, ny, nz).getType() == Material.SIGN_POST) {
-	    					String end_signtxt = ((Sign) w.getBlockAt(nx, ny, nz).getState()).getLine(1);
-	    					if (end_signtxt.equalsIgnoreCase("[Door End]") || end_signtxt.equalsIgnoreCase("[Door]")) {
-	        					Block sign1 = event.getBlock();
-	        					Block sign2 = w.getBlockAt(nx, ny, nz);
-	    						if (i > 0) {
-	    							ny = 1;
-	    						} else {
-	    							ny = -1;
-	    						}
-	        					// Check blocks below signs are of the same type
-	        					Material b1 = sign1.getRelative(0, ny, 0).getType();
-	        					Material b2 = sign2.getRelative(0, -ny, 0).getType();
-	        					Material b3 = sign1.getRelative(zd, ny, xd).getType();
-	        					Material b4 = sign1.getRelative(-zd, ny, -xd).getType();
-	        					Material b5 = sign2.getRelative(zd, -ny, xd).getType();
-	        					Material b6 = sign2.getRelative(-zd, -ny, -xd).getType();
-	        					//plugin.mf.sendmsg(event.getPlayer(), b1.toString() + b2.toString() + b3.toString() + b4.toString() + b5.toString() + b6.toString());
-	        					if (b1 == b2 && b2 == b3 && b3 == b4 && b4 == b5 && b5 == b6) {
-	        						boolean air = true;
-	        						boolean cle = false;
-	        						for (int p = 2; p < Math.abs(i) - 1; p++) {
-	        							int j = p;
-	        							if (i < 0)
-	        								j *= -1;
-	        							for (int k = -1; k < 2; k++) {
-	        								Material b7 = sign1.getRelative((k * zd), j, (k * xd)).getType();
-	        								if (b1 == b7) {
-	        									cle = true;
-	        								}
-	        								if (b7 != Material.AIR && b7 != b1 && b7 != Material.STATIONARY_WATER && b7 != Material.STATIONARY_LAVA) {
-	        									air = false;
-	        								}
-	        							}
-	        						}
-	        						if (air) {
-	        							if (cle) {
-	        								b1 = Material.AIR;
-	        							}
-	        							for (int p = 2; p < Math.abs(i) - 1; p++) {
-	            							int j = p;
-	            							if (i < 0)
-	            								j *= -1;
-	            							for (int k = -1; k < 2; k++) {
-	            								sign1.getRelative((k * zd), j, (k * xd)).setType(b1);
-	            							}
-	            						}
-	        						} else {
-	        							plugin.mf.sendmsg(event.getPlayer(), "Bridge area not empty!");
-	        						}
-	        					} else {
-	        						plugin.mf.sendmsg(event.getPlayer(), "Block types don't match!");
-	        					}
-	    					}
-	    					break;
-	    				}
-	    			}
-	    		}
-    		} else {
-    			event.getPlayer().sendMessage("This mod is not available in survival!");
-    		}
+    		plugin.blockListener.cbsigns(event.getBlock(), event.getPlayer(), -2);
     		for (Stargate i : plugin.mf.stargates.values()) {
     			if (i.getBlock().equals(event.getBlock())) {
     				i.incrementDest(event.getPlayer());
@@ -551,14 +577,20 @@ public class MIABlockListener extends BlockListener {
     		}
     	}
     	
-    	if (event.getItemInHand().getType() == Material.STICK) {
+    	if (event.getBlock().getType() == Material.STICK) {
     		plugin.mf.sendmsg(event.getPlayer(), "Block belongs to: " + ((Zone) plugin.mf.insidezone(event.getBlock().getLocation(), true)).getName());
     	}
     }
     
     @Override
-    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
-    	
+    public void onBlockInteract(BlockInteractEvent event) {
+    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE ||
+    			event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) &&
+    			((Zone) plugin.mf.insidezone(event.getBlock(), true)).isChestProtected((Player) event.getEntity())) {
+    		
+    		plugin.mf.sendmsg((Player) event.getEntity(), plugin.d+"4This object is locked!");
+    		event.setCancelled(true);
+    	}
     }
     
     @Override

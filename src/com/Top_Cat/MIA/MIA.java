@@ -29,8 +29,8 @@ public class MIA extends JavaPlugin {
     MIAFunctions mf;
     public final String d = "\u00C2\u00A7";
 	public final String c = d+"e";
-    Connection conn;   
-
+    Connection conn;
+    
     public void onEnable() {
         // TODO: Place any custom enable code here including the registration of any events
         try {
@@ -70,15 +70,14 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_TOGGLE_SNEAK, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION, playerListener, Priority.Normal, this);
         
-        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED , blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_FLOW, blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_INTERACT, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal, this);
-        //pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
@@ -97,8 +96,9 @@ public class MIA extends JavaPlugin {
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
         
-        playerListener.loadallusers();
         mf.rebuild_cache();
+        
+        playerListener.loadallusers();
         for (Player i : getServer().getOnlinePlayers()) {
         	Date time = new Date();
     		playerListener.logintimes.put(i, time.getTime() / 1000);

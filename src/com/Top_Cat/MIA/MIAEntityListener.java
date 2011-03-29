@@ -126,7 +126,6 @@ public class MIAEntityListener extends EntityListener {
     @Override
     public void onExplosionPrimed(ExplosionPrimedEvent event) {
     	//event.getRadius()
-    	
     }
     
     @Override
@@ -139,8 +138,10 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
-    		event.setCancelled(true);
+    	if (plugin.playerListener.st == 1) {
+	    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
+	    		event.setCancelled(true);
+	    	}
     	}
     }
 }

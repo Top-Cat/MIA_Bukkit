@@ -122,7 +122,6 @@ public class MIAFunctions {
     }
     
     public void rebuild_cache() {
-    	plugin.playerListener.spleefgames.clear();
     	cache_zones();
     	cache_towns();
     	cache_worlds();
@@ -285,6 +284,9 @@ public class MIAFunctions {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		for (Player i : plugin.getServer().getOnlinePlayers()) {
+			plugin.playerListener.prevtown.put(i, (Town) plugin.mf.insidetown(i.getLocation(), true));
 		}
     }
     
@@ -602,7 +604,22 @@ public class MIAFunctions {
 		return out;
     }
     
-    public void teleport(Player p, Location l) {
+    public Location teleport(Player p, Location l, boolean tele) {
+    	if (!cantele(p, l)) {
+    		return p.getLocation();
+    	}
+    	plugin.mf.worlds.get(p.getWorld().getName()).removePlayer(p);
+    	l.getWorld().loadChunk(l.getBlockX(), l.getBlockZ());
+    	if (tele) { p.teleportTo(l); }
+    	plugin.mf.worlds.get(l.getWorld().getName()).addPlayer(p);
+    	return l;    	
+    }
+    
+    public Location teleport(Player p, Location l) {
+    	return teleport(p, l, true);
+    }
+    
+    public boolean cantele(Player p, Location l) {
     	if (!p.isOp() && p.getWorld() != l.getWorld() && !((p.getWorld().getName().equals("Nether") && l.getWorld().getName().equals("Final")) || (p.getWorld().getName().equals("Final") && l.getWorld().getName().equals("Nether")))) {
     		//Players inventory must be empty
     		int t = 0;
@@ -614,13 +631,10 @@ public class MIAFunctions {
     		}
     		if (t > 0) {
     			sendmsg(p, "Your inventory must be empty to travel to this world!");
-    			return;
+    			return false;
     		}
     	}
-    	plugin.mf.worlds.get(p.getWorld().getName()).removePlayer(p);
-    	l.getWorld().loadChunk(l.getBlockX(), l.getBlockZ());
-    	p.teleportTo(l);
-    	plugin.mf.worlds.get(l.getWorld().getName()).addPlayer(p);
+    	return true;
     }
     
     List<Zone> zones = new ArrayList<Zone>();
@@ -634,7 +648,7 @@ public class MIAFunctions {
 			String q = "SELECT * FROM zones";
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery()	;
-			while (r.next()) {
+		while (r.next()) {
 				String c = r.getString("corners");
 				String[] bls = c.split(":");
 				Integer[] cs = intarray(bls[0].split(","));
@@ -690,10 +704,15 @@ public class MIAFunctions {
     private Zone inzoneR(Location ps, boolean town) {
     	if (zones.size() == 0)
     		rebuild_cache();
-    	
-    	gzone.setMobs(worlds.get(ps.getWorld().getName()).isMobs());
-    	gzone.setPvP(worlds.get(ps.getWorld().getName()).isPvP());
-    	gzone.setHealing(worlds.get(ps.getWorld().getName()).getHealing());
+    	if (worlds.size() > 0) {
+    		try {
+	    	gzone.setMobs(worlds.get(ps.getWorld().getName()).isMobs());
+	    	gzone.setPvP(worlds.get(ps.getWorld().getName()).isPvP());
+	    	gzone.setHealing(worlds.get(ps.getWorld().getName()).getHealing());
+    		} catch (Exception e) {
+    			System.out.println(ps.getWorld().getName());
+    		}
+    	}
     	return inzoneR(ps, town, zones, gzone);
     }
     

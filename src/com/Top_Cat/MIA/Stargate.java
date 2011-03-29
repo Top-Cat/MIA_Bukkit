@@ -185,7 +185,7 @@ public class Stargate {
 			if (openp && p == openplayer && (l.getBlock() == bot1 || l.getBlock() == bot2)) {
 				changeGateState(false, p);
 				dest.changeGateState(false, p);
-				p.teleportTo(dest.tele);
+				//p.teleportTo(dest.tele);
 				return dest.tele;
 			}
 		}

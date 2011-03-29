@@ -37,7 +37,17 @@ class Zone {
 		this.ts = ts;
 		this.spleef = spleef;
 		if (spleef) {
-			plugin.playerListener.spleefgames.put(this, new SpleefGame(plugin, this));
+			SpleefGame g = null;
+			for (Zone i : plugin.playerListener.spleefgames.keySet()) {
+				if (i.id == id && !(i instanceof Town)) {
+					g = plugin.playerListener.spleefgames.get(i);
+					plugin.playerListener.spleefgames.remove(i);
+				}
+			}
+			if (g == null) {
+				g = new SpleefGame(plugin, this);
+			}
+			plugin.playerListener.spleefgames.put(this, g);
 		}
 	}
 	
@@ -56,7 +66,17 @@ class Zone {
 		this.owner = owner;
 		this.spleef = spleef;
 		if (spleef) {
-			plugin.playerListener.spleefgames.put(this, new SpleefGame(plugin, this));
+			SpleefGame g = null;
+			for (Zone i: plugin.playerListener.spleefgames.keySet()) {
+				if (i.id == id && !(i instanceof Town)) {
+					g = plugin.playerListener.spleefgames.get(i);
+					plugin.playerListener.spleefgames.remove(i);
+				}
+			}
+			if (g == null) {
+				g = new SpleefGame(plugin, this);
+			}
+			plugin.playerListener.spleefgames.put(this, g);
 		}
 	}
 	
