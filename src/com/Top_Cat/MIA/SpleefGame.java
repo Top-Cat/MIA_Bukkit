@@ -24,7 +24,7 @@ public class SpleefGame {
 			sg = 0;
 			sw = 0;
 			
-			p.teleportTo(g.z.getcenter());
+			p.teleport(g.z.getcenter());
 		}
 		
 		public void spleefplayed(boolean win) {
@@ -41,13 +41,13 @@ public class SpleefGame {
 		  }
 		
 		public void reset() {
-			player.teleportTo(g.z.getcenter());
+			player.teleport(g.z.getcenter());
 			alive = false;
 			ready = false;
 		}
 		
 		public void leaveGame() {
-			player.teleportTo(priorloc);
+			player.teleport(priorloc);
 		}
 		
 		public void setReady(boolean b) {

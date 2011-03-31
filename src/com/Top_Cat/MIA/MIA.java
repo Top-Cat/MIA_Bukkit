@@ -63,26 +63,25 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLAYER_ITEM, playerListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_PICKUP_ITEM, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_TOGGLE_SNEAK, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION, playerListener, Priority.Normal, this);
         
-        pm.registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_RIGHTCLICKED , blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_DAMAGE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_FLOW, blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_FROMTO, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
         
-        pm.registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.EXPLOSION_PRIMED, entityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.EXPLOSION_PRIME, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal, this);
         
@@ -124,7 +123,7 @@ public class MIA extends JavaPlugin {
 	    			mf.save_progress(i, j);
 	    		}
 	    	}
-        }
+    	}
     	
     	for (NPC i : mf.npcs.values()) {
     		i.destroy();

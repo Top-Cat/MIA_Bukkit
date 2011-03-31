@@ -117,6 +117,8 @@ public class MIAFunctions {
 		} catch (TwitterException e) {
 			System.out.println("Didn't update status. " + e); 
 			//e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("Didn't update status. " + e); 
 		}
         
     }
@@ -610,7 +612,7 @@ public class MIAFunctions {
     	}
     	plugin.mf.worlds.get(p.getWorld().getName()).removePlayer(p);
     	l.getWorld().loadChunk(l.getBlockX(), l.getBlockZ());
-    	if (tele) { p.teleportTo(l); }
+    	if (tele) { p.teleport(l); }
     	plugin.mf.worlds.get(l.getWorld().getName()).addPlayer(p);
     	return l;    	
     }

@@ -4,11 +4,10 @@ import java.util.HashMap;
 import org.bukkit.entity.Entity;
 
 
+@SuppressWarnings("serial")
 public class BasicHumanNpcList extends HashMap<String, BasicHumanNpc> {
 
-	private static final long serialVersionUID = 1L;
-
-	public boolean containsBukkitEntity(Entity entity)
+    public boolean containsBukkitEntity(Entity entity)
     {
         for(BasicHumanNpc bnpc : this.values())
         {

@@ -58,7 +58,8 @@ public class NpcSpawner {
         return null;
     }
 
-    public static BasicHumanNpc SpawnBasicHumanNpc(String uniqueId, String name, World world, double x, double y, double z, float yaw, float pitch) {
+    @SuppressWarnings("unchecked")
+	public static BasicHumanNpc SpawnBasicHumanNpc(String uniqueId, String name, World world, double x, double y, double z, float yaw, float pitch) {
         try {
             WorldServer ws = GetWorldServer(world);
             MinecraftServer ms = GetMinecraftServer(ws.getServer());
@@ -73,7 +74,8 @@ public class NpcSpawner {
             ws.b.add(eh);
 
             //ws.b(eh);
-            Class params[] = new Class[1];
+            @SuppressWarnings("rawtypes")
+			Class params[] = new Class[1];
             params[0] = Entity.class;
 
             Method method;

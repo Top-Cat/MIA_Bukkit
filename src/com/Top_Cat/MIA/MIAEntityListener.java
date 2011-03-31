@@ -16,7 +16,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.ExplosionPrimedEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 
 import com.Top_Cat.MIA.Quest.Type;
 
@@ -46,7 +46,7 @@ public class MIAEntityListener extends EntityListener {
 	    	}
 	    	damager = sub.getDamager();
     	}
-    	if (event.getEntity().getWorld().getName().equals("Creative")) {
+    	if (event.getEntity().getWorld().getName().equals("Creative") && event.getEntity() instanceof Player) {
     		event.setCancelled(true);
     	}
     	if (!event.isCancelled() && (event instanceof EntityDamageByEntityEvent || event instanceof EntityDamageByProjectileEvent || event instanceof EntityDamageByBlockEvent))
@@ -83,7 +83,6 @@ public class MIAEntityListener extends EntityListener {
     			for (Quest i : plugin.mf.quest_sort.get(Type.Assasin).values()) {
         			i.kill(((Player) attacker), def);
         		}
-	    		//System.out.println(((Player) attacker).getDisplayName() + " killed a " + def);
 	    		lastkilled = defender;
 	    	}
     	}
@@ -124,7 +123,7 @@ public class MIAEntityListener extends EntityListener {
     }
     
     @Override
-    public void onExplosionPrimed(ExplosionPrimedEvent event) {
+    public void onExplosionPrime(ExplosionPrimeEvent event) {
     	//event.getRadius()
     }
     
@@ -138,9 +137,11 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-    	if (plugin.playerListener.st == 1) {
-	    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
-	    		event.setCancelled(true);
+    	if (!(event.getEntity() instanceof Player)) {
+	    	if (plugin.playerListener.st == 1) {
+		    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
+		    		event.setCancelled(true);
+		    	}
 	    	}
     	}
     }

@@ -66,7 +66,7 @@ public class NPC {
 	}
 	
 	public String premessage(String s) {
-		return plugin.c+"[NPC] " + name + ": §f" + s;
+		return plugin.c+"[NPC] " + name + ": ï¿½f" + s;
 	}
 	
 	public void interact(Player p) {

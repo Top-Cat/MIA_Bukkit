@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Quest {
-	
 	private String id, name, desc, compl, datatxt, prov, rewa;
 	private Type t;
 	private String pre;
@@ -298,5 +297,4 @@ public class Quest {
 			plugin.mf.post_tweet(p.getDisplayName() + " completed the quest '" + name + "'! Their stats: http://thomasc.co.uk/minecraft/" + p.getDisplayName()+ "/");
 		}
 	}
-	
 }

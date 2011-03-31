@@ -19,15 +19,18 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.block.Block;
@@ -117,9 +120,43 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     @Override
-    public void onPlayerItem(PlayerItemEvent event) {
-    	if (event.getItem().getType() == Material.LAVA_BUCKET || event.getItem().getType() == Material.WATER_BUCKET || event.getItem().getType() == Material.WOODEN_DOOR || event.getItem().getType() == Material.IRON_DOOR) {
-    		event.setCancelled(plugin.blockListener.useitem_block(event.getBlockClicked(), event.getPlayer()));
+    public void onPlayerInteract(PlayerInteractEvent event) {
+    	if (event.getItem() != null) {
+	    	if (event.getItem().getType() == Material.LAVA_BUCKET || event.getItem().getType() == Material.WATER_BUCKET || event.getItem().getType() == Material.WOODEN_DOOR || event.getItem().getType() == Material.IRON_DOOR) {
+	    		event.setCancelled(plugin.blockListener.useitem_block(event.getClickedBlock(), event.getPlayer()));
+	    	}
+    	}
+    	if (event.getClickedBlock() != null) {
+	    	if ((event.getClickedBlock().getType() == Material.CHEST || event.getClickedBlock().getType() == Material.BURNING_FURNACE ||
+	    			event.getClickedBlock().getType() == Material.FURNACE || event.getClickedBlock().getType() == Material.WORKBENCH) &&
+	    			((Zone) plugin.mf.insidezone(event.getClickedBlock(), true)).isChestProtected(event.getPlayer())) {
+	    		
+	    		plugin.mf.sendmsg((Player) event.getClickedBlock(), plugin.d+"4This object is locked!");
+	    		event.setCancelled(true);
+	    	}
+	    	
+	    	if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+		    	if (event.getClickedBlock().getType() == Material.WALL_SIGN || event.getClickedBlock().getType() == Material.SIGN_POST) {
+		    		plugin.blockListener.cbsigns(event.getClickedBlock(), event.getPlayer(), -2);
+		    		for (Stargate i : plugin.mf.stargates.values()) {
+		    			if (i.getBlock().equals(event.getClickedBlock())) {
+		    				i.incrementDest(event.getPlayer());
+		    			}
+		    		}
+		    	}
+		    	
+		    	if (event.getClickedBlock().getType() == Material.STONE_BUTTON) {
+		    		for (Stargate i : plugin.mf.stargates.values()) {
+		    			if (i.getButtonBlock() == event.getClickedBlock()) {
+		    				i.changeGateState(true, event.getPlayer());
+		    			}
+		    		}
+		    	}
+		    	
+		    	if (event.getItem() != null && event.getItem().getType() == Material.STICK) {
+		    		plugin.mf.sendmsg(event.getPlayer(), "Block belongs to: " + ((Zone) plugin.mf.insidezone(event.getClickedBlock().getLocation(), true)).getName());
+		    	}
+	    	}
     	}
     }
     
@@ -164,7 +201,7 @@ public class MIAPlayerListener extends PlayerListener {
     int st = 0;
     
     @Override
-    public void onPlayerJoin(PlayerEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
     	if (st == 0) {
     		plugin.mf.rebuild_cache();
     		st = 1;
@@ -197,6 +234,8 @@ public class MIAPlayerListener extends PlayerListener {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e) {
+				System.out.println("Oh dear");
 		}
 		
 		Date time = new Date();
@@ -228,8 +267,12 @@ public class MIAPlayerListener extends PlayerListener {
 		catch (IOException e) {
 		    System.out.println("IO Exception");
 		}
+		catch (Exception e) {
+			System.out.println("Oh dear");
+		}
 		
-		plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), msg);
+		event.setJoinMessage(msg);
+		//plugin.mf.sendmsg(plugin.getServer().getOnlinePlayers(), msg);
 		
 		for (NPC i : plugin.mf.npcs.values()) {
 			i.update();
@@ -284,7 +327,7 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     @Override
-    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
     	plugin.mf.updatestats(event.getPlayer(), 2, 7, 1);
     	boolean canc = true;
     	String com = event.getMessage();
@@ -313,7 +356,7 @@ public class MIAPlayerListener extends PlayerListener {
 			Location l =  los.get(los.size() - 1).getLocation();
 			l.setYaw(event.getPlayer().getLocation().getYaw());
 			l.setY(l.getWorld().getHighestBlockYAt(l));
-			event.getPlayer().teleportTo(l);
+			event.getPlayer().teleport(l);
 		} else if (coms[0].equalsIgnoreCase("/cloak")) {
 			if (coms.length >= 2 && coms[1].equalsIgnoreCase("list")) {
 				HashMap<Integer, String[]> t = plugin.mf.cloaks;
@@ -521,7 +564,7 @@ public class MIAPlayerListener extends PlayerListener {
 				} else {
 					plugin.mf.sendmsg(event.getPlayer(), "Couldn't find game '" + coms[2] + "'");
 				}
-    		} else if (coms[1].equalsIgnoreCase("leave")) {
+    		} else if (coms[1].equalsIgnoreCase("leave") && coms.length > 1) {
     			for (Zone i : plugin.mf.zones) {
     				if (i.getName().equalsIgnoreCase(coms[2]) && i.isSpleefArena()) {
     					if (spleefgames.get(i).playerPlaying(event.getPlayer())) {
@@ -658,7 +701,7 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     @Override
-    public void onPlayerQuit(PlayerEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
     	Date time = new Date();
 		plugin.mf.updatestats(event.getPlayer(), 2, 2, (int) (time.getTime() / 1000), true);
 		plugin.mf.updatestats(event.getPlayer(), 2, 4, (int) ((time.getTime() / 1000) - logintimes.get(event.getPlayer())));
@@ -761,7 +804,7 @@ public class MIAPlayerListener extends PlayerListener {
     				Location tc = plugin.mf.teleport(event.getPlayer(), tl, false);
     				if (tc == tl) {
     					event.setTo(tl);
-    					event.getPlayer().teleportTo(tl);
+    					event.getPlayer().teleport(tl);
     				}
     			}
     	}

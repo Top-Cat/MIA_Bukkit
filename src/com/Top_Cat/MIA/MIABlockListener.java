@@ -15,9 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockInteractEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockListener;
@@ -227,9 +225,10 @@ public class MIABlockListener extends BlockListener {
 	    	boolean canmake = true;
 	    	boolean town = false;
 	    	String network = "";
+	    	Town t = plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown();
 	    	if (event.getPlayer().isOp() && event.getLine(2).length() > 0) {
 	    		network = event.getLine(2).toLowerCase();
-	    	} else if (plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getMayor() == event.getPlayer() && plugin.mf.notothertown(event.getPlayer()) && event.getBlock().getWorld().getName().equals("Final")) {
+	    	} else if (t != null && t.getMayor() == event.getPlayer() && plugin.mf.notothertown(event.getPlayer()) && event.getBlock().getWorld().getName().equals("Final")) {
 	    		network = plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTown().getName().toLowerCase();
 	    		town = true;
 	    	} else {
@@ -322,7 +321,7 @@ public class MIABlockListener extends BlockListener {
 		    	if (t == -2) {
 		    		close = w.getBlockAt(x, y - 1, z).getType() != Material.FENCE;
 		    	} else {
-		    		close = t != -1;
+		    		close = t != 0;
 		    	}
 		    	
 		    	int minY = Math.max(0, y - 12);
@@ -553,48 +552,13 @@ public class MIABlockListener extends BlockListener {
     @Override
     public void onBlockRedstoneChange(BlockRedstoneEvent event) {
     	if (event.getBlock().getType() == Material.SIGN_POST || event.getBlock().getType() == Material.WALL_SIGN) {
-    		System.out.println("Sign post!");
+    		//System.out.println("Sign post!");
     		cbsigns(event.getBlock(), null, event.getNewCurrent());
     	}
     }
     
     @Override
-    public void onBlockRightClick(BlockRightClickEvent event) {
-    	if (event.getBlock().getType() == Material.WALL_SIGN || event.getBlock().getType() == Material.SIGN_POST) {
-    		plugin.blockListener.cbsigns(event.getBlock(), event.getPlayer(), -2);
-    		for (Stargate i : plugin.mf.stargates.values()) {
-    			if (i.getBlock().equals(event.getBlock())) {
-    				i.incrementDest(event.getPlayer());
-    			}
-    		}
-    	}
-    	
-    	if (event.getBlock().getType() == Material.STONE_BUTTON) {
-    		for (Stargate i : plugin.mf.stargates.values()) {
-    			if (i.getButtonBlock() == event.getBlock()) {
-    				i.changeGateState(true, event.getPlayer());
-    			}
-    		}
-    	}
-    	
-    	if (event.getBlock().getType() == Material.STICK) {
-    		plugin.mf.sendmsg(event.getPlayer(), "Block belongs to: " + ((Zone) plugin.mf.insidezone(event.getBlock().getLocation(), true)).getName());
-    	}
-    }
-    
-    @Override
-    public void onBlockInteract(BlockInteractEvent event) {
-    	if ((event.getBlock().getType() == Material.CHEST || event.getBlock().getType() == Material.BURNING_FURNACE ||
-    			event.getBlock().getType() == Material.FURNACE || event.getBlock().getType() == Material.WORKBENCH) &&
-    			((Zone) plugin.mf.insidezone(event.getBlock(), true)).isChestProtected((Player) event.getEntity())) {
-    		
-    		plugin.mf.sendmsg((Player) event.getEntity(), plugin.d+"4This object is locked!");
-    		event.setCancelled(true);
-    	}
-    }
-    
-    @Override
-    public void onBlockFlow(BlockFromToEvent event) {
+    public void onBlockFromTo(BlockFromToEvent event) {
     	int town1 = plugin.mf.insidetown(event.getBlock());
     	int town2 = plugin.mf.insidetown(event.getToBlock());
     	if (town1 == 0 && town1 != town2 && event.getToBlock().getType() == Material.AIR) {
