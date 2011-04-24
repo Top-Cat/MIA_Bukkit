@@ -11,6 +11,7 @@ import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
+import npclib.NPCManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,7 +32,10 @@ public class MIA extends JavaPlugin {
 	public final String c = d+"e";
     Connection conn;
     
+    NPCManager m;
+    
     public void onEnable() {
+    	 m = new NPCManager(this);
         // TODO: Place any custom enable code here including the registration of any events
         try {
         	Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -56,6 +60,10 @@ public class MIA extends JavaPlugin {
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 50);
     	getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
     	
+       	getServer().createWorld("Nether", Environment.NETHER);
+        getServer().createWorld("Survival", Environment.NORMAL);
+        getServer().createWorld("Creative", Environment.NORMAL);
+    	
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
@@ -78,6 +86,8 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.REDSTONE_CHANGE , blockListener, Priority.Normal, this);
         
+        pm.registerEvent(Event.Type.LEAVES_DECAY, blockListener, Priority.Normal, this);
+        
         pm.registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_DEATH, entityListener, Priority.Normal, this);
@@ -86,10 +96,6 @@ public class MIA extends JavaPlugin {
         pm.registerEvent(Event.Type.ENTITY_COMBUST, entityListener, Priority.Normal, this);
         
         pm.registerEvent(Event.Type.VEHICLE_MOVE, vehicleListener, Priority.Normal, this);
-
-       	getServer().createWorld("Nether", Environment.NETHER);
-        getServer().createWorld("Survival", Environment.NORMAL);
-        getServer().createWorld("Creative", Environment.NORMAL);
         
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
         PluginDescriptionFile pdfFile = this.getDescription();

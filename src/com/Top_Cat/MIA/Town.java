@@ -27,7 +27,7 @@ public class Town extends Zone {
 	private int mayor;
 	
 	public Town(MIA instance, int id, Block c1, String name, int mayor, towntypes tt, List<String> usrs) {
-		super(instance, id, c1, instance.getServer().getWorlds().get(0).getBlockAt(c1.getX() + tt.radius(), c1.getY(), c1.getZ()), name, 0, false, false, false, false, false, mayor, Zone.townshape.CIRCLE);
+		super(instance, id, c1, instance.getServer().getWorlds().get(0).getBlockAt(c1.getX() + tt.radius(), c1.getY(), c1.getZ()), name, 0, false, false, false, false, false, false, mayor, Zone.townshape.CIRCLE);
 		plugin = instance;
 		users = usrs;
 		this.tt = tt;

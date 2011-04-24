@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 class Zone {
 	private Block b1, b2;
 	private int id, healing;
-	private boolean PvP, mobs, chest, protect, spleef;
+	private boolean PvP, mobs, chest, protect, spleef, fire;
 	int owner;
 	private String name;
 	private final MIA plugin;
@@ -21,7 +21,7 @@ class Zone {
 		SQUARE, CIRCLE, CUBE, SPHERE
 	}
 	
-	public Zone(MIA instance, int id, Block c1, Block c2, String name, int healing, boolean PvP, boolean mobs, boolean chest, boolean protect, boolean spleef, int owner, townshape ts) {
+	public Zone(MIA instance, int id, Block c1, Block c2, String name, int healing, boolean PvP, boolean mobs, boolean chest, boolean protect, boolean spleef, boolean fire, int owner, townshape ts) {
 		plugin = instance;
 		
 		this.id = id;
@@ -36,6 +36,7 @@ class Zone {
 		this.owner = owner;
 		this.ts = ts;
 		this.spleef = spleef;
+		this.fire = fire;
 		if (spleef) {
 			SpleefGame g = null;
 			for (Zone i : plugin.playerListener.spleefgames.keySet()) {
@@ -51,7 +52,7 @@ class Zone {
 		}
 	}
 	
-	public Zone(MIA instance, int id, Block c1, Block c2, String name, int healing, boolean PvP, boolean mobs, boolean chest, boolean protect, boolean spleef, int owner) {
+	public Zone(MIA instance, int id, Block c1, Block c2, String name, int healing, boolean PvP, boolean mobs, boolean chest, boolean protect, boolean spleef, boolean fire, int owner) {
 		plugin = instance;
 		
 		this.id = id;
@@ -65,6 +66,7 @@ class Zone {
 		this.protect = protect;
 		this.owner = owner;
 		this.spleef = spleef;
+		this.fire = fire;
 		if (spleef) {
 			SpleefGame g = null;
 			for (Zone i: plugin.playerListener.spleefgames.keySet()) {
@@ -78,6 +80,10 @@ class Zone {
 			}
 			plugin.playerListener.spleefgames.put(this, g);
 		}
+	}
+	
+	public boolean getFire() {
+		return fire;
 	}
 	
 	public void addChild(Zone z) {

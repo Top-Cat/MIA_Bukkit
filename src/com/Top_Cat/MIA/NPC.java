@@ -7,11 +7,11 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import redecouverte.npcspawner.BasicHumanNpc;
-import redecouverte.npcspawner.NpcSpawner;
+import npclib.NPCEntity;
 
 public class NPC {
 	
@@ -19,7 +19,7 @@ public class NPC {
 	int proxy, id, inhand;
 	final MIA plugin;
 	Block chest = null;
-	BasicHumanNpc bhn;
+	NPCEntity bhn;
 	Location l;
 	String name;
 	String prefix = "";
@@ -27,18 +27,20 @@ public class NPC {
 	List<Quest> end_quests = new ArrayList<Quest>();
 	
 	public NPC(MIA instance, int id, String name, Location l, int inhand, int proxy, boolean pre, String chest) {
+		plugin = instance;
+		
 		if (pre)
 			prefix = "NPC-";
-		bhn = NpcSpawner.SpawnBasicHumanNpc(String.valueOf(id), prefix + name, l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
+		bhn = plugin.m.spawnNPC(prefix + name, new Location(l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch()));
+		
 		if (inhand > 0)
-			bhn.getBukkitEntity().setItemInHand(new ItemStack(inhand, 1));
+			((HumanEntity) bhn.getBukkitEntity()).setItemInHand(new ItemStack(inhand, 1));
 		
 		this.inhand = inhand;
 		this.proxy = proxy;
 		this.id = id;
 		this.l = l;
 		this.name = name;
-		plugin = instance;
 		dialogs = instance.mf.getdialogs(this);
 		String [] cp = chest.split(",");
 		if (cp.length == 4) {
@@ -55,18 +57,20 @@ public class NPC {
 	}
 	
 	public void destroy() {
-		NpcSpawner.RemoveBasicHumanNpc(bhn);
+		plugin.m.despawn(prefix + name);
 	}
 	
 	public void update() {
-		NpcSpawner.RemoveBasicHumanNpc(bhn); // Until I find a better way of broadcasting the position of the npc
-		bhn = NpcSpawner.SpawnBasicHumanNpc(String.valueOf(id), prefix + name, l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
-		if (inhand > 0)
-			bhn.getBukkitEntity().setItemInHand(new ItemStack(inhand, 1));
+		bhn.setPositionRotation(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
+		//plugin.m.moveNPC(prefix + name, new Location(l.getWorld(), ));
+		//plugin.m.despawn(prefix + name); // Until I find a better way of broadcasting the position of the npc
+		//bhn = NpcSpawner.SpawnBasicHumanNpc(String.valueOf(id), prefix + name, l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch());
+		//if (inhand > 0)
+		//	bhn.getBukkitEntity().setItemInHand(new ItemStack(inhand, 1));
 	}
 	
 	public String premessage(String s) {
-		return plugin.c+"[NPC] " + name + ": �f" + s;
+		return plugin.c+"[NPC] " + name + ": " + plugin.d + "f" + s;
 	}
 	
 	public void interact(Player p) {

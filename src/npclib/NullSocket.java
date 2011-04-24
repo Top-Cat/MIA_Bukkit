@@ -1,4 +1,9 @@
-package redecouverte.npcspawner;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package npclib;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -6,8 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class NpcSocket extends Socket{
-
+/**
+ *
+ * @author martin
+ */
+public class NullSocket extends Socket {
     @Override
     public InputStream getInputStream()
     {
@@ -20,5 +28,4 @@ public class NpcSocket extends Socket{
     {
         return new ByteArrayOutputStream();
     }
-
 }

@@ -12,10 +12,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockListener;
@@ -54,14 +56,19 @@ public class MIABlockListener extends BlockListener {
         picks.add(Material.DIAMOND_PICKAXE);
         
         pick_fast.add(Material.COAL_ORE);
+        pick_fast.add(Material.BEDROCK);
         pick_fast.add(Material.IRON_ORE);
         pick_fast.add(Material.STONE);
         pick_fast.add(Material.COBBLESTONE);
+        pick_fast.add(Material.SANDSTONE);
         pick_fast.add(Material.MOSSY_COBBLESTONE);
         pick_fast.add(Material.GOLD_ORE);
         pick_fast.add(Material.DIAMOND_ORE);
         pick_fast.add(Material.OBSIDIAN);
         pick_fast.add(Material.MOB_SPAWNER);
+        pick_fast.add(Material.LOCKED_CHEST);
+        pick_fast.add(Material.COBBLESTONE_STAIRS);
+        pick_fast.add(Material.BEDROCK);
         
         axe.add(Material.WOOD_AXE);
         axe.add(Material.STONE_AXE);
@@ -72,10 +79,25 @@ public class MIABlockListener extends BlockListener {
         axe_fast.add(Material.WOOD);
         axe_fast.add(Material.LOG);
         axe_fast.add(Material.LEAVES);
+        tools.addAll(axe);
+        tools.addAll(picks);
+        tools.addAll(spades);
+        tools.add(Material.FISHING_ROD);
     }
     
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
+    	if (event.getBlock().getType() == Material.TNT && event.getBlock().getWorld().getName() != "Creative") {
+    		if (plugin.mf.insidetown(event.getBlock()) > 0 || !((Zone) plugin.mf.insidezone(event.getBlock(), true)).isMobs()) {
+        		event.setCancelled(true);
+        		event.getBlock().setType(Material.AIR);
+        		/*for (org.bukkit.inventory.ItemStack i : event.getPlayer().getInventory().getContents()) {
+        			if (i.getType() == Material.TNT) {
+        				 event.getPlayer().getInventory().remove(i);
+        			}
+        		}*/
+        	}
+    	}
     	event.setCancelled(useitem_block(event.getBlock(), event.getPlayer()));
     	if (!event.isCancelled()) {
     		for (Quest i : plugin.mf.quest_sort.get(Type.Build).values()) {
@@ -105,6 +127,7 @@ public class MIABlockListener extends BlockListener {
     
     ArrayList<Block> b = new ArrayList<Block>();
     List<Material> spades = new ArrayList<Material>();
+    List<Material> tools = new ArrayList<Material>();
     List<Material> spade_fast = new ArrayList<Material>();
     List<Material> picks = new ArrayList<Material>();
     List<Material> pick_fast = new ArrayList<Material>();
@@ -138,10 +161,16 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockDamage(BlockDamageEvent event) {
+    	if (event.getBlock().getType() == Material.TNT) {
+    		int tnttown = plugin.mf.insidetown(event.getBlock().getLocation());
+    		if (tnttown > 0 && !(tnttown == plugin.playerListener.userinfo.get(event.getPlayer().getDisplayName()).getTownId())) {
+    			event.setCancelled(true);
+    		}
+    	}
     	Zone z = ((Zone) plugin.mf.insidezone(event.getBlock(), true));
 		if (z.isProtected(event.getPlayer()) && !event.getPlayer().isOp()) {
 			event.setCancelled(true);
-		}	
+		}
 		
     	for (Zone i : plugin.mf.zones) {
 			if (i.inZone(event.getBlock().getLocation()) && i.isSpleefArena() && plugin.playerListener.spleefgames.containsKey(i)) {
@@ -259,7 +288,7 @@ public class MIABlockListener extends BlockListener {
 				for (Block i : bl) {
 					if (i.getType() != Material.OBSIDIAN) {
 						isgate = false;
-						plugin.mf.sendmsg(event.getPlayer(), i.getX() + "," + i.getY() + "," + i.getZ());
+						//plugin.mf.sendmsg(event.getPlayer(), i.getX() + "," + i.getY() + "," + i.getZ());
 					}
 				}
 				
@@ -362,6 +391,13 @@ public class MIABlockListener extends BlockListener {
     		int x = b.getX();
     		int z = b.getZ();
     		int y = b.getY();
+    		
+			Pattern pd = Pattern.compile("\\[Bridge:([0-9]+)\\]");
+			Matcher md = pd.matcher(signtxt);
+			
+			Pattern pd2 = Pattern.compile("\\[Bridge:([0-9]+):([0-9]+)\\]");
+			Matcher md2 = pd2.matcher(signtxt);
+    		
     		if (signtxt.equalsIgnoreCase("[Gate]")) {
     			HashMap<Block, Boolean> foundblocks = new HashMap<Block, Boolean>();
     			
@@ -382,7 +418,20 @@ public class MIABlockListener extends BlockListener {
     			for (int i = b.getY() + 1; i < 128; i++) {
     				checklift(w, p, x, i, z, p.getLocation());
     			}
-    		} else if (signtxt.equalsIgnoreCase("[Bridge]") || signtxt.equalsIgnoreCase("[Bridge Up]")) {
+     		} else if (signtxt.equalsIgnoreCase("[Bridge]") || signtxt.equalsIgnoreCase("[Bridge Up]") || md.matches() || md2.matches()) {
+     			
+     			String amm = "1";
+     			String pos = "1";
+     			if (md.matches()) {
+     				amm = md.replaceAll("$1");
+     			}
+     			if (md2.matches()) {
+     				amm = md2.replaceAll("$1");
+     				pos = md2.replaceAll("$2");
+     			}
+     			int wid = Integer.parseInt(amm);
+     			int len = Integer.parseInt(pos);
+     			
     			BlockFace s = new org.bukkit.material.Sign(Material.SIGN, b.getData()).getFacing();
     			int yd = signtxt.equalsIgnoreCase("[Bridge Up]") ? 1 : -1;
     			int xd = 0;
@@ -399,7 +448,11 @@ public class MIABlockListener extends BlockListener {
     				System.out.println("Lolwut?");
     				System.out.println(s.toString());
     			}
-    			for (int i = 1; i < 20; i++) {
+    			int mi = 20;
+    			if (len > mi) {
+    				mi = len + 1;
+    			}
+    			for (int i = len; i < mi; i++) {
     				int nx = x + (i * xd);
     				int nz = z + (i * zd);
     				
@@ -409,20 +462,23 @@ public class MIABlockListener extends BlockListener {
         					Block sign1 = b;
         					Block sign2 = w.getBlockAt(nx, b.getY(), nz);
         					// Check blocks below signs are of the same type
+        					boolean same = true;
         					Material b1 = sign1.getRelative(0, yd, 0).getType();
-        					Material b2 = sign2.getRelative(0, yd, 0).getType();
-        					Material b3 = sign1.getRelative(zd, yd, xd).getType();
-        					Material b4 = sign1.getRelative(-zd, yd, -xd).getType();
-        					Material b5 = sign2.getRelative(zd, yd, xd).getType();
-        					Material b6 = sign2.getRelative(-zd, yd, -xd).getType();
+        					for (int k = -wid; k <= wid; k++) {
+        						Material b2 = sign1.getWorld().getBlockAt(sign1.getX() + (k * zd), sign1.getY() + yd, sign1.getZ() + (k * xd)).getType();
+        						Material b3 = sign2.getWorld().getBlockAt(sign2.getX() + (k * zd), sign2.getY() + yd, sign2.getZ() + (k * xd)).getType();
+        						if (b1 != b2 || b1 != b3) {
+        							same = false;
+        						}
+        					}
         					Material[] kcl = {b1, Material.AIR, Material.STATIONARY_WATER, Material.STATIONARY_LAVA, Material.LAVA, Material.WATER};
         					List<Material> kc = Arrays.asList(kcl);
         					//plugin.mf.sendmsg(event.getPlayer(), b1.toString() + b2.toString() + b3.toString() + b4.toString() + b5.toString() + b6.toString());
-        					if (b1 == b2 && b2 == b3 && b3 == b4 && b4 == b5 && b5 == b6) {
+        					if (same) {
         						boolean air = true;
         						boolean cle = false;
-        						for (int j = 1; j < i; 	j++) {
-        							for (int k = -1; k < 2; k++) {
+        						for (int j = 1; j < i; j++) {
+        							for (int k = -wid; k <= wid; k++) {
         								Block b7b = sign1.getRelative((j * xd) + (k * zd), yd, (j * zd) + (k * xd));
         								Material b7 = b7b.getType();
         								if (b1 == b7) {
@@ -441,7 +497,7 @@ public class MIABlockListener extends BlockListener {
         								b1 = Material.AIR;
         							}
             						for (int j = 1; j < i; j++) {
-            							for (int k = -1; k < 2; k++) {
+            							for (int k = -wid; k <= wid; k++) {
             								sign1.getRelative((j * xd) + (k * zd), yd, (j * zd) + (k * xd)).setType(b1);
             							}
             						}
@@ -569,9 +625,18 @@ public class MIABlockListener extends BlockListener {
     
     @Override
     public void onBlockIgnite(BlockIgniteEvent event) {
-    	if (!(event.getCause() == IgniteCause.FLINT_AND_STEEL && event.getPlayer() != null && plugin.mf.notothertown(event.getPlayer()))) {
+    	boolean f = (event.getCause() == IgniteCause.SPREAD && ((Zone) plugin.mf.insidezone(event.getBlock().getLocation(), true)).getFire());
+    	boolean g = (event.getCause() == IgniteCause.FLINT_AND_STEEL && event.getPlayer() != null && plugin.mf.notothertown(event.getPlayer())); 
+    	if (!(f || g)) {
     		event.setCancelled(true);
     	}
     }
 
+    @Override
+    public void onLeavesDecay(LeavesDecayEvent event) {
+    	if (event.getBlock().getWorld().getName() == "Creative") {
+    		event.setCancelled(true);
+    	}
+    }
+    
 }

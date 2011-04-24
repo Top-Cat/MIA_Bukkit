@@ -11,11 +11,14 @@ public class MIAWorld {
 	private List<String> commands = new ArrayList<String>();
 	private List<Player> users = new ArrayList<Player>();
 	private boolean townchat, mobs, pvp;
-	private int healing, id;
+	private int healing, id, cx, cy, size;
 	private String name;
 	private final MIA plugin;
 	
-	public MIAWorld(MIA instance, int id, String name, String coms, boolean townchat, boolean mobs, boolean pvp, int healing) {
+	public MIAWorld(MIA instance, int id, String name, String coms, boolean townchat, boolean mobs, boolean pvp, int healing, String centre, int size) {
+		String[] c = centre.split(",");
+		cx = Integer.parseInt(c[0]);
+		cy = Integer.parseInt(c[1]);
 		commands = Arrays.asList(coms.split(","));
 		this.townchat = townchat;
 		this.mobs = mobs;
@@ -24,6 +27,15 @@ public class MIAWorld {
 		this.name = name;
 		plugin = instance;
 		this.id = id;
+		this.size = size;
+	}
+	
+	public int[] getCenter() {
+		return new int[] {cx, cy};
+	}
+	
+	public int getSize() {
+		return size;
 	}
 	
 	public boolean canCommand(String com0) {

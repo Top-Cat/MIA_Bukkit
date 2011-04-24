@@ -59,13 +59,15 @@ public class MIAPlayerListener extends PlayerListener {
 		@Override
 		public void run() {
 			for (World j : plugin.getServer().getWorlds()) {
-		    	for (LivingEntity i : j.getLivingEntities()) {
-		    		if (i instanceof Sheep && !s.contains(i)) {
-		    			int dc = (int) Math.floor(Math.random() * DyeColor.values().length);
-		    			((Sheep) i).setColor(DyeColor.values()[dc]);
-		    			s.add((Sheep) i);
-		    		}
-		    	}
+				if (plugin.mf.worlds.get(j.getName()).getId() != 2) {
+			    	for (LivingEntity i : j.getLivingEntities()) {
+			    		if (i instanceof Sheep && !s.contains(i)) {
+			    			int dc = (int) Math.floor(Math.random() * DyeColor.values().length);
+			    			((Sheep) i).setColor(DyeColor.values()[dc]);
+			    			s.add((Sheep) i);
+			    		}
+			    	}
+				}
 			}
 	    	
 	    	Date time = new Date();
@@ -99,11 +101,15 @@ public class MIAPlayerListener extends PlayerListener {
 	    	
     		if (updatec++ % 12 == 0) {
     			for (Player k : plugin.getServer().getOnlinePlayers()) {
-    				plugin.mf.updatestats(k, 2, 13, k.getHealth(), true);
+    				int h = k.getHealth();
+    				if (h < 0) {
+    					h = 0;
+    				}
+    				plugin.mf.updatestats(k, 2, 13, h, true);
     			}
     			plugin.mf.updatestats();
     		}
-    		if (updatec > 120) {
+    		if (updatec > 110) {
     			updatec = 0;
     			plugin.mf.rebuild_cache();
     			plugin.getServer().getWorld("Creative").setTime(1000);
@@ -121,6 +127,18 @@ public class MIAPlayerListener extends PlayerListener {
     
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
+    	
+    	if (event.getPlayer().getLocation().getWorld().getName().equalsIgnoreCase("Creative") && plugin.blockListener.tools.contains(event.getPlayer().getItemInHand().getType()) && event.getPlayer().getItemInHand().getDurability() > 10) {
+    		event.getPlayer().getItemInHand().setDurability((short)0);
+    	}
+    	if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock().getWorld().getName().equals("Creative") && plugin.blockListener.pick_fast.contains(event.getClickedBlock().getType()) && plugin.blockListener.picks.contains(event.getPlayer().getItemInHand().getType())) {
+    		event.setCancelled(true);
+    		
+    		plugin.mf.updatestats(event.getPlayer(), 0, event.getClickedBlock().getTypeId());
+    		plugin.mf.updatestats(event.getPlayer(), 2, 9, 1);
+			
+    		event.getClickedBlock().setType(Material.AIR);
+    	}
     	if (event.getItem() != null) {
 	    	if (event.getItem().getType() == Material.LAVA_BUCKET || event.getItem().getType() == Material.WATER_BUCKET || event.getItem().getType() == Material.WOODEN_DOOR || event.getItem().getType() == Material.IRON_DOOR) {
 	    		event.setCancelled(plugin.blockListener.useitem_block(event.getClickedBlock(), event.getPlayer()));
@@ -131,7 +149,7 @@ public class MIAPlayerListener extends PlayerListener {
 	    			event.getClickedBlock().getType() == Material.FURNACE || event.getClickedBlock().getType() == Material.WORKBENCH) &&
 	    			((Zone) plugin.mf.insidezone(event.getClickedBlock(), true)).isChestProtected(event.getPlayer())) {
 	    		
-	    		plugin.mf.sendmsg((Player) event.getClickedBlock(), plugin.d+"4This object is locked!");
+	    		plugin.mf.sendmsg((Player) event.getPlayer(), plugin.d+"4This object is locked!");
 	    		event.setCancelled(true);
 	    	}
 	    	
@@ -151,6 +169,11 @@ public class MIAPlayerListener extends PlayerListener {
 		    				i.changeGateState(true, event.getPlayer());
 		    			}
 		    		}
+		    	}
+		    	
+		    	if (event.getClickedBlock().getType() == Material.TNT) {
+		    		event.getClickedBlock().setType(Material.AIR);
+		    		event.getClickedBlock().getWorld().dropItemNaturally(event.getClickedBlock().getLocation(), new ItemStack(Material.TNT, 1));
 		    	}
 		    	
 		    	if (event.getItem() != null && event.getItem().getType() == Material.STICK) {
@@ -198,14 +221,9 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     HashMap<Player, Long> logintimes = new HashMap<Player, Long>();
-    int st = 0;
     
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
-    	if (st == 0) {
-    		plugin.mf.rebuild_cache();
-    		st = 1;
-    	}
     	String nam = event.getPlayer().getDisplayName();
     	
     	PreparedStatement pr;
@@ -283,12 +301,16 @@ public class MIAPlayerListener extends PlayerListener {
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId(), event.getItemDrop().getItemStack().getAmount());
+    	int i = event.getItemDrop().getItemStack().getAmount();
+    	if (i < 0) { i = 0; }
+    	plugin.mf.updatestats(event.getPlayer(), 3, event.getItemDrop().getItemStack().getTypeId(), i);
     }
     
     @Override
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-    	plugin.mf.updatestats(event.getPlayer(), 4, event.getItem().getItemStack().getTypeId(), event.getItem().getItemStack().getAmount());
+    	int i = event.getItem().getItemStack().getAmount();
+    	if (i < 0) { i = 0; }
+    	plugin.mf.updatestats(event.getPlayer(), 4, event.getItem().getItemStack().getTypeId(), i);
     }
     
     public void onPlayerAnimation(PlayerAnimationEvent event) {
@@ -345,10 +367,11 @@ public class MIAPlayerListener extends PlayerListener {
 			Player p = plugin.getServer().getPlayer(coms[1]);
 			PlayerInventory i = p.getInventory();
 			i.clear();
-			i.setBoots(new ItemStack(1, 0));
-			i.setChestplate(new ItemStack(1, 0));
-			i.setHelmet(new ItemStack(1, 0));
-			i.setLeggings(new ItemStack(1, 0));
+			//i.clear(40);
+			i.clear(39);
+			i.clear(38);
+			i.clear(37);
+			i.clear(36);
 		} else if (coms[0].equalsIgnoreCase("/destroyring")) {
 			dring(event.getPlayer().getLocation().getBlock().getRelative(0, -1, 0));
 		} else if (coms[0].equalsIgnoreCase("/jumpto")) {
@@ -522,6 +545,10 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	} else if (coms[0].equalsIgnoreCase("/spawn")) {
     		plugin.mf.spawn(event.getPlayer());
+    	} else if (coms[0].equalsIgnoreCase("/creative")) {
+    		plugin.mf.spawn2(event.getPlayer());
+    	} else if (coms[0].equalsIgnoreCase("/wolf") && event.getPlayer().isOp()) {
+    		event.getPlayer().getWorld().spawnCreature(event.getPlayer().getLocation(), CreatureType.WOLF);
     	} else if (coms[0].equalsIgnoreCase("/mspawn")){
     		
     		CreatureType mt = CreatureType.fromName(coms[1].equalsIgnoreCase("PigZombie") ? "PigZombie" : capitalCase(coms[1]));
@@ -594,7 +621,7 @@ public class MIAPlayerListener extends PlayerListener {
     		}
     	} else if (coms[0].equalsIgnoreCase("/ready")) {
     		for (SpleefGame i : spleefgames.values()) {
-    			if (i.playerPlaying(event.getPlayer())) {
+    			if (i.playerPlaying(event.getPlayer()) && i.activegame == false) {
     				i.setReadyPlayer(event.getPlayer(), true);
     			}
     		}
@@ -741,15 +768,17 @@ public class MIAPlayerListener extends PlayerListener {
     		plugin.mf.updatestats(event.getPlayer(), 2, 6, 1);
     	}
     	
-    	if (Math.sqrt(Math.pow(event.getTo().getBlockX() - 466, 2) + Math.pow(event.getTo().getBlockZ() + 303, 2)) > 1000) {
-    		if (Math.sqrt(Math.pow(event.getFrom().getBlockX() - 466, 2) + Math.pow(event.getFrom().getBlockZ() + 303, 2)) < 1000) {
+    	MIAWorld ma = plugin.mf.worlds.get(event.getTo().getWorld().getName());
+    	int[] c = ma.getCenter();
+    	if (Math.sqrt(Math.pow(event.getTo().getBlockX() - c[0], 2) + Math.pow(event.getTo().getBlockZ() - c[1], 2)) > ma.getSize()) {
+    		if (Math.sqrt(Math.pow(event.getFrom().getBlockX() - c[0], 2) + Math.pow(event.getFrom().getBlockZ() - c[1], 2)) < ma.getSize()) {
     			event.setCancelled(true);
     		} else {
-    			double vX = event.getTo().getBlockX() - 466;
-    			double vY = event.getTo().getBlockZ() + 303;
+    			double vX = event.getTo().getBlockX() - c[0];
+    			double vY = event.getTo().getBlockZ() - c[1];
     			double magV = Math.sqrt(vX*vX + vY*vY);
-    			int aX = (int) (466 + vX / magV * 1000);
-    			int aY = (int) (-303 + vY / magV * 1000);
+    			int aX = (int) (c[0] + vX / magV * ma.getSize());
+    			int aY = (int) (c[1] + vY / magV * ma.getSize());
     			
     			Location dest = new Location(event.getPlayer().getWorld(), aX, event.getPlayer().getWorld().getHighestBlockYAt(aX, aY), aY);
     			plugin.mf.teleport(event.getPlayer(), dest);

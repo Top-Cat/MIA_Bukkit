@@ -4,6 +4,9 @@ import java.util.HashMap;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -36,6 +39,14 @@ public class MIAEntityListener extends EntityListener {
     	Entity damager = null;
     	if (event instanceof EntityDamageByEntityEvent) {
     		EntityDamageByEntityEvent sub = (EntityDamageByEntityEvent)event;
+    		
+        	if (event.getEntity() instanceof Painting && sub.getDamager() instanceof Player) {
+        		Zone z = ((Zone) plugin.mf.insidezone(((Painting) event.getEntity()).getLocation(), true));
+        		if (z.isProtected((Player) sub.getDamager()) && !((Player) sub.getDamager()).isOp()) {
+        			event.setCancelled(true);
+        		}
+        	}
+    		
 	    	if (event.getEntity() instanceof HumanEntity && sub.getDamager() instanceof Player) {
 	    		for (NPC i : plugin.mf.npcs.values()) {
 	    			if (i.isEntity(event.getEntity())) {
@@ -63,12 +74,16 @@ public class MIAEntityListener extends EntityListener {
     public boolean onDamage(Entity attacker, Entity defender, int damage) {
     	if (defender instanceof Player) {
 	    	boolean zonea = false;
-	    	if (attacker instanceof Player) {
+	    	if (attacker instanceof Player || attacker instanceof Wolf) {
 	    		zonea = ((Zone) plugin.mf.insidezone(defender.getLocation(), true)).isPvP((Player) defender);
+	    		if (zonea && attacker instanceof Player) {
+	    			zonea = !(plugin.mf.playertownId((Player) defender) == plugin.mf.playertownId((Player) attacker));
+	    		} else if (zonea) {
+	    			System.out.println(((Wolf) attacker).toString());
+	    		}
 	    	} else if (attacker instanceof Creature) {
 	    		zonea = ((Zone) plugin.mf.insidezone(defender.getLocation(), true)).isMobs();
 	    	}
-    		
 	    	if ((plugin.mf.insidetown(defender.getLocation()) > 0 && attacker instanceof Entity) || !zonea) {
 	        	return true;
 	    	} else if (attacker instanceof Player) {
@@ -115,10 +130,12 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
-    	for (Block i : event.blockList()) {
-        	if (plugin.mf.insidetown(i) > 0 || !((Zone) plugin.mf.insidezone(i, true)).isMobs()) {
-        		event.setCancelled(true);
-        	}
+    	if (event.getEntity() instanceof Creeper || event.getLocation().getWorld().getName() == "Creative") {
+	    	for (Block i : event.blockList()) {
+	        	if (plugin.mf.insidetown(i) > 0 || !((Zone) plugin.mf.insidezone(i, true)).isMobs()) {
+	        		event.setCancelled(true);
+	        	}
+	    	}
     	}
     }
     
@@ -137,12 +154,8 @@ public class MIAEntityListener extends EntityListener {
     
     @Override
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-    	if (!(event.getEntity() instanceof Player)) {
-	    	if (plugin.playerListener.st == 1) {
-		    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
-		    		event.setCancelled(true);
-		    	}
-	    	}
+    	if (!((Zone) plugin.mf.insidezone(event.getLocation(), true)).isMobs()) {
+    		event.setCancelled(true);
     	}
     }
 }

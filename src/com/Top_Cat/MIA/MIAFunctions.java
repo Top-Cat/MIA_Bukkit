@@ -30,7 +30,7 @@ public class MIAFunctions {
         plugin = instance;
         
         sblock = plugin.getServer().getWorlds().get(0).getBlockAt(409, 4, -354);
-        gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, false, 0);
+        gzone = new Zone(plugin, 0, sblock, sblock, "everywhere", 0, true, true, false, false, false, false, 0);
     }
     
     public ArrayList<ArrayList<ArrayList<Integer>>> getpattern(int zid) {
@@ -141,7 +141,7 @@ public class MIAFunctions {
 			pr = plugin.conn.prepareStatement(q);
 			ResultSet r = pr.executeQuery();
 			while (r.next()) {
-				worlds.put(r.getString("name"), new MIAWorld(plugin, r.getInt("Id"), r.getString("name"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing")));
+				worlds.put(r.getString("name"), new MIAWorld(plugin, r.getInt("Id"), r.getString("name"), r.getString("commands"), r.getBoolean("townchat"), r.getBoolean("mobs"), r.getBoolean("pvp"), r.getInt("healing"), r.getString("center"), r.getInt("size")));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -297,10 +297,10 @@ public class MIAFunctions {
     HashMap<Quest.Type, HashMap<String, Quest>> quest_sort = new HashMap<Quest.Type, HashMap<String, Quest>>();
     
     public void cache_npcs() {
-    	npcs.clear();
     	for (Type i : Type.values()) {
     		quest_sort.put(i, new HashMap<String, Quest>());
     	}
+    	npcs.clear();
     	PreparedStatement pr;
 		try {
 			String q = "SELECT * FROM npcs";
@@ -626,10 +626,24 @@ public class MIAFunctions {
     		//Players inventory must be empty
     		int t = 0;
     		for (ItemStack i : p.getInventory().getContents()) {
-    			t += i.getAmount();
+    			if (i != null) {
+	    			if (i.getAmount() >= 0) {
+	    				t += i.getAmount();
+	    			} else {
+	    				t += 1;
+	    				break;
+	    			}
+    			}
     		}
     		for (ItemStack i : p.getInventory().getArmorContents()) {
-    			t += i.getAmount();
+    			if (i != null) {
+	    			if (i.getAmount() >= 0) {
+	    				t += i.getAmount();
+	    			} else {
+	    				t += 1;
+	    				break;
+	    			}
+    			}
     		}
     		if (t > 0) {
     			sendmsg(p, "Your inventory must be empty to travel to this world!");
@@ -657,7 +671,7 @@ public class MIAFunctions {
 				Integer[] cs2 = intarray(bls[1].split(","));
 				Block b1 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs[0], cs[1], cs[2]);
 				Block b2 = plugin.getServer().getWorlds().get(r.getInt("world")).getBlockAt(cs2[0], cs2[1], cs2[2]);
-				Zone nz = new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getBoolean("spleef"), r.getInt("owner"));
+				Zone nz = new Zone(plugin, r.getInt("Id"), b1, b2, r.getString("name"), r.getInt("healing"), r.getBoolean("PvP"), r.getBoolean("mobs"), r.getBoolean("chest"), r.getBoolean("protect"), r.getBoolean("spleef"), r.getBoolean("fire"), r.getInt("owner"));
 				zones.add(nz);
 				int par = r.getInt("parent");
 				if (par > 0) {
@@ -781,6 +795,11 @@ public class MIAFunctions {
     public void spawn(Player p) {
     	World w = plugin.getServer().getWorld("Final");
     	teleport(p, new Location(w, 467d, 114d, -325d, 180, 0));
+    }
+    
+    public void spawn2(Player p) {
+    	World w = plugin.getServer().getWorld("Creative");
+    	teleport(p, new Location(w, 45d, 72d, 108d, 270, 20));
     }
     
     HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> stats = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
