@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package npclib;
 
 import net.minecraft.server.Entity;
@@ -17,9 +13,9 @@ import net.minecraft.server.World;
 import net.minecraft.server.WorldServer;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.HumanEntity;
 
 /**
  *
@@ -56,6 +52,7 @@ public class NPCEntity extends EntityPlayer {
 
     @Override
     public boolean a(EntityHuman entity) {
+
         EntityTargetEvent event = new NpcEntityTargetEvent(getBukkitEntity(), entity.getBukkitEntity(), NpcEntityTargetEvent.NpcTargetReason.NPC_RIGHTCLICKED);
         CraftServer server = ((WorldServer) this.world).getServer();
         server.getPluginManager().callEvent(event);
@@ -111,8 +108,8 @@ public class NPCEntity extends EntityPlayer {
     public void move(double x, double y, double z) {
         super.move(x, y, z);
     }
-    
-	public void setItemInHand(Material m) {
-		((HumanEntity) getBukkitEntity()).setItemInHand(new ItemStack(m, 1));
+	
+    public void setItemInHand(Material m) {
+        ((HumanEntity) getBukkitEntity()).setItemInHand(new ItemStack(m, 1));
     }
 }
