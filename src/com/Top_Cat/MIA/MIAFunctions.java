@@ -309,7 +309,7 @@ public class MIAFunctions {
 			
 			while (r.next()) {
 				Location l = new Location(plugin.getServer().getWorlds().get(r.getInt("world")), r.getDouble("posX"), r.getDouble("posY"), r.getDouble("posZ"), r.getInt("rotation"), r.getInt("pitch"));
-				npcs.put(r.getString("npc_id"), new NPC(plugin, r.getInt("Id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy"), r.getBoolean("prefix"), r.getString("chest")));
+				npcs.put(r.getString("npc_id"), new NPC(plugin, r.getString("npc_id"), r.getString("name"), l, r.getInt("item_in_hand"), r.getInt("proxy"), r.getBoolean("prefix"), r.getString("chest")));
 			}
 			
 			q = "SELECT * FROM quests";

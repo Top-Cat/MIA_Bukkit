@@ -16,22 +16,22 @@ import npclib.NPCEntity;
 public class NPC {
 	
 	List<String> dialogs = new ArrayList<String>();
-	int proxy, id, inhand;
+	int proxy, inhand;
 	final MIA plugin;
 	Block chest = null;
 	NPCEntity bhn;
 	Location l;
-	String name;
+	String name, id;
 	String prefix = "";
 	List<Quest> start_quests = new ArrayList<Quest>();
 	List<Quest> end_quests = new ArrayList<Quest>();
 	
-	public NPC(MIA instance, int id, String name, Location l, int inhand, int proxy, boolean pre, String chest) {
+	public NPC(MIA instance, String id, String name, Location l, int inhand, int proxy, boolean pre, String chest) {
 		plugin = instance;
 		
 		if (pre)
 			prefix = "NPC-";
-		bhn = plugin.m.spawnNPC(prefix + name, new Location(l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch()));
+		bhn = plugin.m.spawnNPC(prefix + name, new Location(l.getWorld(), l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch()), id);
 		
 		if (inhand > 0)
 			((HumanEntity) bhn.getBukkitEntity()).setItemInHand(new ItemStack(inhand, 1));
@@ -57,7 +57,7 @@ public class NPC {
 	}
 	
 	public void destroy() {
-		plugin.m.despawn(prefix + name);
+		plugin.m.despawnById(id);
 	}
 	
 	public void update() {
@@ -108,7 +108,7 @@ public class NPC {
 		return (bhn.getBukkitEntity().getEntityId() == i.getEntityId());
 	}
 	
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 	
