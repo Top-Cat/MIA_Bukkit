@@ -17,54 +17,54 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   // (snip ctor, setters, etc.)
 
   public OnlinePlayer(MIA plugin, int bal, int cape, String name, String prefix, int town, int id, int sg, int sw) {
-	  ammount = bal;
-	  this.name = name;
-	  this.prefix = prefix;
-	  this.id = id;
-	  this.cape = cape;
-	  this.town = town;
-	  this.sg = sg;
-	  this.sw = sw;
-	  for (Town i : plugin.mf.towns) {
-			if (i.getId() == town) {
-				t = i;
-				break;
-			}
-	  }
+      ammount = bal;
+      this.name = name;
+      this.prefix = prefix;
+      this.id = id;
+      this.cape = cape;
+      this.town = town;
+      this.sg = sg;
+      this.sw = sw;
+      for (Town i : plugin.mf.towns) {
+            if (i.getId() == town) {
+                t = i;
+                break;
+            }
+      }
   }
   
   public int getCape() {
-	  return cape;
+      return cape;
   }
   
   public List<Quest> tmpQuestList() {
-	  return npc_tmp;
+      return npc_tmp;
   }
   
   public void setQuestList(List<Quest> ql) {
-	  npc_tmp = ql;
-	  aquest = null;
+      npc_tmp = ql;
+      aquest = null;
   }
   
   public void setAQuest(Quest i) {
-	  aquest = i;
+      aquest = i;
   }
   
   public Quest aQuest() {
-	  return aquest;
+      return aquest;
   }
   
   public void spleefplayed(boolean win) {
-	  sg++;
-	  if (win)
-		  sw++;
+      sg++;
+      if (win)
+          sw++;
   }
   
   public int[] spleefstats() {
-	  int[] out = new int[2];
-	  out[0] = sg;
-	  out[1] = sw;
-	  return out;
+      int[] out = new int[2];
+      out[0] = sg;
+      out[1] = sw;
+      return out;
   }
   
   public int getBalance() {
@@ -75,40 +75,40 @@ class OnlinePlayer implements Comparable<OnlinePlayer> {
   }
   
   public int getId() {
-	    return id;
+        return id;
   }
   
   public String getPrefix() {
-	  return prefix;
+      return prefix;
   }
   
   public int getTownId() {
-	  return town;
+      return town;
   }
   
   public Town getTown() {
-	  return t;
+      return t;
   }
   
   public boolean isPlayer(Player p) {
-	  return p.getDisplayName().equalsIgnoreCase(name);
+      return p.getDisplayName().equalsIgnoreCase(name);
   }
   
   public boolean cbal(int amm) {
-	  if (ammount + amm > 0) {
-		  ammount += amm;
-		  return true;
-	  }
-	  return false;
+      if (ammount + amm > 0) {
+          ammount += amm;
+          return true;
+      }
+      return false;
   }
 
   public int compareTo(OnlinePlayer other) {
     if (this.ammount < other.getBalance()) {
-    	return 1;
+        return 1;
     } else if (this.ammount > other.getBalance()) {
-    	return -1;
+        return -1;
     } else {
-    	return 0;
+        return 0;
     }
   }
 }

@@ -1,4 +1,4 @@
-package npclib;
+package org.martin.bukkit.npclib;
 
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MinecraftServer;

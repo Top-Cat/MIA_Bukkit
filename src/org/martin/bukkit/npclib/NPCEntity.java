@@ -1,4 +1,7 @@
-package npclib;
+package org.martin.bukkit.npclib;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.minecraft.server.Entity;
 import net.minecraft.server.EntityHuman;
@@ -11,7 +14,10 @@ import net.minecraft.server.NetworkManager;
 import net.minecraft.server.Packet18ArmAnimation;
 import net.minecraft.server.World;
 import net.minecraft.server.WorldServer;
+
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +32,44 @@ public class NPCEntity extends EntityPlayer {
     private int lastTargetId;
     private long lastBounceTick;
     private int lastBounceId;
+    private NPCPath path;
+    private Block last;
+    private Timer t = new Timer();
+    private Location end;
+    private int maxIter;
+    
+    public void pathFindTo(Location l, int maxIterations) {
+        path = new NPCPath(getBukkitEntity().getLocation(), l, maxIterations);
+        end = l;
+        maxIter = maxIterations;
+        t.schedule(new movePath(), 300);
+    }
+    
+    public class movePath extends TimerTask {
+
+        @Override
+        public void run() {
+            if (path != null) {
+                Block b = path.getNextBlock();
+                float angle = yaw;
+                if (b != null) {
+                    if (path.standon.contains(b.getType())) {
+                        if (last != null) {
+                            angle = ((float) Math.toDegrees(Math.atan2(last.getZ() - b.getZ(), last.getX() - b.getX()))) + 90;
+                        }
+                        setPositionRotation(b.getX() + 0.5, b.getY(), b.getZ() + 0.5, angle, pitch);
+                        t.schedule(new movePath(), 300);
+                    } else {
+                        pathFindTo(end, maxIter);
+                    }
+                } else if (last != null) {
+                    setPositionRotation(end.getX(), end.getY(), end.getZ(), end.getYaw(), end.getPitch());
+                }
+                last = b;
+            }
+        }
+        
+    }
 
     public NPCEntity(MinecraftServer minecraftserver, World world, String s, ItemInWorldManager iteminworldmanager) {
         super(minecraftserver, world, s, iteminworldmanager);
@@ -46,7 +90,7 @@ public class NPCEntity extends EntityPlayer {
         this.b.tracker.a(this, new Packet18ArmAnimation(this, 1));
     }
 
-    public void actAsHurt(){
+    public void actAsHurt() {
         this.b.tracker.a(this, new Packet18ArmAnimation(this, 2));
     }
 
@@ -108,8 +152,16 @@ public class NPCEntity extends EntityPlayer {
     public void move(double x, double y, double z) {
         super.move(x, y, z);
     }
-	
+
     public void setItemInHand(Material m) {
         ((HumanEntity) getBukkitEntity()).setItemInHand(new ItemStack(m, 1));
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName(){
+        return name;
     }
 }

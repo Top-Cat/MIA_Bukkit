@@ -1,4 +1,4 @@
-package npclib;
+package org.martin.bukkit.npclib;
 
 import java.lang.reflect.Field;
 import java.net.Socket;

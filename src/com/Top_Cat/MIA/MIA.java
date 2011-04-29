@@ -11,7 +11,7 @@ import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
-import npclib.NPCManager;
+import org.martin.bukkit.npclib.NPCManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,41 +29,41 @@ public class MIA extends JavaPlugin {
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     MIAFunctions mf;
     public final String d = "\u00C2\u00A7";
-	public final String c = d+"e";
+    public final String c = d+"e";
     Connection conn;
     
     NPCManager m;
     
     public void onEnable() {
-    	 m = new NPCManager(this);
+         m = new NPCManager(this);
         // TODO: Place any custom enable code here including the registration of any events
         try {
-        	Class.forName("com.mysql.jdbc.Driver").newInstance();
-        	// Step 2: Establish the connection to the database. 
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            // Step 2: Establish the connection to the database. 
             conn = DriverManager.getConnection(new sqllogin().url);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		mf = new MIAFunctions(this);
-		mf.post_tweet("The Minecraft server has started!");
-    	
-    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 50);
-    	getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
-    	
-       	getServer().createWorld("Nether", Environment.NETHER);
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        mf = new MIAFunctions(this);
+        mf.post_tweet("The Minecraft server has started!");
+        
+        getServer().getScheduler().scheduleAsyncRepeatingTask(this, playerListener.timer, 20, 50);
+        getServer().getScheduler().scheduleAsyncRepeatingTask(this, vehicleListener.timer, 20, 20);
+        
+           getServer().createWorld("Nether", Environment.NETHER);
         getServer().createWorld("Survival", Environment.NORMAL);
         getServer().createWorld("Creative", Environment.NORMAL);
-    	
+        
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
@@ -105,9 +105,9 @@ public class MIA extends JavaPlugin {
         
         playerListener.loadallusers();
         for (Player i : getServer().getOnlinePlayers()) {
-        	Date time = new Date();
-    		playerListener.logintimes.put(i, time.getTime() / 1000);
-    		mf.worlds.get(i.getWorld().getName()).addPlayer(i);
+            Date time = new Date();
+            playerListener.logintimes.put(i, time.getTime() / 1000);
+            mf.worlds.get(i.getWorld().getName()).addPlayer(i);
         }
         mf.cache_npcs();
     }
@@ -118,24 +118,24 @@ public class MIA extends JavaPlugin {
         // NOTE: All registered events are automatically unregistered when a plugin is disabled
 
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
-    	for (Player i : getServer().getOnlinePlayers()) {
-    		Date time = new Date();
-    		if (playerListener.logintimes.containsKey(i)) {
-    			mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));
-    		}
-    		
-    		for (Quest j : mf.quest.values()) {
-	    		if (j.isActive(i)) {
-	    			mf.save_progress(i, j);
-	    		}
-	    	}
-    	}
-    	
-    	for (NPC i : mf.npcs.values()) {
-    		i.destroy();
-    	}
-    	
-    	mf.updatestats();
+        for (Player i : getServer().getOnlinePlayers()) {
+            Date time = new Date();
+            if (playerListener.logintimes.containsKey(i)) {
+                mf.updatestats(i, 2, 4, (int) ((time.getTime() / 1000) - playerListener.logintimes.get(i)));
+            }
+            
+            for (Quest j : mf.quest.values()) {
+                if (j.isActive(i)) {
+                    mf.save_progress(i, j);
+                }
+            }
+        }
+        
+        for (NPC i : mf.npcs.values()) {
+            i.destroy();
+        }
+        
+        mf.updatestats();
         System.out.println("Goodbye world!");
     }
     public boolean isDebugging(final Player player) {

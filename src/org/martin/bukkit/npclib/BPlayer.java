@@ -1,4 +1,4 @@
-package npclib;
+package org.martin.bukkit.npclib;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +20,7 @@ public class BPlayer {
     //private Player palyer;
     private EntityPlayer ePlayer;
     //private EntityHuman hPlayer;
+
     public BPlayer(Player player) {
         try {
             //this.palyer = player;
@@ -39,6 +40,4 @@ public class BPlayer {
     public void openVirtualChest(InventoryLargeChest lChest) {
         ePlayer.a(lChest);
     }
-
-    
 }
